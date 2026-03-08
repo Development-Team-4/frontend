@@ -1,28 +1,7 @@
-"use client"
-
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Shield } from "lucide-react"
-import Link from "next/link"
+import { Shield } from 'lucide-react';
+import { RegisterForm } from '@/widgets/register-form';
 
 export default function RegisterPage() {
-  const router = useRouter()
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setTimeout(() => router.push("/"), 600)
-  }
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <div className="w-full max-w-sm">
@@ -36,79 +15,8 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        <Card className="p-6">
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div>
-              <Label htmlFor="name" className="mb-1.5 text-xs">
-                Full Name
-              </Label>
-              <Input
-                id="name"
-                placeholder="John Doe"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="bg-background"
-              />
-            </div>
-            <div>
-              <Label htmlFor="email" className="mb-1.5 text-xs">
-                Email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@company.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-background"
-              />
-            </div>
-            <div>
-              <Label htmlFor="password" className="mb-1.5 text-xs">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Min. 8 characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="bg-background"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="confirm-password" className="mb-1.5 text-xs">
-                Confirm Password
-              </Label>
-              <Input
-                id="confirm-password"
-                type="password"
-                placeholder="Min. 8 characters"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="bg-background"
-              />
-            </div>
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={!name || !email || !password || isLoading}
-            >
-              {isLoading ? "Creating account..." : "Create Account"}
-            </Button>
-          </form>
-
-          <div className="mt-4 text-center">
-            <Link
-              href="/login"
-              className="text-xs text-primary hover:underline"
-            >
-              Already have an account? Sign in
-            </Link>
-          </div>
-        </Card>
+        <RegisterForm />
       </div>
     </div>
-  )
+  );
 }

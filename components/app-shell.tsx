@@ -1,7 +1,7 @@
-"use client"
+'use client';
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Ticket,
@@ -12,33 +12,33 @@ import {
   Shield,
   ChevronLeft,
   ChevronRight,
-} from "lucide-react"
-import { cn } from "@/lib/utils"
-import { currentUser, notifications } from "@/lib/mock-data"
-import { useState } from "react"
-import { Badge } from "@/components/ui/badge"
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { currentUser, notifications } from '@/lib/mock-data';
+import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from '@/components/ui/tooltip';
 
 const navigation = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Tickets", href: "/tickets", icon: Ticket },
-  { name: "Create Ticket", href: "/tickets/new", icon: Plus },
-  { name: "Notifications", href: "/notifications", icon: Bell },
-  { name: "Settings", href: "/settings", icon: Settings },
-]
+  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { name: 'Tickets', href: '/tickets', icon: Ticket },
+  { name: 'Create Ticket', href: '/tickets/new', icon: Plus },
+  { name: 'Notifications', href: '/notifications', icon: Bell },
+  { name: 'Settings', href: '/settings', icon: Settings },
+];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname()
-  const [collapsed, setCollapsed] = useState(false)
-  const unreadCount = notifications.filter((n) => !n.read).length
+  const pathname = usePathname();
+  const [collapsed, setCollapsed] = useState(false);
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
-  if (pathname === "/login" || pathname === "/register") {
-    return <>{children}</>
+  if (pathname === '/login' || pathname === '/register') {
+    return <>{children}</>;
   }
 
   return (
@@ -46,8 +46,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="flex h-screen overflow-hidden">
         <aside
           className={cn(
-            "flex flex-col border-r border-sidebar-border bg-sidebar transition-all duration-200",
-            collapsed ? "w-16" : "w-60"
+            'flex flex-col border-r border-sidebar-border bg-sidebar transition-all duration-200',
+            collapsed ? 'w-16' : 'w-60',
           )}
         >
           <div className="flex h-14 items-center gap-2 border-b border-sidebar-border px-4">
@@ -65,25 +65,25 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <ul className="flex flex-col gap-1">
               {navigation.map((item) => {
                 const isActive =
-                  item.href === "/"
-                    ? pathname === "/"
-                    : pathname.startsWith(item.href)
+                  item.href === '/'
+                    ? pathname === '/'
+                    : pathname.startsWith(item.href);
 
                 const linkContent = (
                   <Link
                     key={item.name}
                     href={item.href}
                     className={cn(
-                      "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                      'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
                       isActive
-                        ? "bg-sidebar-accent text-sidebar-primary"
-                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                        ? 'bg-sidebar-accent text-sidebar-primary'
+                        : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground',
                     )}
                   >
                     <item.icon className="h-4 w-4 shrink-0" />
                     {!collapsed && <span>{item.name}</span>}
                     {!collapsed &&
-                      item.name === "Notifications" &&
+                      item.name === 'Notifications' &&
                       unreadCount > 0 && (
                         <Badge
                           variant="destructive"
@@ -93,12 +93,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         </Badge>
                       )}
                     {collapsed &&
-                      item.name === "Notifications" &&
+                      item.name === 'Notifications' &&
                       unreadCount > 0 && (
                         <span className="absolute right-1.5 top-1 h-2 w-2 rounded-full bg-destructive" />
                       )}
                   </Link>
-                )
+                );
 
                 if (collapsed) {
                   return (
@@ -110,10 +110,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         </TooltipContent>
                       </Tooltip>
                     </li>
-                  )
+                  );
                 }
 
-                return <li key={item.name}>{linkContent}</li>
+                return <li key={item.name}>{linkContent}</li>;
               })}
             </ul>
           </nav>
@@ -132,9 +132,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="mt-2 flex items-center gap-3 rounded-md px-3 py-2">
               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-medium text-primary">
                 {currentUser.name
-                  .split(" ")
+                  .split(' ')
                   .map((n) => n[0])
-                  .join("")}
+                  .join('')}
               </div>
               {!collapsed && (
                 <div className="flex-1 min-w-0">
@@ -158,10 +158,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </aside>
 
-        <main className="flex-1 overflow-y-auto bg-background">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto bg-background">{children}</main>
       </div>
     </TooltipProvider>
-  )
+  );
 }
