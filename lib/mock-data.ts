@@ -1,41 +1,117 @@
-import type { Ticket, User, Comment, AuditEntry, Notification } from './types';
+import { Topic } from '@/entities/topic/types';
+import type { Comment, Notification } from './types';
+import { Ticket } from '@/entities/ticket/types';
+import { Category } from '@/entities/category/types';
+import { User } from '@/entities/user/types';
+
+export const topics: Topic[] = [
+  {
+    id: 't1',
+    name: 'Техническая поддержка',
+    description: 'Вопросы по работе системы',
+  },
+  {
+    id: 't2',
+    name: 'Биллинг и оплата',
+    description: 'Вопросы по оплате и счетам',
+  },
+  {
+    id: 't3',
+    name: 'Продукты и услуги',
+    description: 'Информация о продуктах',
+  },
+];
+
+export const categories: Category[] = [
+  {
+    id: 'c1',
+    topicId: 't1',
+    name: 'Ошибки и баги',
+    description: 'Сообщения об ошибках в системе',
+    assignedStaff: ['u2', 'u3'],
+  },
+  {
+    id: 'c2',
+    topicId: 't1',
+    name: 'Настройка и интеграции',
+    description: 'Помощь с настройкой',
+    assignedStaff: ['u2'],
+  },
+  {
+    id: 'c3',
+    topicId: 't1',
+    name: 'Доступ и авторизация',
+    description: 'Проблемы с входом в систему',
+    assignedStaff: ['u3', 'u6'],
+  },
+  {
+    id: 'c4',
+    topicId: 't2',
+    name: 'Оплата',
+    description: 'Вопросы по оплате',
+    assignedStaff: ['u6'],
+  },
+  {
+    id: 'c5',
+    topicId: 't2',
+    name: 'Возвраты',
+    description: 'Запросы на возврат средств',
+    assignedStaff: ['u6'],
+  },
+  {
+    id: 'c6',
+    topicId: 't3',
+    name: 'Консультации',
+    description: 'Консультации по продуктам',
+    assignedStaff: ['u2', 'u6'],
+  },
+];
 
 export const users: User[] = [
   {
     id: 'u1',
-    name: 'Alexei Petrov',
+    name: 'Алексей Петров',
     email: 'a.petrov@corp.com',
     role: 'ADMIN',
+    notificationChannels: { email: true, telegram: true },
   },
   {
     id: 'u2',
-    name: 'Maria Ivanova',
+    name: 'Мария Иванова',
     email: 'm.ivanova@corp.com',
-    role: 'AGENT',
+    role: 'SUPPORT',
+    categoryIds: ['c1', 'c2', 'c6'],
+    notificationChannels: { email: true, telegram: false },
   },
   {
     id: 'u3',
-    name: 'Dmitry Sokolov',
+    name: 'Дмитрий Соколов',
     email: 'd.sokolov@corp.com',
-    role: 'AGENT',
+    role: 'SUPPORT',
+    categoryIds: ['c1', 'c3'],
+    notificationChannels: { email: true, telegram: true },
   },
   {
     id: 'u4',
-    name: 'Elena Kuznetsova',
+    name: 'Елена Кузнецова',
     email: 'e.kuznetsova@corp.com',
     role: 'USER',
+    notificationChannels: { email: true, telegram: false },
   },
   {
     id: 'u5',
-    name: 'Nikolai Volkov',
+    name: 'Николай Волков',
     email: 'n.volkov@corp.com',
     role: 'USER',
+    notificationChannels: { email: false, telegram: true },
   },
   {
     id: 'u6',
-    name: 'Irina Smirnova',
+    name: 'Ирина Смирнова',
     email: 'i.smirnova@corp.com',
-    role: 'AGENT',
+    role: 'SUPPORT',
+    categoryIds: ['c3', 'c4', 'c5', 'c6'],
+    notificationChannels: { email: true, telegram: true },
   },
 ];
 
@@ -44,238 +120,120 @@ export const currentUser: User = users[0];
 export const tickets: Ticket[] = [
   {
     id: 'TK-1001',
-    subject: 'Login page returns 500 after deployment',
+    subject: 'Страница входа возвращает ошибку 500',
     description:
-      'After the latest deployment to production, the login page consistently returns a 500 error. The issue started at approximately 14:00 UTC. Server logs show a NullPointerException in the AuthenticationController. Rollback needed ASAP.',
-    status: 'IN_PROGRESS',
-    priority: 'CRITICAL',
-    category: 'BUG',
+      'После последнего обновления страница входа постоянно выдаёт ошибку 500. Проблема началась примерно в 14:00 UTC. В логах сервера видно NullPointerException в AuthenticationController.',
+    status: 'IN_WORK',
+    categoryId: 'c3',
     createdAt: '2026-02-28T14:05:00Z',
     updatedAt: '2026-02-28T16:30:00Z',
     createdBy: users[3],
-    assignee: users[1],
-    sla: {
-      responseDeadline: '2026-02-28T15:05:00Z',
-      resolutionDeadline: '2026-02-28T18:05:00Z',
-      respondedAt: '2026-02-28T14:22:00Z',
-      isResponseBreached: false,
-      isResolutionBreached: false,
-    },
-    attachments: [
-      {
-        id: 'a1',
-        name: 'server-logs.txt',
-        size: 245000,
-        type: 'text/plain',
-        url: '#',
-        uploadedAt: '2026-02-28T14:10:00Z',
-        uploadedBy: users[3],
-      },
-    ],
-    tags: ['production', 'auth', 'hotfix'],
+    assignee: users[2],
   },
   {
     id: 'TK-1002',
-    subject: 'Add dark mode support to dashboard',
+    subject: 'Добавить тёмную тему для дашборда',
     description:
-      'Users have been requesting dark mode support for the main dashboard. We need to implement theme switching using CSS variables and persist the preference in user settings.',
-    status: 'OPEN',
-    priority: 'MEDIUM',
-    category: 'FEATURE',
+      'Пользователи просят добавить поддержку тёмной темы для главной панели. Нужно реализовать переключение тем с использованием CSS-переменных.',
+    status: 'CREATED',
+    categoryId: 'c1',
     createdAt: '2026-02-27T10:00:00Z',
     updatedAt: '2026-02-27T10:00:00Z',
     createdBy: users[4],
-    sla: {
-      responseDeadline: '2026-02-27T18:00:00Z',
-      resolutionDeadline: '2026-03-03T10:00:00Z',
-      isResponseBreached: true,
-      isResolutionBreached: false,
-    },
-    attachments: [],
-    tags: ['ui', 'enhancement'],
   },
   {
     id: 'TK-1003',
-    subject: 'Redis cache eviction causing stale data',
+    subject: 'Кэш Redis не очищается при обновлении профиля',
     description:
-      'The Redis cache is not being properly evicted when user profiles are updated. This causes stale data to appear for up to 30 minutes after changes are made. Need to review the cache invalidation strategy.',
-    status: 'IN_PROGRESS',
-    priority: 'HIGH',
-    category: 'INFRASTRUCTURE',
+      'Кэш Redis не обновляется корректно при изменении профиля пользователя. Устаревшие данные отображаются до 30 минут после изменений.',
+    status: 'IN_WORK',
+    categoryId: 'c2',
     createdAt: '2026-02-26T09:15:00Z',
     updatedAt: '2026-02-28T11:00:00Z',
     createdBy: users[1],
-    assignee: users[2],
-    sla: {
-      responseDeadline: '2026-02-26T13:15:00Z',
-      resolutionDeadline: '2026-02-28T09:15:00Z',
-      respondedAt: '2026-02-26T10:00:00Z',
-      isResponseBreached: false,
-      isResolutionBreached: true,
-    },
-    attachments: [],
-    tags: ['redis', 'cache', 'performance'],
+    assignee: users[1],
   },
   {
     id: 'TK-1004',
-    subject: 'XSS vulnerability in comment section',
+    subject: 'Не приходят письма для сброса пароля',
     description:
-      'A cross-site scripting vulnerability has been discovered in the ticket comment section. Unsanitized HTML input is being rendered directly in the DOM. This is a critical security issue that needs immediate attention.',
-    status: 'OPEN',
-    priority: 'CRITICAL',
-    category: 'SECURITY',
-    createdAt: '2026-02-28T08:00:00Z',
-    updatedAt: '2026-02-28T08:00:00Z',
-    createdBy: users[5],
-    sla: {
-      responseDeadline: '2026-02-28T09:00:00Z',
-      resolutionDeadline: '2026-02-28T14:00:00Z',
-      isResponseBreached: true,
-      isResolutionBreached: true,
-    },
-    attachments: [
-      {
-        id: 'a2',
-        name: 'vulnerability-report.pdf',
-        size: 1200000,
-        type: 'application/pdf',
-        url: '#',
-        uploadedAt: '2026-02-28T08:05:00Z',
-        uploadedBy: users[5],
-      },
-    ],
-    tags: ['security', 'urgent', 'xss'],
-  },
-  {
-    id: 'TK-1005',
-    subject: 'Password reset email not being sent',
-    description:
-      'Multiple users have reported that the password reset functionality is not sending emails. The issue might be related to the SMTP configuration change that was made last week.',
-    status: 'WAITING',
-    priority: 'HIGH',
-    category: 'SUPPORT',
+      'Несколько пользователей сообщили, что функция сброса пароля не отправляет письма. Проблема может быть связана с изменением конфигурации SMTP.',
+    status: 'IN_WORK',
+    categoryId: 'c3',
     createdAt: '2026-02-25T16:00:00Z',
     updatedAt: '2026-02-27T09:30:00Z',
     createdBy: users[4],
     assignee: users[5],
-    sla: {
-      responseDeadline: '2026-02-25T20:00:00Z',
-      resolutionDeadline: '2026-02-27T16:00:00Z',
-      respondedAt: '2026-02-25T17:15:00Z',
-      isResponseBreached: false,
-      isResolutionBreached: true,
-    },
-    attachments: [],
-    tags: ['email', 'smtp'],
+  },
+  {
+    id: 'TK-1005',
+    subject: 'Вопрос по оплате подписки',
+    description:
+      'Здравствуйте! Хотел бы уточнить возможность оплаты годовой подписки с рассрочкой на 3 месяца. Есть ли такая опция?',
+    status: 'CREATED',
+    categoryId: 'c4',
+    createdAt: '2026-02-28T08:00:00Z',
+    updatedAt: '2026-02-28T08:00:00Z',
+    createdBy: users[4],
   },
   {
     id: 'TK-1006',
-    subject: 'Implement SSO with SAML 2.0',
+    subject: 'Запрос на возврат средств',
     description:
-      'Enterprise clients require SAML 2.0 SSO integration. We need to implement both SP-initiated and IdP-initiated flows. Should work with Okta, Azure AD, and OneLogin.',
-    status: 'OPEN',
-    priority: 'MEDIUM',
-    category: 'FEATURE',
+      'Прошу оформить возврат средств за последний месяц подписки. Причина: не использовал сервис из-за командировки.',
+    status: 'RESOLVED',
+    categoryId: 'c5',
     createdAt: '2026-02-24T11:00:00Z',
-    updatedAt: '2026-02-24T11:00:00Z',
-    createdBy: users[0],
-    sla: {
-      responseDeadline: '2026-02-24T19:00:00Z',
-      resolutionDeadline: '2026-03-10T11:00:00Z',
-      respondedAt: '2026-02-24T14:00:00Z',
-      isResponseBreached: false,
-      isResolutionBreached: false,
-    },
-    attachments: [],
-    tags: ['sso', 'enterprise', 'auth'],
+    updatedAt: '2026-02-26T14:00:00Z',
+    createdBy: users[4],
+    assignee: users[5],
   },
   {
     id: 'TK-1007',
-    subject: 'Database migration failed on staging',
+    subject: 'Миграция базы данных не прошла на staging',
     description:
-      'The Flyway migration V42 failed on the staging environment due to a conflicting schema change. The migration needs to be fixed before the next release.',
+      'Миграция Flyway V42 не прошла на staging-окружении из-за конфликта схемы. Нужно исправить перед следующим релизом.',
     status: 'RESOLVED',
-    priority: 'HIGH',
-    category: 'INFRASTRUCTURE',
+    categoryId: 'c1',
     createdAt: '2026-02-23T13:00:00Z',
     updatedAt: '2026-02-25T10:00:00Z',
     createdBy: users[2],
     assignee: users[2],
-    sla: {
-      responseDeadline: '2026-02-23T17:00:00Z',
-      resolutionDeadline: '2026-02-25T13:00:00Z',
-      respondedAt: '2026-02-23T13:30:00Z',
-      resolvedAt: '2026-02-25T09:45:00Z',
-      isResponseBreached: false,
-      isResolutionBreached: false,
-    },
-    attachments: [],
-    tags: ['database', 'migration', 'staging'],
   },
   {
     id: 'TK-1008',
-    subject: 'API rate limiting returns wrong HTTP code',
+    subject: 'API возвращает неверный HTTP-код при rate limiting',
     description:
-      'The API rate limiter is returning 403 Forbidden instead of 429 Too Many Requests when the rate limit is exceeded. This causes issues with client-side retry logic.',
+      'API rate limiter возвращает 403 Forbidden вместо 429 Too Many Requests при превышении лимита. Это вызывает проблемы с логикой повторных запросов на клиенте.',
     status: 'CLOSED',
-    priority: 'LOW',
-    category: 'BUG',
+    categoryId: 'c1',
     createdAt: '2026-02-20T09:00:00Z',
     updatedAt: '2026-02-22T15:00:00Z',
     createdBy: users[4],
     assignee: users[1],
-    sla: {
-      responseDeadline: '2026-02-20T17:00:00Z',
-      resolutionDeadline: '2026-02-24T09:00:00Z',
-      respondedAt: '2026-02-20T11:00:00Z',
-      resolvedAt: '2026-02-22T14:30:00Z',
-      isResponseBreached: false,
-      isResolutionBreached: false,
-    },
-    attachments: [],
-    tags: ['api', 'rate-limit'],
   },
   {
     id: 'TK-1009',
-    subject: 'Grafana dashboards not showing metrics',
+    subject: 'Grafana дашборды не показывают метрики',
     description:
-      "After the Prometheus endpoint migration, several Grafana dashboards are showing 'No Data'. The issue affects JVM metrics, custom business metrics, and request latency panels.",
-    status: 'IN_PROGRESS',
-    priority: 'MEDIUM',
-    category: 'INFRASTRUCTURE',
+      "После миграции Prometheus endpoint несколько дашбордов Grafana показывают 'No Data'. Проблема затрагивает JVM метрики и панели задержки запросов.",
+    status: 'IN_WORK',
+    categoryId: 'c2',
     createdAt: '2026-02-27T14:00:00Z',
     updatedAt: '2026-02-28T09:00:00Z',
     createdBy: users[0],
-    assignee: users[2],
-    sla: {
-      responseDeadline: '2026-02-27T22:00:00Z',
-      resolutionDeadline: '2026-03-01T14:00:00Z',
-      respondedAt: '2026-02-27T15:30:00Z',
-      isResponseBreached: false,
-      isResolutionBreached: false,
-    },
-    attachments: [],
-    tags: ['grafana', 'monitoring', 'prometheus'],
+    assignee: users[1],
   },
   {
     id: 'TK-1010',
-    subject: 'File upload fails for files over 10MB',
+    subject: 'Консультация по интеграции API',
     description:
-      'The S3 file upload integration is failing for any file larger than 10MB. The multipart upload configuration needs to be reviewed. Nginx may also need a client_max_body_size increase.',
-    status: 'OPEN',
-    priority: 'LOW',
-    category: 'SUPPORT',
+      'Хотел бы получить консультацию по интеграции вашего API с нашей CRM-системой. Какие есть варианты и ограничения?',
+    status: 'CREATED',
+    categoryId: 'c6',
     createdAt: '2026-02-28T07:00:00Z',
     updatedAt: '2026-02-28T07:00:00Z',
-    createdBy: users[3],
-    sla: {
-      responseDeadline: '2026-02-28T15:00:00Z',
-      resolutionDeadline: '2026-03-04T07:00:00Z',
-      isResponseBreached: false,
-      isResolutionBreached: false,
-    },
-    attachments: [],
-    tags: ['s3', 'upload', 'nginx'],
+    createdBy: users[4],
   },
 ];
 
@@ -284,157 +242,85 @@ export const comments: Record<string, Comment[]> = {
     {
       id: 'c1',
       ticketId: 'TK-1001',
-      author: users[1],
+      author: users[2],
       content:
-        "I'm looking into this now. The stack trace points to a null user context in the session filter.",
+        'Смотрю проблему. Стектрейс указывает на null user context в session filter.',
       createdAt: '2026-02-28T14:22:00Z',
-      isInternal: false,
     },
     {
       id: 'c2',
       ticketId: 'TK-1001',
-      author: users[1],
+      author: users[2],
       content:
-        'Root cause identified: the new Redis session serializer is not handling legacy session tokens correctly. Working on a fix.',
+        'Нашёл причину: новый Redis session serializer некорректно обрабатывает legacy session tokens. Работаю над исправлением.',
       createdAt: '2026-02-28T15:45:00Z',
-      isInternal: true,
     },
     {
       id: 'c3',
       ticketId: 'TK-1001',
       author: users[0],
       content:
-        'How long until the fix is ready? We have clients reporting this issue.',
+        'Сколько времени займёт исправление? Клиенты сообщают об этой проблеме.',
       createdAt: '2026-02-28T16:00:00Z',
-      isInternal: false,
     },
     {
       id: 'c4',
       ticketId: 'TK-1001',
-      author: users[1],
-      content: 'Fix is in code review. ETA for deployment: ~30 minutes.',
+      author: users[2],
+      content: 'Фикс на код-ревью. ETA деплоя: ~30 минут.',
       createdAt: '2026-02-28T16:30:00Z',
-      isInternal: false,
     },
   ],
   'TK-1003': [
     {
       id: 'c5',
       ticketId: 'TK-1003',
-      author: users[2],
+      author: users[1],
       content:
-        'Investigating the TTL configuration. It seems the @CacheEvict annotations are not triggering for the profile update endpoint.',
+        'Проверяю конфигурацию TTL. Похоже, аннотации @CacheEvict не срабатывают для endpoint обновления профиля.',
       createdAt: '2026-02-26T10:00:00Z',
-      isInternal: false,
     },
     {
       id: 'c6',
       ticketId: 'TK-1003',
-      author: users[2],
+      author: users[1],
       content:
-        "Found the issue: Spring's cache proxy doesn't intercept self-invocations within the same class. Refactoring the cache layer.",
+        'Нашла проблему: прокси Spring Cache не перехватывает self-invocations внутри того же класса. Рефакторю кэш-слой.',
       createdAt: '2026-02-28T11:00:00Z',
-      isInternal: true,
-    },
-  ],
-  'TK-1005': [
-    {
-      id: 'c7',
-      ticketId: 'TK-1005',
-      author: users[5],
-      content:
-        'The SMTP credentials were rotated but not updated in the Kubernetes secrets. Waiting for DevOps to update them.',
-      createdAt: '2026-02-25T17:15:00Z',
-      isInternal: false,
-    },
-    {
-      id: 'c8',
-      ticketId: 'TK-1005',
-      author: users[5],
-      content: 'DevOps team is on PTO until Monday. Escalating to team lead.',
-      createdAt: '2026-02-27T09:30:00Z',
-      isInternal: true,
-    },
-  ],
-};
-
-export const auditLog: Record<string, AuditEntry[]> = {
-  'TK-1001': [
-    {
-      id: 'al1',
-      ticketId: 'TK-1001',
-      user: users[3],
-      action: 'CREATED',
-      field: 'ticket',
-      timestamp: '2026-02-28T14:05:00Z',
-    },
-    {
-      id: 'al2',
-      ticketId: 'TK-1001',
-      user: users[1],
-      action: 'UPDATED',
-      field: 'status',
-      oldValue: 'OPEN',
-      newValue: 'IN_PROGRESS',
-      timestamp: '2026-02-28T14:22:00Z',
-    },
-    {
-      id: 'al3',
-      ticketId: 'TK-1001',
-      user: users[0],
-      action: 'UPDATED',
-      field: 'assignee',
-      newValue: 'Maria Ivanova',
-      timestamp: '2026-02-28T14:20:00Z',
-    },
-    {
-      id: 'al4',
-      ticketId: 'TK-1001',
-      user: users[0],
-      action: 'UPDATED',
-      field: 'priority',
-      oldValue: 'HIGH',
-      newValue: 'CRITICAL',
-      timestamp: '2026-02-28T14:15:00Z',
-    },
-  ],
-  'TK-1003': [
-    {
-      id: 'al5',
-      ticketId: 'TK-1003',
-      user: users[1],
-      action: 'CREATED',
-      field: 'ticket',
-      timestamp: '2026-02-26T09:15:00Z',
-    },
-    {
-      id: 'al6',
-      ticketId: 'TK-1003',
-      user: users[1],
-      action: 'UPDATED',
-      field: 'assignee',
-      newValue: 'Dmitry Sokolov',
-      timestamp: '2026-02-26T09:20:00Z',
-    },
-    {
-      id: 'al7',
-      ticketId: 'TK-1003',
-      user: users[2],
-      action: 'UPDATED',
-      field: 'status',
-      oldValue: 'OPEN',
-      newValue: 'IN_PROGRESS',
-      timestamp: '2026-02-26T10:00:00Z',
     },
   ],
   'TK-1004': [
     {
-      id: 'al8',
+      id: 'c7',
       ticketId: 'TK-1004',
-      user: users[5],
-      action: 'CREATED',
-      field: 'ticket',
-      timestamp: '2026-02-28T08:00:00Z',
+      author: users[5],
+      content:
+        'SMTP credentials были обновлены, но не обновлены в Kubernetes secrets. Жду DevOps для обновления.',
+      createdAt: '2026-02-25T17:15:00Z',
+    },
+    {
+      id: 'c8',
+      ticketId: 'TK-1004',
+      author: users[5],
+      content: 'Команда DevOps в отпуске до понедельника. Эскалирую тимлиду.',
+      createdAt: '2026-02-27T09:30:00Z',
+    },
+  ],
+  'TK-1006': [
+    {
+      id: 'c9',
+      ticketId: 'TK-1006',
+      author: users[5],
+      content:
+        'Заявка на возврат принята. Средства будут возвращены в течение 3-5 рабочих дней.',
+      createdAt: '2026-02-25T10:00:00Z',
+    },
+    {
+      id: 'c10',
+      ticketId: 'TK-1006',
+      author: users[4],
+      content: 'Спасибо за оперативную обработку!',
+      createdAt: '2026-02-26T14:00:00Z',
     },
   ],
 };
@@ -442,47 +328,81 @@ export const auditLog: Record<string, AuditEntry[]> = {
 export const notifications: Notification[] = [
   {
     id: 'n1',
-    type: 'SLA_WARNING',
-    title: 'SLA Breach: TK-1004',
-    message: 'Response SLA breached for ticket TK-1004 (XSS vulnerability)',
-    ticketId: 'TK-1004',
-    read: false,
-    createdAt: '2026-02-28T09:00:00Z',
-  },
-  {
-    id: 'n2',
-    type: 'ESCALATION',
-    title: 'Escalation: TK-1003',
-    message: 'Resolution SLA breached. Priority escalated to CRITICAL.',
-    ticketId: 'TK-1003',
-    read: false,
-    createdAt: '2026-02-28T09:15:00Z',
-  },
-  {
-    id: 'n3',
     type: 'COMMENT',
-    title: 'New comment on TK-1001',
-    message: 'Maria Ivanova commented: Fix is in code review...',
+    title: 'Новый комментарий в TK-1001',
+    message: 'Дмитрий Соколов: Фикс на код-ревью...',
     ticketId: 'TK-1001',
     read: false,
     createdAt: '2026-02-28T16:30:00Z',
   },
   {
-    id: 'n4',
+    id: 'n2',
+    type: 'STATUS_CHANGE',
+    title: 'Статус изменён: TK-1006',
+    message: "Тикет TK-1006 переведён в статус 'Решён'",
+    ticketId: 'TK-1006',
+    read: false,
+    createdAt: '2026-02-26T14:00:00Z',
+  },
+  {
+    id: 'n3',
     type: 'ASSIGNMENT',
-    title: 'Assigned: TK-1005',
-    message: 'You were assigned to ticket TK-1005',
-    ticketId: 'TK-1005',
+    title: 'Назначен: TK-1004',
+    message: 'Вам назначен тикет TK-1004',
+    ticketId: 'TK-1004',
     read: true,
     createdAt: '2026-02-25T16:10:00Z',
   },
   {
+    id: 'n4',
+    type: 'COMMENT',
+    title: 'Новый комментарий в TK-1003',
+    message: 'Мария Иванова: Нашла проблему...',
+    ticketId: 'TK-1003',
+    read: true,
+    createdAt: '2026-02-28T11:00:00Z',
+  },
+  {
     id: 'n5',
     type: 'STATUS_CHANGE',
-    title: 'TK-1007 Resolved',
-    message: 'Ticket TK-1007 has been resolved by Dmitry Sokolov',
+    title: 'TK-1007 Решён',
+    message: 'Тикет TK-1007 был решён Марией Ивановой',
     ticketId: 'TK-1007',
     read: true,
     createdAt: '2026-02-25T10:00:00Z',
   },
 ];
+
+export function getTopicById(id: string): Topic | undefined {
+  return topics.find((t) => t.id === id);
+}
+
+export function getCategoryById(id: string): Category | undefined {
+  return categories.find((c) => c.id === id);
+}
+
+export function getCategoriesByTopicId(topicId: string): Category[] {
+  return categories.filter((c) => c.topicId === topicId);
+}
+
+export function getUserById(id: string): User | undefined {
+  return users.find((u) => u.id === id);
+}
+
+export function getStaffForCategory(categoryId: string): User[] {
+  const category = getCategoryById(categoryId);
+  if (!category) return [];
+  return users.filter((u) => category.assignedStaff.includes(u.id));
+}
+
+export function getTicketsByUser(userId: string): Ticket[] {
+  return tickets.filter((t) => t.createdBy.id === userId);
+}
+
+export function getTicketsByCategory(categoryId: string): Ticket[] {
+  return tickets.filter((t) => t.categoryId === categoryId);
+}
+
+export function getTicketsByAssignee(userId: string): Ticket[] {
+  return tickets.filter((t) => t.assignee?.id === userId);
+}

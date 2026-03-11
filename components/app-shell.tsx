@@ -12,6 +12,8 @@ import {
   Shield,
   ChevronLeft,
   ChevronRight,
+  FolderTree,
+  Users,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { currentUser, notifications } from '@/lib/mock-data';
@@ -24,18 +26,55 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
-const navigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Tickets', href: '/tickets', icon: Ticket },
-  { name: 'Create Ticket', href: '/tickets/new', icon: Plus },
-  { name: 'Notifications', href: '/notifications', icon: Bell },
-  { name: 'Settings', href: '/settings', icon: Settings },
-];
+const getNavigation = (role: string) => {
+  const baseNav = [
+    { name: 'Мои тикеты', href: '/tickets', icon: Ticket },
+    { name: 'Создать тикет', href: '/tickets/new', icon: Plus },
+    { name: 'Уведомления', href: '/notifications', icon: Bell },
+    { name: 'Настройки', href: '/settings', icon: Settings },
+  ];
+
+  if (role === 'SUPPORT') {
+    return [
+      { name: 'Тикеты категории', href: '/support/tickets', icon: Ticket },
+      { name: 'Мои назначенные', href: '/support/assigned', icon: Ticket },
+      { name: 'Уведомления', href: '/notifications', icon: Bell },
+      { name: 'Настройки', href: '/settings', icon: Settings },
+    ];
+  }
+
+  if (role === 'ADMIN') {
+    return [
+      { name: 'Дашборд', href: '/', icon: LayoutDashboard },
+      { name: 'Все тикеты', href: '/tickets', icon: Ticket },
+      { name: 'Темы и категории', href: '/admin/categories', icon: FolderTree },
+      { name: 'Сотрудники', href: '/admin/staff', icon: Users },
+      { name: 'Уведомления', href: '/notifications', icon: Bell },
+      { name: 'Настройки', href: '/settings', icon: Settings },
+    ];
+  }
+
+  return baseNav;
+};
+
+const getRoleLabel = (role: string) => {
+  switch (role) {
+    case 'ADMIN':
+      return 'Администратор';
+    case 'SUPPORT':
+      return 'Поддержка';
+    case 'USER':
+      return 'Пользователь';
+    default:
+      return role;
+  }
+};
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const unreadCount = notifications.filter((n) => !n.read).length;
+  const navigation = getNavigation(currentUser.role);
 
   if (pathname === '/login' || pathname === '/register') {
     return <>{children}</>;
@@ -83,7 +122,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     <item.icon className="h-4 w-4 shrink-0" />
                     {!collapsed && <span>{item.name}</span>}
                     {!collapsed &&
-                      item.name === 'Notifications' &&
+                      item.name === 'Уведомления' &&
                       unreadCount > 0 && (
                         <Badge
                           variant="destructive"
@@ -93,7 +132,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         </Badge>
                       )}
                     {collapsed &&
-                      item.name === 'Notifications' &&
+                      item.name === 'Уведомления' &&
                       unreadCount > 0 && (
                         <span className="absolute right-1.5 top-1 h-2 w-2 rounded-full bg-destructive" />
                       )}
@@ -142,7 +181,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     {currentUser.name}
                   </p>
                   <p className="truncate text-[10px] text-muted-foreground">
-                    {currentUser.role}
+                    {getRoleLabel(currentUser.role)}
                   </p>
                 </div>
               )}
