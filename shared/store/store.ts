@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { IStore } from '../types/store';
 import { User } from '@/entities/user/types';
 import { Category } from '@/entities/category/types';
+import { Notification } from '@/lib/types';
+import { MessageSquare, RefreshCw, UserPlus } from 'lucide-react';
 
 type SortField = 'createdAt' | 'updatedAt' | 'status';
 type SortDirection = 'asc' | 'desc';
@@ -27,6 +29,14 @@ interface TicketsFilterState {
   setSortDir: (dir: SortDirection) => void;
   clearFilters: () => void;
   toggleSort: (field: SortField) => void;
+  setNotifications: (
+    notifications: Notification[] | ((prev: Notification[]) => Notification[]),
+  ) => void;
+  notifications: Notification[];
+  typeConfig: Record<
+    Notification['type'],
+    { icon: React.ElementType; color: string; bg: string; label: string }
+  >;
 }
 
 export const useStore = create<TicketsFilterState>((set, get) => ({
@@ -123,6 +133,54 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
     },
   ],
 
+  notifications: [
+    {
+      id: 'n1',
+      type: 'COMMENT',
+      title: 'Новый комментарий в TK-1001',
+      message: 'Дмитрий Соколов: Фикс на код-ревью...',
+      ticketId: 'TK-1001',
+      read: false,
+      createdAt: '2026-02-28T16:30:00Z',
+    },
+    {
+      id: 'n2',
+      type: 'STATUS_CHANGE',
+      title: 'Статус изменён: TK-1006',
+      message: "Тикет TK-1006 переведён в статус 'Решён'",
+      ticketId: 'TK-1006',
+      read: false,
+      createdAt: '2026-02-26T14:00:00Z',
+    },
+    {
+      id: 'n3',
+      type: 'ASSIGNMENT',
+      title: 'Назначен: TK-1004',
+      message: 'Вам назначен тикет TK-1004',
+      ticketId: 'TK-1004',
+      read: true,
+      createdAt: '2026-02-25T16:10:00Z',
+    },
+    {
+      id: 'n4',
+      type: 'COMMENT',
+      title: 'Новый комментарий в TK-1003',
+      message: 'Мария Иванова: Нашла проблему...',
+      ticketId: 'TK-1003',
+      read: true,
+      createdAt: '2026-02-28T11:00:00Z',
+    },
+    {
+      id: 'n5',
+      type: 'STATUS_CHANGE',
+      title: 'TK-1007 Решён',
+      message: 'Тикет TK-1007 был решён Марией Ивановой',
+      ticketId: 'TK-1007',
+      read: true,
+      createdAt: '2026-02-25T10:00:00Z',
+    },
+  ],
+
   search: '',
   statusFilter: 'all',
   topicFilter: 'all',
@@ -131,6 +189,27 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
   sortField: 'updatedAt',
   sortDir: 'desc',
 
+  typeConfig: {
+    COMMENT: {
+      icon: MessageSquare,
+      color: 'text-chart-1',
+      bg: 'bg-chart-1/10',
+      label: 'Комментарий',
+    },
+    ASSIGNMENT: {
+      icon: UserPlus,
+      color: 'text-chart-2',
+      bg: 'bg-chart-2/10',
+      label: 'Назначение',
+    },
+    STATUS_CHANGE: {
+      icon: RefreshCw,
+      color: 'text-muted-foreground',
+      bg: 'bg-muted',
+      label: 'Статус',
+    },
+  },
+
   setSearch: (search) => set({ search }),
   setStatusFilter: (statusFilter) => set({ statusFilter }),
   setTopicFilter: (topicFilter) => set({ topicFilter }),
@@ -138,6 +217,13 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
   setAssigneeFilter: (assigneeFilter) => set({ assigneeFilter }),
   setSortField: (sortField) => set({ sortField }),
   setSortDir: (sortDir) => set({ sortDir }),
+  setNotifications: (notifications) =>
+    set((state) => ({
+      notifications:
+        typeof notifications === 'function'
+          ? notifications(state.notifications)
+          : notifications,
+    })),
 
   clearFilters: () =>
     set({
