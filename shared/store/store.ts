@@ -39,6 +39,9 @@ interface TicketsFilterState {
     { icon: React.ElementType; color: string; bg: string; label: string }
   >;
   topics: Topic[];
+  getCategoryById: (id: string) => Category | undefined;
+  getCategoriesByTopicId: (topicId: string) => Category[];
+  getStaffForCategory: (categoryId: string) => User[];
 }
 
 export const useStore = create<TicketsFilterState>((set, get) => ({
@@ -268,8 +271,12 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
   },
 
   getStaffForCategory(categoryId: string): User[] {
-    const category = getCategoryById(categoryId);
+    const category = get().getCategoryById(categoryId);
     if (!category) return [];
     return get().users.filter((u) => category.assignedStaff.includes(u.id));
+  },
+
+  getCategoryById(id: string): Category | undefined {
+    return get().categories.find((c) => c.id === id);
   },
 }));

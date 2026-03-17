@@ -1,3 +1,4 @@
+'use client';
 import { useStore } from '@/shared/store/store';
 import { useState } from 'react';
 
