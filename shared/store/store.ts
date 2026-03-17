@@ -4,6 +4,7 @@ import { User } from '@/entities/user/types';
 import { Category } from '@/entities/category/types';
 import { Notification } from '@/lib/types';
 import { MessageSquare, RefreshCw, UserPlus } from 'lucide-react';
+import { Topic } from '@/entities/topic/types';
 
 type SortField = 'createdAt' | 'updatedAt' | 'status';
 type SortDirection = 'asc' | 'desc';
@@ -37,6 +38,7 @@ interface TicketsFilterState {
     Notification['type'],
     { icon: React.ElementType; color: string; bg: string; label: string }
   >;
+  topics: Topic[];
 }
 
 export const useStore = create<TicketsFilterState>((set, get) => ({
@@ -85,6 +87,24 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
       role: 'SUPPORT',
       categoryIds: ['c3', 'c4', 'c5', 'c6'],
       notificationChannels: { email: true, telegram: true },
+    },
+  ],
+
+  topics: [
+    {
+      id: 't1',
+      name: 'Техническая поддержка',
+      description: 'Вопросы по работе системы',
+    },
+    {
+      id: 't2',
+      name: 'Биллинг и оплата',
+      description: 'Вопросы по оплате и счетам',
+    },
+    {
+      id: 't3',
+      name: 'Продукты и услуги',
+      description: 'Информация о продуктах',
     },
   ],
 
@@ -241,5 +261,15 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
     } else {
       set({ sortField: field, sortDir: 'desc' });
     }
+  },
+
+  getCategoriesByTopicId(topicId: string): Category[] {
+    return get().categories.filter((c) => c.topicId === topicId);
+  },
+
+  getStaffForCategory(categoryId: string): User[] {
+    const category = getCategoryById(categoryId);
+    if (!category) return [];
+    return get().users.filter((u) => category.assignedStaff.includes(u.id));
   },
 }));
