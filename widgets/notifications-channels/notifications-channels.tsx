@@ -42,7 +42,7 @@ export const NotificationsChannels = () => {
           </div>
           <Switch checked={telegramNotif} onCheckedChange={setTelegramNotif} />
         </div>
-        <Separator />
+        {/* <Separator />
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-card-foreground">SLA Warnings</p>
@@ -52,8 +52,8 @@ export const NotificationsChannels = () => {
           </div>
           <Switch checked={slaWarnings} onCheckedChange={setSlaWarnings} />
         </div>
-        <Separator />
-        <div className="flex items-center justify-between">
+        <Separator /> */}
+        {/* <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-card-foreground">Escalation Alerts</p>
             <p className="text-xs text-muted-foreground">
@@ -61,7 +61,7 @@ export const NotificationsChannels = () => {
             </p>
           </div>
           <Switch checked={escalations} onCheckedChange={setEscalations} />
-        </div>
+        </div> */}
       </div>
     </Card>
   );

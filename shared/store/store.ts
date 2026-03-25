@@ -5,6 +5,8 @@ import { Category } from '@/entities/category/types';
 import { Notification } from '@/lib/types';
 import { MessageSquare, RefreshCw, UserPlus } from 'lucide-react';
 import { Topic } from '@/entities/topic/types';
+import { users } from '@/lib/mock-data';
+import { Ticket } from '@/entities/ticket/types';
 
 type SortField = 'createdAt' | 'updatedAt' | 'status';
 type SortDirection = 'asc' | 'desc';
@@ -42,6 +44,7 @@ interface TicketsFilterState {
   getCategoryById: (id: string) => Category | undefined;
   getCategoriesByTopicId: (topicId: string) => Category[];
   getStaffForCategory: (categoryId: string) => User[];
+  tickets: Ticket[];
 }
 
 export const useStore = create<TicketsFilterState>((set, get) => ({
@@ -90,6 +93,126 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
       role: 'SUPPORT',
       categoryIds: ['c3', 'c4', 'c5', 'c6'],
       notificationChannels: { email: true, telegram: true },
+    },
+  ],
+
+  tickets: [
+    {
+      id: 'TK-1001',
+      subject: 'Страница входа возвращает ошибку 500',
+      description:
+        'После последнего обновления страница входа постоянно выдаёт ошибку 500. Проблема началась примерно в 14:00 UTC. В логах сервера видно NullPointerException в AuthenticationController.',
+      status: 'IN_WORK',
+      categoryId: 'c3',
+      createdAt: '2026-02-28T14:05:00Z',
+      updatedAt: '2026-02-28T16:30:00Z',
+      createdBy: users[3],
+      assignee: users[2],
+    },
+    {
+      id: 'TK-1002',
+      subject: 'Добавить тёмную тему для дашборда',
+      description:
+        'Пользователи просят добавить поддержку тёмной темы для главной панели. Нужно реализовать переключение тем с использованием CSS-переменных.',
+      status: 'CREATED',
+      categoryId: 'c1',
+      createdAt: '2026-02-27T10:00:00Z',
+      updatedAt: '2026-02-27T10:00:00Z',
+      createdBy: users[4],
+    },
+    {
+      id: 'TK-1003',
+      subject: 'Кэш Redis не очищается при обновлении профиля',
+      description:
+        'Кэш Redis не обновляется корректно при изменении профиля пользователя. Устаревшие данные отображаются до 30 минут после изменений.',
+      status: 'IN_WORK',
+      categoryId: 'c2',
+      createdAt: '2026-02-26T09:15:00Z',
+      updatedAt: '2026-02-28T11:00:00Z',
+      createdBy: users[1],
+      assignee: users[1],
+    },
+    {
+      id: 'TK-1004',
+      subject: 'Не приходят письма для сброса пароля',
+      description:
+        'Несколько пользователей сообщили, что функция сброса пароля не отправляет письма. Проблема может быть связана с изменением конфигурации SMTP.',
+      status: 'IN_WORK',
+      categoryId: 'c3',
+      createdAt: '2026-02-25T16:00:00Z',
+      updatedAt: '2026-02-27T09:30:00Z',
+      createdBy: users[4],
+      assignee: users[5],
+    },
+    {
+      id: 'TK-1005',
+      subject: 'Вопрос по оплате подписки',
+      description:
+        'Здравствуйте! Хотел бы уточнить возможность оплаты годовой подписки с рассрочкой на 3 месяца. Есть ли такая опция?',
+      status: 'CREATED',
+      categoryId: 'c4',
+      createdAt: '2026-02-28T08:00:00Z',
+      updatedAt: '2026-02-28T08:00:00Z',
+      createdBy: users[4],
+    },
+    {
+      id: 'TK-1006',
+      subject: 'Запрос на возврат средств',
+      description:
+        'Прошу оформить возврат средств за последний месяц подписки. Причина: не использовал сервис из-за командировки.',
+      status: 'RESOLVED',
+      categoryId: 'c5',
+      createdAt: '2026-02-24T11:00:00Z',
+      updatedAt: '2026-02-26T14:00:00Z',
+      createdBy: users[4],
+      assignee: users[5],
+    },
+    {
+      id: 'TK-1007',
+      subject: 'Миграция базы данных не прошла на staging',
+      description:
+        'Миграция Flyway V42 не прошла на staging-окружении из-за конфликта схемы. Нужно исправить перед следующим релизом.',
+      status: 'RESOLVED',
+      categoryId: 'c1',
+      createdAt: '2026-02-23T13:00:00Z',
+      updatedAt: '2026-02-25T10:00:00Z',
+      createdBy: users[2],
+      assignee: users[2],
+    },
+    {
+      id: 'TK-1008',
+      subject: 'API возвращает неверный HTTP-код при rate limiting',
+      description:
+        'API rate limiter возвращает 403 Forbidden вместо 429 Too Many Requests при превышении лимита. Это вызывает проблемы с логикой повторных запросов на клиенте.',
+      status: 'CLOSED',
+      categoryId: 'c1',
+      createdAt: '2026-02-20T09:00:00Z',
+      updatedAt: '2026-02-22T15:00:00Z',
+      createdBy: users[4],
+      assignee: users[1],
+    },
+    {
+      id: 'TK-1009',
+      subject: 'Grafana дашборды не показывают метрики',
+      description:
+        "После миграции Prometheus endpoint несколько дашбордов Grafana показывают 'No Data'. Проблема затрагивает JVM метрики и панели задержки запросов.",
+      status: 'IN_WORK',
+      categoryId: 'c2',
+      createdAt: '2026-02-27T14:00:00Z',
+      updatedAt: '2026-02-28T09:00:00Z',
+      createdBy: users[0],
+      assignee: users[1],
+    },
+    {
+      id: 'TK-1010',
+      subject: 'Консультация по интеграции API',
+      description:
+        'Хотел бы получить консультацию по интеграции вашего API с нашей CRM-системой. Какие есть варианты и ограничения?',
+      status: 'CREATED',
+      categoryId: 'c6',
+      createdAt: '2026-02-28T07:00:00Z',
+      updatedAt: '2026-02-28T07:00:00Z',
+      createdBy: users[4],
     },
   ],
 

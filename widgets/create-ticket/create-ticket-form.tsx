@@ -1,0 +1,150 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { ArrowLeft } from 'lucide-react';
+import { useCreateTicketForm } from '@/features/create-ticket-form';
+
+export function CreateTicketForm() {
+  const router = useRouter();
+  const {
+    handleSubmit,
+    handleTopicChange,
+    filteredCategories,
+    isSubmitting,
+    subject,
+    setSubject,
+    description,
+    setDescription,
+    topicId,
+    categoryId,
+    setCategoryId,
+    canSubmit,
+    topics,
+  } = useCreateTicketForm();
+
+  return (
+    <div className="mx-auto max-w-2xl p-6">
+      <div className="mb-6">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mb-3"
+          onClick={() => router.push('/tickets')}
+        >
+          <ArrowLeft className="mr-1 h-4 w-4" />
+          Назад к тикетам
+        </Button>
+        <h1 className="text-2xl font-semibold text-foreground">
+          Создать тикет
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Создайте новое обращение в службу поддержки
+        </p>
+      </div>
+
+      <Card className="p-6">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <div>
+            <Label htmlFor="subject" className="mb-1.5 text-xs">
+              Заголовок
+            </Label>
+            <Input
+              id="subject"
+              placeholder="Краткое описание проблемы..."
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              className="bg-background"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="description" className="mb-1.5 text-xs">
+              Описание
+            </Label>
+            <Textarea
+              id="description"
+              placeholder="Подробное описание проблемы, шаги для воспроизведения, ожидаемое поведение..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="min-h-[140px] bg-background"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="mb-1.5 text-xs">Тема</Label>
+              <Select value={topicId} onValueChange={handleTopicChange}>
+                <SelectTrigger className="bg-background">
+                  <SelectValue placeholder="Выберите тему" />
+                </SelectTrigger>
+                <SelectContent>
+                  {topics.map((topic) => (
+                    <SelectItem key={topic.id} value={topic.id}>
+                      {topic.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="mb-1.5 text-xs">Категория</Label>
+              <Select
+                value={categoryId}
+                onValueChange={setCategoryId}
+                disabled={!topicId}
+              >
+                <SelectTrigger className="bg-background">
+                  <SelectValue
+                    placeholder={
+                      topicId ? 'Выберите категорию' : 'Сначала выберите тему'
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {filteredCategories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-border bg-muted/30 p-3">
+            <p className="text-xs text-muted-foreground">
+              После создания тикета сотрудники поддержки получат уведомление и
+              смогут взять ваш запрос в работу. Вы получите уведомление при
+              изменении статуса или добавлении комментария.
+            </p>
+          </div>
+
+          <div className="flex justify-end gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.push('/tickets')}
+            >
+              Отмена
+            </Button>
+            <Button type="submit" disabled={!canSubmit || isSubmitting}>
+              {isSubmitting ? 'Создание...' : 'Создать тикет'}
+            </Button>
+          </div>
+        </form>
+      </Card>
+    </div>
+  );
+}

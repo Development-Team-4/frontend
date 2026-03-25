@@ -1,3 +1,7 @@
+import { RecentTickets } from '@/components/recent-tickets';
+import { StatsCards } from '@/components/stats-cards';
+import { TicketCharts } from '@/components/ticket-charts';
+
 export default function DashboardPage() {
   return (
     <div className="p-6">
@@ -10,7 +14,11 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <div className="flex flex-col gap-6"></div>
+      <div className="flex flex-col gap-6">
+        <StatsCards />
+        <TicketCharts />
+        <RecentTickets />
+      </div>
     </div>
   );
 }

@@ -115,7 +115,7 @@ export const users: User[] = [
   },
 ];
 
-export const currentUser: User = users[0];
+export const currentUser: User = users[5]; // 5 SUPPORT 0 - ADMIN 4 USER
 
 export const tickets: Ticket[] = [
   {
