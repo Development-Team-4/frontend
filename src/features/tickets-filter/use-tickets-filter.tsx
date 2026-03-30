@@ -5,8 +5,7 @@ import { tickets } from '@/lib/mock-data';
 import { statusOrder } from '@/shared/consts';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 import { useMemo } from 'react';
-
-type SortField = 'createdAt' | 'updatedAt' | 'status';
+import { SortField } from '@/shared/types';
 
 export const useTicketsFilter = () => {
   const store = useStore();

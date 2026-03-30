@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Category } from '@/entities/category/types';
 import { useStore } from '@/shared/store/store';
+import { Category } from '@/shared/types';
 import { Edit2, Trash2, Users } from 'lucide-react';
 
 export const CategoryItem = ({ category }: { category: Category }) => {

@@ -1,4 +1,4 @@
-import { TicketStatus } from '@/entities/ticket/types';
+import { TicketStatus } from '../types';
 
 export const statusOrder: Record<TicketStatus, number> = {
   CREATED: 0,

@@ -1,8 +1,11 @@
-import { Topic } from '@/entities/topic/types';
-import type { Comment, Notification } from './types';
-import { Ticket } from '@/entities/ticket/types';
-import { Category } from '@/entities/category/types';
-import { User } from '@/entities/user/types';
+import {
+  Category,
+  Ticket,
+  Topic,
+  User,
+  Comment,
+  Notification,
+} from '@/shared/types';
 
 export const topics: Topic[] = [
   {

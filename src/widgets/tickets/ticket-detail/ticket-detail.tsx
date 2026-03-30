@@ -37,8 +37,8 @@ import { ru } from 'date-fns/locale';
 import { useState } from 'react';
 import Link from 'next/link';
 import { statusLabels, statusStyles } from '@/shared/consts';
-import { TicketStatus } from '@/entities/ticket/types';
 import { TicketNotExist } from '../ticket-not-exist';
+import { TicketStatus } from '@/shared/types';
 
 export function TicketDetail() {
   const params = useParams();

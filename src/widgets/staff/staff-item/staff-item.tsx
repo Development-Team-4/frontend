@@ -11,10 +11,10 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { TableCell, TableRow } from '@/components/ui/table';
-import { User } from '@/entities/user/types';
 import { useStaffList } from '@/features/staff-list';
 import { roleLabels, roleStyles } from '@/shared/consts';
 import { useStore } from '@/shared/store/store';
+import { User } from '@/shared/types';
 import { Edit2, Mail } from 'lucide-react';
 
 export const StaffItem = ({ user }: { user: User }) => {

@@ -1,6 +1,5 @@
-import { User } from '@/entities/user/types';
-
-export type TicketStatus = 'CREATED' | 'IN_WORK' | 'RESOLVED' | 'CLOSED';
+import { TicketStatus } from './enums';
+import { User } from './user';
 
 export interface Ticket {
   id: string;

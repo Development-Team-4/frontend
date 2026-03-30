@@ -1,4 +1,4 @@
-import { User } from '@/entities/user/types';
+import { User } from '@/shared/types';
 
 export const useUpdateProfile = () => {
   const users: User[] = [

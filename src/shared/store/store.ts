@@ -1,51 +1,7 @@
 import { create } from 'zustand';
-import { IStore } from '../types/store';
-import { User } from '@/entities/user/types';
-import { Category } from '@/entities/category/types';
-import { Notification } from '@/lib/types';
 import { MessageSquare, RefreshCw, UserPlus } from 'lucide-react';
-import { Topic } from '@/entities/topic/types';
+import { Category, TicketsFilterState, User } from '@/shared/types';
 import { users } from '@/lib/mock-data';
-import { Ticket } from '@/entities/ticket/types';
-
-type SortField = 'createdAt' | 'updatedAt' | 'status';
-type SortDirection = 'asc' | 'desc';
-
-interface TicketsFilterState {
-  users: User[];
-  categories: Category[];
-
-  search: string;
-  statusFilter: string;
-  topicFilter: string;
-  categoryFilter: string;
-  assigneeFilter: string;
-  sortField: SortField;
-  sortDir: SortDirection;
-
-  setSearch: (search: string) => void;
-  setStatusFilter: (status: string) => void;
-  setTopicFilter: (topic: string) => void;
-  setCategoryFilter: (category: string) => void;
-  setAssigneeFilter: (assignee: string) => void;
-  setSortField: (field: SortField) => void;
-  setSortDir: (dir: SortDirection) => void;
-  clearFilters: () => void;
-  toggleSort: (field: SortField) => void;
-  setNotifications: (
-    notifications: Notification[] | ((prev: Notification[]) => Notification[]),
-  ) => void;
-  notifications: Notification[];
-  typeConfig: Record<
-    Notification['type'],
-    { icon: React.ElementType; color: string; bg: string; label: string }
-  >;
-  topics: Topic[];
-  getCategoryById: (id: string) => Category | undefined;
-  getCategoriesByTopicId: (topicId: string) => Category[];
-  getStaffForCategory: (categoryId: string) => User[];
-  tickets: Ticket[];
-}
 
 export const useStore = create<TicketsFilterState>((set, get) => ({
   users: [
