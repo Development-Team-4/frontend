@@ -8,9 +8,18 @@ export interface Comment {
   createdAt: string;
 }
 
+export const NOTIFICATION_TYPES = {
+  ASSIGNMENT: 'ASSIGNMENT',
+  COMMENT: 'COMMENT',
+  STATUS_CHANGE: 'STATUS_CHANGE',
+} as const;
+
+export type NotificationType =
+  (typeof NOTIFICATION_TYPES)[keyof typeof NOTIFICATION_TYPES];
+
 export interface Notification {
   id: string;
-  type: 'ASSIGNMENT' | 'COMMENT' | 'STATUS_CHANGE';
+  type: NotificationType;
   title: string;
   message: string;
   ticketId: string;
