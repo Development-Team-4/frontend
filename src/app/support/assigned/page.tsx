@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { tickets, currentUser, getCategoryById } from '@/lib/mock-data';
+import { currentUser, getCategoryById } from '@/lib/mock-data';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import {
@@ -23,7 +23,7 @@ import {
 import { User } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { statusLabels, statusStyles } from '@/shared/consts';
+import { statusLabels, statusStyles, tickets } from '@/shared/consts';
 
 export default function AssignedTicketsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');

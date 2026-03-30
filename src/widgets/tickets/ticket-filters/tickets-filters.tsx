@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useTicketsFilter } from '@/features/tickets-filter';
-import { topics } from '@/lib/mock-data';
+import { topics } from '@/shared/consts';
 import { Plus, Search, X } from 'lucide-react';
 import Link from 'next/link';
 

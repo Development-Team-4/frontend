@@ -1,8 +1,7 @@
 'use client';
 
 import { useStore } from '@/shared/store/store';
-import { tickets } from '@/lib/mock-data';
-import { statusOrder } from '@/shared/consts';
+import { statusOrder, tickets } from '@/shared/consts';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 import { useMemo } from 'react';
 import { SortField } from '@/shared/types';

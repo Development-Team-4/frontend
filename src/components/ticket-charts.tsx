@@ -1,6 +1,6 @@
 'use client';
 
-import { tickets, getCategoryById, getTopicById } from '@/lib/mock-data';
+import { getCategoryById, getTopicById } from '@/lib/mock-data';
 import { Card } from '@/components/ui/card';
 import {
   BarChart,
@@ -13,7 +13,8 @@ import {
   Cell,
   Tooltip,
 } from 'recharts';
-import { STATUS_COLORS, STATUS_LABELS } from '@/shared/consts';
+import { STATUS_COLORS, STATUS_LABELS, tickets } from '@/shared/consts';
+import { TicketStatus } from '@/shared/types';
 
 export function TicketCharts() {
   const statusData = Object.entries(
@@ -22,12 +23,12 @@ export function TicketCharts() {
         acc[t.status] = (acc[t.status] || 0) + 1;
         return acc;
       },
-      {} as Record<string, number>,
+      {} as Record<TicketStatus, number>,
     ),
   ).map(([name, value]) => ({
-    name: STATUS_LABELS[name] || name,
+    name: STATUS_LABELS[name as TicketStatus] || name,
     value,
-    fill: STATUS_COLORS[name],
+    fill: STATUS_COLORS[name as TicketStatus],
   }));
 
   const categoryData = Object.entries(

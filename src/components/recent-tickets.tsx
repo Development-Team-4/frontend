@@ -1,13 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { tickets, getCategoryById } from '@/lib/mock-data';
+import { getCategoryById } from '@/lib/mock-data';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { Clock, ArrowUpRight } from 'lucide-react';
-import { statusLabels, statusStyles } from '@/shared/consts';
+import { statusLabels, statusStyles, tickets } from '@/shared/consts';
 
 export function RecentTickets() {
   const recent = [...tickets]

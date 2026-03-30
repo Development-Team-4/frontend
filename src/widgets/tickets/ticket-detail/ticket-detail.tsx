@@ -2,8 +2,6 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import {
-  tickets,
-  comments,
   currentUser,
   getCategoryById,
   getTopicById,
@@ -36,7 +34,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useState } from 'react';
 import Link from 'next/link';
-import { statusLabels, statusStyles } from '@/shared/consts';
+import { comments, statusLabels, statusStyles, tickets } from '@/shared/consts';
 import { TicketNotExist } from '../ticket-not-exist';
 import { TicketStatus } from '@/shared/types';
 

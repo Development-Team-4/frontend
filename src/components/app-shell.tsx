@@ -16,7 +16,7 @@ import {
   Users,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { currentUser, notifications } from '@/lib/mock-data';
+import { currentUser } from '@/lib/mock-data';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -25,6 +25,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { notifications } from '@/shared/consts';
 
 const getNavigation = (role: string) => {
   const baseNav = [

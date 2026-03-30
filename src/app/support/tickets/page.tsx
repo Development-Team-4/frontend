@@ -2,12 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import {
-  tickets,
-  currentUser,
-  categories,
-  getCategoryById,
-} from '@/lib/mock-data';
+import { currentUser, getCategoryById } from '@/lib/mock-data';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -29,7 +24,12 @@ import {
 import { User } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { statusLabels, statusStyles } from '@/shared/consts';
+import {
+  categories,
+  statusLabels,
+  statusStyles,
+  tickets,
+} from '@/shared/consts';
 
 export default function SupportTicketsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
