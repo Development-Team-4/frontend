@@ -1,5 +1,8 @@
-import { TicketsFilters, TicketsFiltersResult } from '@/widgets/ticket-filters';
-import { TicketListItems } from '@/widgets/ticket-list-items';
+import {
+  TicketsFilters,
+  TicketsFiltersResult,
+} from '@/widgets/tickets/ticket-filters';
+import { TicketListItems } from '@/widgets/tickets/ticket-list-items';
 
 export function TicketsList() {
   return (

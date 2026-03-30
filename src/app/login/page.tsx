@@ -1,5 +1,5 @@
 import { Shield } from 'lucide-react';
-import { LoginForm } from '@/widgets/login-form';
+import { LoginForm } from '@/widgets/auth/login-form';
 
 export default function LoginPage() {
   return (

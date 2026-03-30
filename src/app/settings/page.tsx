@@ -1,5 +1,5 @@
-import { NotificationsChannels } from '@/widgets/notifications-channels';
-import { ProfileSettings } from '@/widgets/profile-settings';
+import { NotificationsChannels } from '@/widgets/notifications/notifications-channels';
+import { ProfileSettings } from '@/widgets/profile/profile-settings';
 
 export default function SettingsPage() {
   return (

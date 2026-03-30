@@ -1,5 +1,5 @@
-import { TopicList } from '@/widgets/topic-list';
-import { TopicsCategoriesSettings } from '@/widgets/topics-categories-settings';
+import { TopicList } from '@/widgets/categories/topic-list';
+import { TopicsCategoriesSettings } from '@/widgets/categories/topics-categories-settings';
 
 export default function CategoriesPage() {
   return (

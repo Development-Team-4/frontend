@@ -1,5 +1,5 @@
 import { Shield } from 'lucide-react';
-import { RegisterForm } from '@/widgets/register-form';
+import { RegisterForm } from '@/widgets/auth/register-form';
 
 export default function RegisterPage() {
   return (

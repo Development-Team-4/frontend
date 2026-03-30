@@ -1,5 +1,5 @@
-import { StaffList } from '@/widgets/staff-list';
-import { UsersList } from '@/widgets/users-list';
+import { StaffList } from '@/widgets/staff/staff-list';
+import { UsersList } from '@/widgets/users/users-list';
 
 export default function StaffPage() {
   return (
