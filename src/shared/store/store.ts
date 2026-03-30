@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { MessageSquare, RefreshCw, UserPlus } from 'lucide-react';
 import { Category, TicketsFilterState, User } from '@/shared/types';
-import { users } from '@/lib/mock-data';
 
 export const useStore = create<TicketsFilterState>((set, get) => ({
   users: [
@@ -62,8 +61,8 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
       categoryId: 'c3',
       createdAt: '2026-02-28T14:05:00Z',
       updatedAt: '2026-02-28T16:30:00Z',
-      createdBy: users[3],
-      assignee: users[2],
+      createdBy: get().users[3],
+      assignee: get().users[2],
     },
     {
       id: 'TK-1002',
@@ -74,7 +73,7 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
       categoryId: 'c1',
       createdAt: '2026-02-27T10:00:00Z',
       updatedAt: '2026-02-27T10:00:00Z',
-      createdBy: users[4],
+      createdBy: get().users[4],
     },
     {
       id: 'TK-1003',
@@ -85,8 +84,8 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
       categoryId: 'c2',
       createdAt: '2026-02-26T09:15:00Z',
       updatedAt: '2026-02-28T11:00:00Z',
-      createdBy: users[1],
-      assignee: users[1],
+      createdBy: get().users[1],
+      assignee: get().users[1],
     },
     {
       id: 'TK-1004',
@@ -97,8 +96,8 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
       categoryId: 'c3',
       createdAt: '2026-02-25T16:00:00Z',
       updatedAt: '2026-02-27T09:30:00Z',
-      createdBy: users[4],
-      assignee: users[5],
+      createdBy: get().users[4],
+      assignee: get().users[5],
     },
     {
       id: 'TK-1005',
@@ -109,7 +108,7 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
       categoryId: 'c4',
       createdAt: '2026-02-28T08:00:00Z',
       updatedAt: '2026-02-28T08:00:00Z',
-      createdBy: users[4],
+      createdBy: get().users[4],
     },
     {
       id: 'TK-1006',
@@ -120,8 +119,8 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
       categoryId: 'c5',
       createdAt: '2026-02-24T11:00:00Z',
       updatedAt: '2026-02-26T14:00:00Z',
-      createdBy: users[4],
-      assignee: users[5],
+      createdBy: get().users[4],
+      assignee: get().users[5],
     },
     {
       id: 'TK-1007',
@@ -132,8 +131,8 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
       categoryId: 'c1',
       createdAt: '2026-02-23T13:00:00Z',
       updatedAt: '2026-02-25T10:00:00Z',
-      createdBy: users[2],
-      assignee: users[2],
+      createdBy: get().users[2],
+      assignee: get().users[2],
     },
     {
       id: 'TK-1008',
@@ -144,8 +143,8 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
       categoryId: 'c1',
       createdAt: '2026-02-20T09:00:00Z',
       updatedAt: '2026-02-22T15:00:00Z',
-      createdBy: users[4],
-      assignee: users[1],
+      createdBy: get().users[4],
+      assignee: get().users[1],
     },
     {
       id: 'TK-1009',
@@ -156,8 +155,8 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
       categoryId: 'c2',
       createdAt: '2026-02-27T14:00:00Z',
       updatedAt: '2026-02-28T09:00:00Z',
-      createdBy: users[0],
-      assignee: users[1],
+      createdBy: get().users[0],
+      assignee: get().users[1],
     },
     {
       id: 'TK-1010',
@@ -168,7 +167,7 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
       categoryId: 'c6',
       createdAt: '2026-02-28T07:00:00Z',
       updatedAt: '2026-02-28T07:00:00Z',
-      createdBy: users[4],
+      createdBy: get().users[4],
     },
   ],
 
