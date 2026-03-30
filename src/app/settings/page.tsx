@@ -1,5 +1,6 @@
 import { NotificationsChannels } from '@/widgets/notifications/notifications-channels';
 import { ProfileSettings } from '@/widgets/profile/profile-settings';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 export default function SettingsPage() {
   return (
@@ -9,6 +10,11 @@ export default function SettingsPage() {
         <p className="mt-1 text-sm text-muted-foreground">
           Manage your profile and notification preferences
         </p>
+      </div>
+
+      <div className="mb-6">
+        <h2 className="text-lg font-medium text-foreground mb-4">Theme</h2>
+        <ThemeToggle />
       </div>
 
       <ProfileSettings />
