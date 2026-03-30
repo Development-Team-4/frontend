@@ -1,4 +1,5 @@
 'use client';
+
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,12 +14,13 @@ export const LoginForm = () => {
     setEmail,
     password,
     setPassword,
+    errors,
     isLoading,
-    setIsLoading,
   } = useLoginForm();
+
   return (
     <Card className="p-6">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
         <div>
           <Label htmlFor="email" className="mb-1.5 text-xs">
             Email
@@ -30,8 +32,13 @@ export const LoginForm = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="bg-background"
+            aria-invalid={Boolean(errors.email)}
           />
+          {errors.email && (
+            <p className="mt-1 text-xs text-destructive">{errors.email}</p>
+          )}
         </div>
+
         <div>
           <Label htmlFor="password" className="mb-1.5 text-xs">
             Password
@@ -43,8 +50,13 @@ export const LoginForm = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="bg-background"
+            aria-invalid={Boolean(errors.password)}
           />
+          {errors.password && (
+            <p className="mt-1 text-xs text-destructive">{errors.password}</p>
+          )}
         </div>
+
         <Button
           type="submit"
           className="w-full"

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { MessageSquare, RefreshCw, UserPlus } from 'lucide-react';
-import { Category, TicketsFilterState, User } from '@/shared/types';
+import { Category, Ticket, TicketsFilterState, User } from '@/shared/types';
 import { categories, notifications, tickets, topics, users } from '../consts';
 
 export const useStore = create<TicketsFilterState>((set, get) => ({
@@ -86,5 +86,26 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
 
   getCategoryById: (id: string): Category | undefined => {
     return get().categories.find((c) => c.id === id);
+  },
+
+  getCategoryTickets: (userCategories: Category[]): Ticket[] => {
+    const { tickets, statusFilter, categoryFilter } = get();
+
+    const categoryIds = userCategories.map((c) => c.id);
+
+    let result = tickets.filter((t) => categoryIds.includes(t.categoryId));
+
+    if (statusFilter !== 'all') {
+      result = result.filter((t) => t.status === statusFilter);
+    }
+
+    if (categoryFilter !== 'all') {
+      result = result.filter((t) => t.categoryId === categoryFilter);
+    }
+
+    return [...result].sort(
+      (a, b) =>
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+    );
   },
 }));
