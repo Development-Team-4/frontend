@@ -1,30 +1,40 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { RegisterFormData, registerSchema } from './model/register.schema';
 
 export const useRegisterForm = () => {
   const router = useRouter();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const form = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      fullname: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+    mode: 'onSubmit',
+  });
+
+  const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
-    setTimeout(() => router.push('/'), 600);
+
+    try {
+      console.log('validated data:', data);
+
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      router.push('/');
+    } finally {
+      setIsLoading(false);
+    }
   };
+
   return {
-    handleSubmit,
-    name,
-    setName,
-    email,
-    setEmail,
-    password,
-    setPassword,
-    confirmPassword,
-    setConfirmPassword,
+    ...form,
+    onSubmit,
     isLoading,
-    setIsLoading,
   };
 };
