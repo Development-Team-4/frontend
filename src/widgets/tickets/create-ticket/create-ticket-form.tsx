@@ -18,20 +18,20 @@ import { useCreateTicketForm } from '@/features/create-ticket-form';
 
 export function CreateTicketForm() {
   const router = useRouter();
+
   const {
+    register,
     handleSubmit,
     handleTopicChange,
+    handleCategoryChange,
     filteredCategories,
     isSubmitting,
-    subject,
-    setSubject,
-    description,
-    setDescription,
     topicId,
     categoryId,
-    setCategoryId,
     canSubmit,
     topics,
+    onSubmit,
+    formState: { errors },
   } = useCreateTicketForm();
 
   return (
@@ -46,16 +46,22 @@ export function CreateTicketForm() {
           <ArrowLeft className="mr-1 h-4 w-4" />
           Назад к тикетам
         </Button>
+
         <h1 className="text-2xl font-semibold text-foreground">
           Создать тикет
         </h1>
+
         <p className="mt-1 text-sm text-muted-foreground">
           Создайте новое обращение в службу поддержки
         </p>
       </div>
 
       <Card className="p-6">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col gap-5"
+          noValidate
+        >
           <div>
             <Label htmlFor="subject" className="mb-1.5 text-xs">
               Заголовок
@@ -63,10 +69,15 @@ export function CreateTicketForm() {
             <Input
               id="subject"
               placeholder="Краткое описание проблемы..."
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
               className="bg-background"
+              aria-invalid={Boolean(errors.subject)}
+              {...register('subject')}
             />
+            {errors.subject && (
+              <p className="mt-1 text-xs text-destructive">
+                {errors.subject.message}
+              </p>
+            )}
           </div>
 
           <div>
@@ -76,17 +87,25 @@ export function CreateTicketForm() {
             <Textarea
               id="description"
               placeholder="Подробное описание проблемы, шаги для воспроизведения, ожидаемое поведение..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
               className="min-h-[140px] bg-background"
+              aria-invalid={Boolean(errors.description)}
+              {...register('description')}
             />
+            {errors.description && (
+              <p className="mt-1 text-xs text-destructive">
+                {errors.description.message}
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label className="mb-1.5 text-xs">Тема</Label>
               <Select value={topicId} onValueChange={handleTopicChange}>
-                <SelectTrigger className="bg-background">
+                <SelectTrigger
+                  className="bg-background"
+                  aria-invalid={Boolean(errors.topicId)}
+                >
                   <SelectValue placeholder="Выберите тему" />
                 </SelectTrigger>
                 <SelectContent>
@@ -97,15 +116,24 @@ export function CreateTicketForm() {
                   ))}
                 </SelectContent>
               </Select>
+              {errors.topicId && (
+                <p className="mt-1 text-xs text-destructive">
+                  {errors.topicId.message}
+                </p>
+              )}
             </div>
+
             <div>
               <Label className="mb-1.5 text-xs">Категория</Label>
               <Select
                 value={categoryId}
-                onValueChange={setCategoryId}
+                onValueChange={handleCategoryChange}
                 disabled={!topicId}
               >
-                <SelectTrigger className="bg-background">
+                <SelectTrigger
+                  className="bg-background"
+                  aria-invalid={Boolean(errors.categoryId)}
+                >
                   <SelectValue
                     placeholder={
                       topicId ? 'Выберите категорию' : 'Сначала выберите тему'
@@ -120,6 +148,11 @@ export function CreateTicketForm() {
                   ))}
                 </SelectContent>
               </Select>
+              {errors.categoryId && (
+                <p className="mt-1 text-xs text-destructive">
+                  {errors.categoryId.message}
+                </p>
+              )}
             </div>
           </div>
 
@@ -139,6 +172,7 @@ export function CreateTicketForm() {
             >
               Отмена
             </Button>
+
             <Button type="submit" disabled={!canSubmit || isSubmitting}>
               {isSubmitting ? 'Создание...' : 'Создать тикет'}
             </Button>
