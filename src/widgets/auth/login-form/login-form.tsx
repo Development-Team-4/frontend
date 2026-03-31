@@ -9,18 +9,20 @@ import Link from 'next/link';
 
 export const LoginForm = () => {
   const {
+    register,
     handleSubmit,
-    email,
-    setEmail,
-    password,
-    setPassword,
-    errors,
+    formState: { errors },
     isLoading,
+    onSubmit,
   } = useLoginForm();
 
   return (
     <Card className="p-6">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex flex-col gap-4"
+        noValidate
+      >
         <div>
           <Label htmlFor="email" className="mb-1.5 text-xs">
             Email
@@ -29,13 +31,14 @@ export const LoginForm = () => {
             id="email"
             type="email"
             placeholder="you@company.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             className="bg-background"
             aria-invalid={Boolean(errors.email)}
+            {...register('email')}
           />
           {errors.email && (
-            <p className="mt-1 text-xs text-destructive">{errors.email}</p>
+            <p className="mt-1 text-xs text-destructive">
+              {errors.email.message}
+            </p>
           )}
         </div>
 
@@ -47,21 +50,18 @@ export const LoginForm = () => {
             id="password"
             type="password"
             placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
             className="bg-background"
             aria-invalid={Boolean(errors.password)}
+            {...register('password')}
           />
           {errors.password && (
-            <p className="mt-1 text-xs text-destructive">{errors.password}</p>
+            <p className="mt-1 text-xs text-destructive">
+              {errors.password.message}
+            </p>
           )}
         </div>
 
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={!email || !password || isLoading}
-        >
+        <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? 'Signing in...' : 'Sign In'}
         </Button>
       </form>

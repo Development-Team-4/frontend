@@ -5,6 +5,4 @@ export const loginSchema = z.object({
   password: z.string().min(6, 'Пароль должен содержать минимум 6 символов'),
 });
 
-export type LoginFormValues = z.infer<typeof loginSchema>;
-
-export type LoginFormErrors = Partial<Record<keyof LoginFormValues, string>>;
+export type LoginFormData = z.infer<typeof loginSchema>;
