@@ -1,9 +1,10 @@
 'use client';
 
 import { useStore } from '@/shared/store/store';
-import { statusOrder, tickets } from '@/shared/consts';
-import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 import { useMemo } from 'react';
+import { useFilterTickets } from '@/shared/hooks/use-filter-tickets';
+import { useSortTickets } from '@/shared/hooks/use-sort-tickets';
+import { SortIcon } from '@/components/ui/sort-icon';
 import { SortField } from '@/shared/types';
 
 export const useTicketsFilter = () => {
@@ -35,82 +36,28 @@ export const useTicketsFilter = () => {
     ],
   );
 
-  const filtered = useMemo(() => {
-    let result = [...tickets];
+  const filtered = useFilterTickets({
+    search: store.search,
+    statusFilter: store.statusFilter,
+    topicFilter: store.topicFilter,
+    categoryFilter: store.categoryFilter,
+    assigneeFilter: store.assigneeFilter,
+    categories: store.categories,
+  });
 
-    if (store.search) {
-      const q = store.search.toLowerCase();
-      result = result.filter(
-        (t) =>
-          t.id.toLowerCase().includes(q) ||
-          t.subject.toLowerCase().includes(q) ||
-          t.description.toLowerCase().includes(q),
-      );
-    }
+  const sortedFiltered = useSortTickets({
+    tickets: filtered,
+    sortField: store.sortField,
+    sortDir: store.sortDir,
+  });
 
-    if (store.statusFilter !== 'all') {
-      result = result.filter((t) => t.status === store.statusFilter);
-    }
-
-    if (store.topicFilter !== 'all') {
-      const categoryIdsInTopic = store.categories
-        .filter((c) => c.topicId === store.topicFilter)
-        .map((c) => c.id);
-      result = result.filter((t) => categoryIdsInTopic.includes(t.categoryId));
-    }
-
-    if (store.categoryFilter !== 'all') {
-      result = result.filter((t) => t.categoryId === store.categoryFilter);
-    }
-
-    if (store.assigneeFilter !== 'all') {
-      if (store.assigneeFilter === 'unassigned') {
-        result = result.filter((t) => !t.assignee);
-      } else {
-        result = result.filter((t) => t.assignee?.id === store.assigneeFilter);
-      }
-    }
-
-    result.sort((a, b) => {
-      let cmp = 0;
-      switch (store.sortField) {
-        case 'createdAt':
-          cmp =
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-          break;
-        case 'updatedAt':
-          cmp =
-            new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
-          break;
-        case 'status':
-          cmp = statusOrder[a.status] - statusOrder[b.status];
-          break;
-      }
-      return store.sortDir === 'asc' ? cmp : -cmp;
-    });
-
-    return result;
-  }, [
-    store.search,
-    store.statusFilter,
-    store.topicFilter,
-    store.categoryFilter,
-    store.assigneeFilter,
-    store.sortField,
-    store.sortDir,
-    store.categories,
-  ]);
-
-  const SortIcon = ({ field }: { field: SortField }) => {
-    if (store.sortField !== field)
-      return <ArrowUpDown className="h-3 w-3 text-muted-foreground" />;
-
-    return store.sortDir === 'asc' ? (
-      <ArrowUp className="h-3 w-3 text-primary" />
-    ) : (
-      <ArrowDown className="h-3 w-3 text-primary" />
-    );
-  };
+  const SortIconComponent = ({ field }: { field: SortField }) => (
+    <SortIcon
+      field={field}
+      currentSortField={store.sortField}
+      sortDir={store.sortDir}
+    />
+  );
 
   return {
     search: store.search,
@@ -131,7 +78,7 @@ export const useTicketsFilter = () => {
     supportStaff,
     filteredCategories,
     hasFilters,
-    filtered,
-    SortIcon,
+    filtered: sortedFiltered,
+    SortIcon: SortIconComponent,
   };
 };
