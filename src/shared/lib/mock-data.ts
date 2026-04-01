@@ -1,7 +1,7 @@
 import { categories, tickets, topics, users } from '@/shared/consts';
 import { Category, Ticket, Topic, User } from '@/shared/types';
 
-export const currentUser: User = users[0]; // 5 SUPPORT 0 - ADMIN 4 USER
+export const currentUser: User = users[5]; // 5 SUPPORT 0 - ADMIN 4 USER
 
 export function getTopicById(id: string): Topic | undefined {
   return topics.find((t) => t.id === id);

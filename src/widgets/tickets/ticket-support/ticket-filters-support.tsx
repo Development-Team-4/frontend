@@ -5,17 +5,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useTicketFilterSupport } from '@/features/ticket-filter-support';
+import { Category, Ticket } from '@/shared/types';
+import { Dispatch, SetStateAction } from 'react';
 
-export const TicketFiltersSupport = () => {
-  const {
-    statusFilter,
-    setStatusFilter,
-    categoryFilter,
-    setCategoryFilter,
-    userCategories,
-    categoryTickets,
-  } = useTicketFilterSupport();
+interface TicketFiltersProps {
+  statusFilter: string;
+  categoryFilter: string;
+  setStatusFilter: Dispatch<SetStateAction<string>>;
+  userCategories: Category[];
+  setCategoryFilter: Dispatch<SetStateAction<string>>;
+  categoryTickets: Ticket[];
+}
+
+export const TicketFiltersSupport = ({
+  statusFilter,
+  categoryFilter,
+  setStatusFilter,
+  userCategories,
+  setCategoryFilter,
+  categoryTickets,
+}: TicketFiltersProps) => {
   return (
     <>
       <div className="mb-4 flex gap-3">

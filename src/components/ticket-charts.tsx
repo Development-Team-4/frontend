@@ -1,6 +1,6 @@
 'use client';
 
-import { getCategoryById, getTopicById } from '@/lib/mock-data';
+import { getCategoryById, getTopicById } from '@/shared/lib/mock-data';
 import { Card } from '@/components/ui/card';
 import {
   BarChart,

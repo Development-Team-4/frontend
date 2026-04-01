@@ -1,4 +1,5 @@
-import { currentUser } from '@/lib/mock-data';
+'use client';
+import { currentUser } from '@/shared/lib/mock-data';
 import { categories, tickets } from '@/shared/consts';
 import { useMemo, useState } from 'react';
 

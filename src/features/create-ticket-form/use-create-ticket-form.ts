@@ -1,4 +1,4 @@
-import { getCategoriesByTopicId } from '@/lib/mock-data';
+import { getCategoriesByTopicId } from '@/shared/lib/mock-data';
 import { useStore } from '@/shared/store/store';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';

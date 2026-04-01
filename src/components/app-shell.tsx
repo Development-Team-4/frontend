@@ -15,8 +15,8 @@ import {
   FolderTree,
   Users,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { currentUser } from '@/lib/mock-data';
+import { cn } from '@/shared/lib/utils';
+import { currentUser } from '@/shared/lib/mock-data';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import {

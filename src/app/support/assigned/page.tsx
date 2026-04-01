@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { currentUser, getCategoryById } from '@/lib/mock-data';
+import { currentUser, getCategoryById } from '@/shared/lib/mock-data';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import {

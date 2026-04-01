@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { getCategoryById } from '@/lib/mock-data';
+import { getCategoryById } from '@/shared/lib/mock-data';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
