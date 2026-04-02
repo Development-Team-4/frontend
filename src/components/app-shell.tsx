@@ -1,0 +1,205 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import {
+  LayoutDashboard,
+  Ticket,
+  Plus,
+  Bell,
+  Settings,
+  LogOut,
+  Shield,
+  ChevronLeft,
+  ChevronRight,
+  FolderTree,
+  Users,
+} from 'lucide-react';
+import { cn } from '@/shared/lib/utils';
+import { currentUser } from '@/shared/lib/mock-data';
+import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { notifications } from '@/shared/consts';
+
+const getNavigation = (role: string) => {
+  const baseNav = [
+    { name: 'Мои тикеты', href: '/tickets', icon: Ticket },
+    { name: 'Создать тикет', href: '/tickets/new', icon: Plus },
+    { name: 'Уведомления', href: '/notifications', icon: Bell },
+    { name: 'Настройки', href: '/settings', icon: Settings },
+  ];
+
+  if (role === 'SUPPORT') {
+    return [
+      { name: 'Тикеты категории', href: '/support/tickets', icon: Ticket },
+      { name: 'Мои назначенные', href: '/support/assigned', icon: Ticket },
+      { name: 'Уведомления', href: '/notifications', icon: Bell },
+      { name: 'Настройки', href: '/settings', icon: Settings },
+    ];
+  }
+
+  if (role === 'ADMIN') {
+    return [
+      { name: 'Дашборд', href: '/', icon: LayoutDashboard },
+      { name: 'Все тикеты', href: '/tickets', icon: Ticket },
+      { name: 'Темы и категории', href: '/admin/categories', icon: FolderTree },
+      { name: 'Сотрудники', href: '/admin/staff', icon: Users },
+      { name: 'Уведомления', href: '/notifications', icon: Bell },
+      { name: 'Настройки', href: '/settings', icon: Settings },
+    ];
+  }
+
+  return baseNav;
+};
+
+const getRoleLabel = (role: string) => {
+  switch (role) {
+    case 'ADMIN':
+      return 'Администратор';
+    case 'SUPPORT':
+      return 'Поддержка';
+    case 'USER':
+      return 'Пользователь';
+    default:
+      return role;
+  }
+};
+
+export function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const [collapsed, setCollapsed] = useState(false);
+  const unreadCount = notifications.filter((n) => !n.read).length;
+  const navigation = getNavigation(currentUser.role);
+
+  if (pathname === '/login' || pathname === '/register') {
+    return <>{children}</>;
+  }
+
+  return (
+    <TooltipProvider delayDuration={0}>
+      <div className="flex h-screen overflow-hidden">
+        <aside
+          className={cn(
+            'flex flex-col border-r border-sidebar-border bg-sidebar transition-all duration-200',
+            collapsed ? 'w-16' : 'w-60',
+          )}
+        >
+          <div className="flex h-14 items-center gap-2 border-b border-sidebar-border px-4">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary">
+              <Shield className="h-4 w-4 text-primary-foreground" />
+            </div>
+            {!collapsed && (
+              <span className="text-sm font-semibold text-sidebar-foreground tracking-tight">
+                TicketFlow
+              </span>
+            )}
+          </div>
+
+          <nav className="flex-1 overflow-y-auto px-2 py-3">
+            <ul className="flex flex-col gap-1">
+              {navigation.map((item) => {
+                const isActive =
+                  item.href === '/'
+                    ? pathname === '/'
+                    : pathname.startsWith(item.href);
+
+                const linkContent = (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={cn(
+                      'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                      isActive
+                        ? 'bg-sidebar-accent text-sidebar-primary'
+                        : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground',
+                    )}
+                  >
+                    <item.icon className="h-4 w-4 shrink-0" />
+                    {!collapsed && <span>{item.name}</span>}
+                    {!collapsed &&
+                      item.name === 'Уведомления' &&
+                      unreadCount > 0 && (
+                        <Badge
+                          variant="destructive"
+                          className="ml-auto h-5 min-w-5 justify-center rounded-full px-1.5 text-[10px]"
+                        >
+                          {unreadCount}
+                        </Badge>
+                      )}
+                    {collapsed &&
+                      item.name === 'Уведомления' &&
+                      unreadCount > 0 && (
+                        <span className="absolute right-1.5 top-1 h-2 w-2 rounded-full bg-destructive" />
+                      )}
+                  </Link>
+                );
+
+                if (collapsed) {
+                  return (
+                    <li key={item.name} className="relative">
+                      <Tooltip>
+                        <TooltipTrigger asChild>{linkContent}</TooltipTrigger>
+                        <TooltipContent side="right" className="text-xs">
+                          {item.name}
+                        </TooltipContent>
+                      </Tooltip>
+                    </li>
+                  );
+                }
+
+                return <li key={item.name}>{linkContent}</li>;
+              })}
+            </ul>
+          </nav>
+
+          <div className="border-t border-sidebar-border px-2 py-3">
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              className="flex w-full items-center justify-center rounded-md p-2 text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
+            >
+              {collapsed ? (
+                <ChevronRight className="h-4 w-4" />
+              ) : (
+                <ChevronLeft className="h-4 w-4" />
+              )}
+            </button>
+            <div className="mt-2 flex items-center gap-3 rounded-md px-3 py-2">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-medium text-primary">
+                {currentUser.name
+                  .split(' ')
+                  .map((n) => n[0])
+                  .join('')}
+              </div>
+              {!collapsed && (
+                <div className="flex-1 min-w-0">
+                  <p className="truncate text-xs font-medium text-sidebar-foreground">
+                    {currentUser.name}
+                  </p>
+                  <p className="truncate text-[10px] text-muted-foreground">
+                    {getRoleLabel(currentUser.role)}
+                  </p>
+                </div>
+              )}
+              {!collapsed && (
+                <Link
+                  href="/login"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                </Link>
+              )}
+            </div>
+          </div>
+        </aside>
+
+        <main className="flex-1 overflow-y-auto bg-background">{children}</main>
+      </div>
+    </TooltipProvider>
+  );
+}
