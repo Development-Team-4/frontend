@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { RegisterFormData, registerSchema } from './model/register.schema';
+import { regApi } from './api';
 
 export const useRegisterForm = () => {
   const router = useRouter();
@@ -19,14 +20,24 @@ export const useRegisterForm = () => {
     mode: 'onSubmit',
   });
 
-  const onSubmit = async (data: RegisterFormData) => {
+  const onSubmit = async (values: RegisterFormData) => {
     setIsLoading(true);
 
     try {
-      console.log('validated data:', data);
+      const response = await regApi.registration({
+        userName: values.fullname,
+        userEmail: values.email,
+        userPassword: values.password,
+      });
 
-      await new Promise((resolve) => setTimeout(resolve, 600));
-      router.push('/');
+      if (response?.status === 200 || response?.status === 201) {
+        localStorage.setItem('access_token', response.data.accessToken);
+        localStorage.setItem('refresh_token', response.data.refreshToken);
+
+        router.push('/');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
     } finally {
       setIsLoading(false);
     }
