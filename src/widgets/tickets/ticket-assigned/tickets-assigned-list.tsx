@@ -78,7 +78,7 @@ export const TicketsAssignedList = ({
                   <TableCell>
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       <User className="h-3 w-3" />
-                      {ticket.createdBy.name}
+                      {ticket.createdBy.userName}
                     </div>
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground">

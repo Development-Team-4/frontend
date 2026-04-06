@@ -63,7 +63,7 @@ export function RecentTickets() {
                   {ticket.assignee && (
                     <>
                       <span>{'·'}</span>
-                      <span>{ticket.assignee.name}</span>
+                      <span>{ticket.assignee.userName}</span>
                     </>
                   )}
                 </div>

@@ -6,6 +6,8 @@ import { Topic } from './topic';
 import { User } from './user';
 
 export interface TicketsFilterState {
+  userData: User | null;
+  updateUserData: (newUserData: User) => void;
   users: User[];
   categories: Category[];
 

@@ -17,8 +17,9 @@ import {
 } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import { currentUser } from '@/shared/lib/mock-data';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
+import { LoadingOverlay } from '@/components/loading-overlay';
 import {
   Tooltip,
   TooltipContent,
@@ -26,6 +27,8 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { notifications } from '@/shared/consts';
+import { useStore } from '@/shared/store/store';
+import { useUser } from '@/entities/user/model/use-user';
 
 const getNavigation = (role: string) => {
   const baseNav = [
@@ -35,7 +38,7 @@ const getNavigation = (role: string) => {
     { name: 'Настройки', href: '/settings', icon: Settings },
   ];
 
-  if (role === 'SUPPORT') {
+  if (role === 'MODERATOR') {
     return [
       { name: 'Тикеты категории', href: '/support/tickets', icon: Ticket },
       { name: 'Мои назначенные', href: '/support/assigned', icon: Ticket },
@@ -62,7 +65,7 @@ const getRoleLabel = (role: string) => {
   switch (role) {
     case 'ADMIN':
       return 'Администратор';
-    case 'SUPPORT':
+    case 'MODERATOR':
       return 'Поддержка';
     case 'USER':
       return 'Пользователь';
@@ -72,13 +75,34 @@ const getRoleLabel = (role: string) => {
 };
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const { isLoading, refetch } = useUser();
+  const userData = useStore((state) => state.userData);
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const hasMountedRef = useRef(false);
   const unreadCount = notifications.filter((n) => !n.read).length;
-  const navigation = getNavigation(currentUser.role);
+  const navigation = getNavigation(userData?.userRole || 'USER');
+
+  useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+
+    if (pathname === '/login' || pathname === '/register') {
+      return;
+    }
+
+    refetch();
+  }, [pathname, refetch]);
 
   if (pathname === '/login' || pathname === '/register') {
     return <>{children}</>;
+  }
+
+  // Показываем лоадер на весь экран пока идет загрузка данных пользователя
+  if (isLoading) {
+    return <LoadingOverlay />;
   }
 
   return (
@@ -171,18 +195,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </button>
             <div className="mt-2 flex items-center gap-3 rounded-md px-3 py-2">
               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-medium text-primary">
-                {currentUser.name
-                  .split(' ')
+                {userData?.userName
+                  ?.split(' ')
                   .map((n) => n[0])
                   .join('')}
               </div>
               {!collapsed && (
                 <div className="flex-1 min-w-0">
                   <p className="truncate text-xs font-medium text-sidebar-foreground">
-                    {currentUser.name}
+                    {userData?.userName}
                   </p>
                   <p className="truncate text-[10px] text-muted-foreground">
-                    {getRoleLabel(currentUser.role)}
+                    {userData ? getRoleLabel(userData.userRole) : ''}
                   </p>
                 </div>
               )}

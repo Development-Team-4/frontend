@@ -4,6 +4,8 @@ import { Category, Ticket, TicketsFilterState, User } from '@/shared/types';
 import { categories, notifications, tickets, topics, users } from '../consts';
 
 export const useStore = create<TicketsFilterState>((set, get) => ({
+  userData: null,
+  updateUserData: (newUserData) => set({ userData: newUserData }),
   users,
   tickets,
   topics,
@@ -81,7 +83,7 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
   getStaffForCategory: (categoryId: string): User[] => {
     const category = get().getCategoryById(categoryId);
     if (!category) return [];
-    return get().users.filter((u) => category.assignedStaff.includes(u.id));
+    return get().users.filter((u) => category.assignedStaff.includes(u.userId));
   },
 
   getCategoryById: (id: string): Category | undefined => {
