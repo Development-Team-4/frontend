@@ -12,18 +12,12 @@ export const useUser = () => {
     queryKey: ['userData'],
     queryFn: () => usersDataApi.getUserData(),
     select: (data) => {
-      // Обновляем store с новыми данными
       updateUserData(data);
-      // Возвращаем данные для использования в компонентах
       return data;
     },
-    // Кэшировать данные 5 минут
     staleTime: 5 * 60 * 1000,
-    // Оставлять данные в кэше 10 минут при неиспользовании
     gcTime: 10 * 60 * 1000,
-    // Не перезагружать при фокусе окна (так как данные редко меняются)
     refetchOnWindowFocus: false,
-    // Повторять запрос при ошибке максимум 1 раз
     retry: 1,
   });
 };

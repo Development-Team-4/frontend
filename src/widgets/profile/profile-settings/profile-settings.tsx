@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { useUpdateProfile } from '@/features/update-profile';
 
 export const ProfileSettings = () => {
-  const { currentUser, userData } = useUpdateProfile();
+  const { userData } = useUpdateProfile();
 
   return (
     <Card className="mb-6 p-6">

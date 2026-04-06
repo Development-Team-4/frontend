@@ -100,7 +100,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
-  // Показываем лоадер на весь экран пока идет загрузка данных пользователя
   if (isLoading) {
     return <LoadingOverlay />;
   }
