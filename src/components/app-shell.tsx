@@ -29,6 +29,7 @@ import {
 import { notifications } from '@/shared/consts';
 import { useStore } from '@/shared/store/store';
 import { useUser } from '@/entities/user/model/use-user';
+import { useLogout } from '@/features/logout/model';
 
 const getNavigation = (role: string) => {
   const baseNav = [
@@ -82,6 +83,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const hasMountedRef = useRef(false);
   const unreadCount = notifications.filter((n) => !n.read).length;
   const navigation = getNavigation(userData?.userRole || 'USER');
+  const { logout } = useLogout();
 
   useEffect(() => {
     if (!hasMountedRef.current) {
@@ -210,12 +212,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </div>
               )}
               {!collapsed && (
-                <Link
-                  href="/login"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                <button
+                  className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                  onClick={() => logout()}
                 >
                   <LogOut className="h-3.5 w-3.5" />
-                </Link>
+                </button>
               )}
             </div>
           </div>
