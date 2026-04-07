@@ -9,9 +9,36 @@ import {
 } from '@/components/ui/table';
 import { useTicketsFilter } from '@/features/tickets-filter';
 import { TicketRow } from './ticket-row';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const TicketListItems = () => {
-  const { toggleSort, SortIcon, filtered } = useTicketsFilter();
+  const { toggleSort, SortIcon, filtered, isLoading } = useTicketsFilter();
+
+  const renderSkeletonRows = () => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <TableRow key={i}>
+        <TableCell>
+          <Skeleton className="h-4 w-12" />
+        </TableCell>
+        <TableCell>
+          <Skeleton className="h-4 w-48" />
+        </TableCell>
+        <TableCell>
+          <Skeleton className="h-4 w-20" />
+        </TableCell>
+        <TableCell>
+          <Skeleton className="h-4 w-24" />
+        </TableCell>
+        <TableCell>
+          <Skeleton className="h-4 w-28" />
+        </TableCell>
+        <TableCell>
+          <Skeleton className="h-4 w-20" />
+        </TableCell>
+      </TableRow>
+    ));
+  };
+
   return (
     <div className="rounded-lg border border-border bg-card">
       <Table>
@@ -42,7 +69,9 @@ export const TicketListItems = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filtered.length === 0 ? (
+          {isLoading ? (
+            renderSkeletonRows()
+          ) : filtered.length === 0 ? (
             <TableRow>
               <TableCell
                 colSpan={6}

@@ -14,7 +14,7 @@ export const useTicketsFilter = () => {
   useTopics();
   useCategories();
 
-  const { data: backendTickets = [] } = useTickets();
+  const { data: backendTickets = [], isLoading } = useTickets();
   const topics = useStore((state) => state.topics);
   const store = useStore();
 
@@ -80,5 +80,6 @@ export const useTicketsFilter = () => {
     filtered: sortedFiltered,
     SortIcon: SortIconComponent,
     topics,
+    isLoading,
   };
 };
