@@ -1,17 +1,26 @@
 'use client';
 
 import { useStore } from '@/shared/store/store';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { useFilterTickets } from '@/shared/hooks/use-filter-tickets';
 import { useSortTickets } from '@/shared/hooks/use-sort-tickets';
 import { SortIcon } from '@/components/ui/sort-icon';
 import { SortField } from '@/shared/types';
 import { useTopics } from '@/entities/topic/model';
+import { useCategories } from '@/entities/category/model/use-category';
 
 export const useTicketsFilter = () => {
   useTopics();
+  useCategories();
   const topics = useStore((state) => state.topics);
   const store = useStore();
+
+  // Сбрасываем фильтр категории при изменении топика
+  useEffect(() => {
+    if (store.topicFilter !== 'all') {
+      store.setCategoryFilter('all');
+    }
+  }, [store.topicFilter]);
 
   const supportStaff = useMemo(
     () =>

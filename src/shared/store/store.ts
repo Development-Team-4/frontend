@@ -49,6 +49,7 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
   setAssigneeFilter: (assigneeFilter) => set({ assigneeFilter }),
   setSortField: (sortField) => set({ sortField }),
   setSortDir: (sortDir) => set({ sortDir }),
+  setCategories: (categories) => set({ categories }),
 
   setNotifications: (notifications) =>
     set((state) => ({

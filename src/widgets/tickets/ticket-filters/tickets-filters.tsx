@@ -72,9 +72,17 @@ export const TicketsFilters = () => {
           ))}
         </SelectContent>
       </Select>
-      <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+      <Select
+        value={categoryFilter}
+        onValueChange={setCategoryFilter}
+        disabled={topicFilter === 'all'}
+      >
         <SelectTrigger className="w-[180px] bg-card">
-          <SelectValue placeholder="Категория" />
+          <SelectValue
+            placeholder={
+              topicFilter === 'all' ? 'Сначала выберите тему' : 'Категория'
+            }
+          />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Все категории</SelectItem>
