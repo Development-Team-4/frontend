@@ -9,9 +9,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useStaffList } from '@/features/staff-list/use-staff-list';
+import { useUsers } from '@/entities/user/model/use-user';
 import { StaffItem } from '../staff-item';
 
 export const StaffList = () => {
+  useUsers();
   const { supportStaff } = useStaffList();
   return (
     <Card>

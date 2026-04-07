@@ -10,6 +10,7 @@ export interface TicketsFilterState {
   updateUserData: (newUserData: User) => void;
   updateTopics: (topics: Topic[]) => void;
   users: User[];
+  setUsers: (users: User[]) => void;
   categories: Category[];
   setCategories: (categories: Category[]) => void;
   ticketComments: Comment[];

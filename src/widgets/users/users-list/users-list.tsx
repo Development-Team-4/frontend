@@ -32,33 +32,33 @@ export const UsersList = () => {
           </TableHeader>
           <TableBody>
             {users
-              .filter((u) => u.role === 'USER')
+              .filter((u) => u.userRole === 'USER')
               .map((user) => (
-                <TableRow key={user.id}>
+                <TableRow key={user.userId}>
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
-                        {user.name
+                        {user.userName
                           .split(' ')
                           .map((n) => n[0])
                           .join('')}
                       </div>
                       <span className="text-sm font-medium text-card-foreground">
-                        {user.name}
+                        {user.userName}
                       </span>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                       <Mail className="h-3.5 w-3.5" />
-                      {user.email}
+                      {user.userEmail}
                     </div>
                   </TableCell>
                   <TableCell>
                     <Badge
-                      className={`border-0 text-[10px] ${roleStyles[user.role]}`}
+                      className={`border-0 text-[10px] ${roleStyles[user.userRole]}`}
                     >
-                      {roleLabels[user.role]}
+                      {roleLabels[user.userRole]}
                     </Badge>
                   </TableCell>
                 </TableRow>

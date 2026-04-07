@@ -47,3 +47,20 @@ export const useUserById = (userId: string | null) => {
     retry: 0,
   });
 };
+
+export const useUsers = () => {
+  const setUsers = useStore((state) => state.setUsers);
+
+  return useQuery<User[]>({
+    queryKey: ['users'],
+    queryFn: () => usersDataApi.getAllUsers(),
+    select: (data) => {
+      setUsers(data);
+      return data;
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: 0,
+  });
+};

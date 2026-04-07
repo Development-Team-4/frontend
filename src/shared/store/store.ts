@@ -8,6 +8,7 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
   updateUserData: (newUserData) => set({ userData: newUserData }),
   updateTopics: (topics) => set({ topics }),
   users,
+  setUsers: (users) => set({ users }),
   tickets,
   topics,
   categories,
