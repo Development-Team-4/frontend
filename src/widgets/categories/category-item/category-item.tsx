@@ -26,7 +26,7 @@ export const CategoryItem = ({ category }: { category: Category }) => {
             <span className="text-[10px] text-muted-foreground">
               Сотрудники:{' '}
               {staff.length > 0
-                ? staff.map((s) => s.name).join(', ')
+                ? staff.map((s) => s.userName).join(', ')
                 : 'Не назначены'}
             </span>
           </div>

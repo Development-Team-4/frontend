@@ -1,9 +1,11 @@
 'use client';
 
 import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
+  TableCell,
   TableHead,
   TableHeader,
   TableRow,
@@ -13,7 +15,7 @@ import { useUsers } from '@/entities/user/model/use-user';
 import { StaffItem } from '../staff-item';
 
 export const StaffList = () => {
-  useUsers();
+  const { isLoading } = useUsers();
   const { supportStaff } = useStaffList();
   return (
     <Card>
@@ -28,9 +30,28 @@ export const StaffList = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {supportStaff.map((user, id) => (
-            <StaffItem key={id} user={user} />
-          ))}
+          {isLoading &&
+            Array.from({ length: 4 }).map((_, id) => (
+              <TableRow key={`staff-skeleton-${id}`}>
+                <TableCell>
+                  <Skeleton className="h-4 w-40" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-48" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-20" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-32" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-8 w-8" />
+                </TableCell>
+              </TableRow>
+            ))}
+          {!isLoading &&
+            supportStaff.map((user, id) => <StaffItem key={id} user={user} />)}
         </TableBody>
       </Table>
     </Card>
