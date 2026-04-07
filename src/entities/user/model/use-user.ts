@@ -35,3 +35,15 @@ export const useUser = () => {
 
   return query;
 };
+
+export const useUserById = (userId: string | null) => {
+  return useQuery<User>({
+    queryKey: ['user', userId],
+    queryFn: () => usersDataApi.getUserById(userId!),
+    enabled: Boolean(userId),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: 0,
+  });
+};

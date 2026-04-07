@@ -6,26 +6,32 @@ import { useStore } from '@/shared/store/store';
 import { categoriesDataApi } from '../api';
 import { useEffect } from 'react';
 
-export const useCategories = () => {
+export const useCategories = (topicId?: string | null) => {
   const topicFilter = useStore((state) => state.topicFilter);
   const updateCategories = useStore((state) => state.setCategories);
+  const selectedTopicId =
+    typeof topicId === 'string'
+      ? topicId
+      : topicFilter !== 'all'
+        ? topicFilter
+        : null;
 
   const query = useQuery<Category[]>({
-    queryKey: ['categories', topicFilter],
+    queryKey: ['categories', selectedTopicId],
     queryFn: () => {
-      if (topicFilter === 'all') {
+      if (!selectedTopicId) {
         return Promise.resolve([]);
       }
-      return categoriesDataApi.getCategoriesDataByTopicId(topicFilter);
+      return categoriesDataApi.getCategoriesDataByTopicId(selectedTopicId);
     },
-    enabled: topicFilter !== 'all',
+    enabled: Boolean(selectedTopicId),
   });
 
   useEffect(() => {
-    if (query.data) {
+    if (!topicId && query.data) {
       updateCategories(query.data);
     }
-  }, [query.data, updateCategories]);
+  }, [query.data, updateCategories, topicId]);
 
   return query;
 };

@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import {
   currentUser,
   getTopicById,
@@ -32,27 +32,36 @@ import {
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { comments, statusLabels, statusStyles, tickets } from '@/shared/consts';
+import { comments, statusLabels, statusStyles } from '@/shared/consts';
 import { TicketNotExist } from '../ticket-not-exist';
 import { TicketStatus } from '@/shared/types';
+import { useTicketDetail } from '@/features/ticket-detail';
+import { LoadingOverlay } from '@/components/loading-overlay';
+import { useUserById } from '@/entities/user/model/use-user';
 
 export function TicketDetail() {
-  const params = useParams();
   const router = useRouter();
-  const ticketId = params.id as string;
-  const ticket = tickets.find((t) => t.id === ticketId);
+  const { ticketId, data: ticket, isLoading } = useTicketDetail();
   const ticketComments = comments[ticketId] || [];
   const [newComment, setNewComment] = useState('');
-  const [statusValue, setStatusValue] = useState(ticket?.status || 'OPEN');
-  const [assigneeValue, setAssigneeValue] = useState(
-    ticket?.assignee?.userId || '',
-  );
+  const [statusValue, setStatusValue] = useState<TicketStatus>('OPEN');
+  const [assigneeValue, setAssigneeValue] = useState('');
 
   const { data: category } = useCategoryById(ticket?.categoryId || null);
+  const { data: createdByUser } = useUserById(ticket?.createdBy.userId || null);
+  const { data: assigneeUser } = useUserById(ticket?.assignee?.userId || null);
   const topic = category ? getTopicById(category.topicId) : null;
   const categoryStaff = ticket ? getStaffForCategory(ticket.categoryId) : [];
+  const createdByName = createdByUser?.userName || ticket?.createdBy.userName;
+  const assigneeName = assigneeUser?.userName || ticket?.assignee?.userName;
+
+  useEffect(() => {
+    if (!ticket) return;
+    setStatusValue(ticket.status);
+    setAssigneeValue(ticket.assignee?.userId || '');
+  }, [ticket]);
 
   const isOwner = ticket?.createdBy.userId === currentUser.userId;
   const isAssignee = ticket?.assignee?.userId === currentUser.userId;
@@ -64,6 +73,10 @@ export function TicketDetail() {
   const canChangeStatus = isAssignee || isAdmin;
   const canAssign = isAdmin || (isSupport && !ticket?.assignee);
   const canComment = isOwner || isAssignee || isAdmin;
+
+  if (isLoading) {
+    return <LoadingOverlay />;
+  }
 
   if (!ticket) {
     return <TicketNotExist ticketId={ticketId} />;
@@ -115,7 +128,7 @@ export function TicketDetail() {
               <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <User className="h-3 w-3" />
-                  {ticket.createdBy.userName}
+                  {createdByName}
                 </div>
                 <div className="flex items-center gap-1">
                   <Clock className="h-3 w-3" />
@@ -311,7 +324,7 @@ export function TicketDetail() {
               </>
             ) : (
               <div className="rounded-md border border-border bg-background px-3 py-2 text-sm">
-                {ticket.assignee?.userName || (
+                {assigneeName || (
                   <span className="text-muted-foreground italic">
                     Не назначен
                   </span>
@@ -325,9 +338,7 @@ export function TicketDetail() {
           <div className="flex flex-col gap-2 text-xs">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Автор</span>
-              <span className="text-card-foreground">
-                {ticket.createdBy.userName}
-              </span>
+              <span className="text-card-foreground">{createdByName}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Создан</span>

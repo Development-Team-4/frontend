@@ -46,7 +46,16 @@ const mapBackendTicket = (ticket: TicketBackend): Ticket => {
       userEmail: '',
       userRole: 'USER',
     },
-    assignee: assigneeUser || undefined,
+    assignee:
+      assigneeUser ||
+      (ticket.assigneeId
+        ? {
+            userId: ticket.assigneeId,
+            userName: 'Unknown',
+            userEmail: '',
+            userRole: 'USER',
+          }
+        : undefined),
   };
 };
 
@@ -59,6 +68,14 @@ class TicketsDataApi {
       .then((res) => res.data);
 
     return backendTickets.map(mapBackendTicket);
+  }
+
+  async getTicketById(id: string): Promise<Ticket> {
+    const backendTicket = await api
+      .get<TicketBackend>(`/tickets/${id}`)
+      .then((res) => res.data);
+
+    return mapBackendTicket(backendTicket);
   }
 }
 

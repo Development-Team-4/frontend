@@ -1,15 +1,18 @@
-import { getCategoriesByTopicId } from '@/shared/lib/mock-data';
 import { useStore } from '@/shared/store/store';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
   CreateTicketFormData,
   createTicketSchema,
 } from './model/createTicket.schema';
+import { useTopics } from '@/entities/topic/model';
+import { useCategories } from '@/entities/category/model';
+import { createTicketApi } from './api';
 
 export const useCreateTicketForm = () => {
+  useTopics();
   const router = useRouter();
   const topics = useStore((state) => state.topics);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,11 +32,7 @@ export const useCreateTicketForm = () => {
   const categoryId = form.watch('categoryId');
   const subject = form.watch('subject');
   const description = form.watch('description');
-
-  const filteredCategories = useMemo(() => {
-    if (!topicId) return [];
-    return getCategoriesByTopicId(topicId);
-  }, [topicId]);
+  const { data: filteredCategories = [] } = useCategories(topicId || null);
 
   const handleTopicChange = (value: string) => {
     form.setValue('topicId', value, {
@@ -59,8 +58,12 @@ export const useCreateTicketForm = () => {
     try {
       console.log('ticket data:', data);
 
-      // await createTicket(data)
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      const newData = {
+        subject: data.subject,
+        description: data.description,
+        categoryId: data.categoryId,
+      };
+      await createTicketApi.createTicket(newData);
 
       router.push('/tickets');
     } finally {
