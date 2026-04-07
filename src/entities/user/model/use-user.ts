@@ -4,11 +4,14 @@ import { useQuery } from '@tanstack/react-query';
 import { usersDataApi } from '../api';
 import { useStore } from '@/shared/store/store';
 import type { User } from '@/shared/types';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export const useUser = () => {
   const updateUserData = useStore((state) => state.updateUserData);
+  const router = useRouter();
 
-  return useQuery<User>({
+  const query = useQuery<User>({
     queryKey: ['userData'],
     queryFn: () => usersDataApi.getUserData(),
     select: (data) => {
@@ -20,4 +23,15 @@ export const useUser = () => {
     refetchOnWindowFocus: false,
     retry: 1,
   });
+
+  useEffect(() => {
+    if (query.error) {
+      console.error('Failed to fetch user:', query.error);
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      router.push('/login');
+    }
+  }, [query.error, router]);
+
+  return query;
 };

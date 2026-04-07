@@ -1,11 +1,14 @@
 import { useMutation } from '@tanstack/react-query';
 import { logoutApi } from '../api';
 import { useRouter } from 'next/navigation';
+import { getJtiFromToken } from '@/shared/lib/jwt-parser';
 
 export const useLogout = () => {
   const router = useRouter();
   const refreshToken = localStorage.getItem('refresh_token');
-  const accessTokenJti = localStorage.getItem('access_token')?.split('.')[1];
+  const accessToken = localStorage.getItem('access_token');
+  const accessTokenJti = accessToken ? getJtiFromToken(accessToken) : null;
+
   const logoutMutation = useMutation({
     mutationFn: () => logoutApi.logout({ refreshToken, accessTokenJti }),
     onSuccess: () => {
