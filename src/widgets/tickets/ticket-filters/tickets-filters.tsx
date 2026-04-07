@@ -9,7 +9,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useTicketsFilter } from '@/features/tickets-filter';
-import { topics } from '@/shared/consts';
 import { Plus, Search, X } from 'lucide-react';
 import Link from 'next/link';
 
@@ -28,6 +27,7 @@ export const TicketsFilters = () => {
     setAssigneeFilter,
     supportStaff,
     hasFilters,
+    topics,
     clearFilters,
   } = useTicketsFilter();
   return (
@@ -93,8 +93,8 @@ export const TicketsFilters = () => {
           <SelectItem value="all">Все исполнители</SelectItem>
           <SelectItem value="unassigned">Без исполнителя</SelectItem>
           {supportStaff.map((a) => (
-            <SelectItem key={a.id} value={a.id}>
-              {a.name}
+            <SelectItem key={a.userId} value={a.userId}>
+              {a.userName}
             </SelectItem>
           ))}
         </SelectContent>

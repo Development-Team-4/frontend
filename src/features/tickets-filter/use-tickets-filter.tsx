@@ -6,12 +6,18 @@ import { useFilterTickets } from '@/shared/hooks/use-filter-tickets';
 import { useSortTickets } from '@/shared/hooks/use-sort-tickets';
 import { SortIcon } from '@/components/ui/sort-icon';
 import { SortField } from '@/shared/types';
+import { useTopics } from '@/entities/topic/model';
 
 export const useTicketsFilter = () => {
+  useTopics();
+  const topics = useStore((state) => state.topics);
   const store = useStore();
 
   const supportStaff = useMemo(
-    () => store.users.filter((u) => u.role === 'SUPPORT' || u.role === 'ADMIN'),
+    () =>
+      store.users.filter(
+        (u) => u.userRole === 'SUPPORT' || u.userRole === 'ADMIN',
+      ),
     [store.users],
   );
 
@@ -80,5 +86,6 @@ export const useTicketsFilter = () => {
     hasFilters,
     filtered: sortedFiltered,
     SortIcon: SortIconComponent,
+    topics,
   };
 };

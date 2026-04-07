@@ -6,6 +6,7 @@ import { categories, notifications, tickets, topics, users } from '../consts';
 export const useStore = create<TicketsFilterState>((set, get) => ({
   userData: null,
   updateUserData: (newUserData) => set({ userData: newUserData }),
+  updateTopics: (topics) => set({ topics }),
   users,
   tickets,
   topics,

@@ -8,6 +8,7 @@ import { User } from './user';
 export interface TicketsFilterState {
   userData: User | null;
   updateUserData: (newUserData: User) => void;
+  updateTopics: (topics: Topic[]) => void;
   users: User[];
   categories: Category[];
 
