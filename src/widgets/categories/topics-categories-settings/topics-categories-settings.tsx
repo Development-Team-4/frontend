@@ -25,6 +25,8 @@ export const TopicsCategoriesSettings = () => {
   const {
     newTopicName,
     setNewTopicName,
+    newTopicDescription,
+    setNewTopicDescription,
     newCategoryName,
     setNewCategoryName,
     selectedTopicForCategory,
@@ -69,6 +71,17 @@ export const TopicsCategoriesSettings = () => {
                 placeholder="Например: Техническая поддержка"
                 className="mt-1.5"
               />
+
+              <Label htmlFor="topicDescription" className="mt-4 block text-xs">
+                Описание темы
+              </Label>
+              <Input
+                id="topicDescription"
+                value={newTopicDescription}
+                onChange={(e) => setNewTopicDescription(e.target.value)}
+                placeholder="Кратко опишите, для каких обращений эта тема"
+                className="mt-1.5"
+              />
             </div>
             <DialogFooter>
               <Button type="submit" disabled={!newTopicName.trim()}>
@@ -106,7 +119,14 @@ export const TopicsCategoriesSettings = () => {
                   <SelectContent>
                     {topics.map((topic) => (
                       <SelectItem key={topic.id} value={topic.id}>
-                        {topic.name}
+                        <div className="flex flex-col">
+                          <span>{topic.name}</span>
+                          {topic.description && (
+                            <span className="text-xs text-muted-foreground">
+                              {topic.description}
+                            </span>
+                          )}
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>

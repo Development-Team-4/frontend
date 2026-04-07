@@ -27,6 +27,7 @@ export const TicketsFilters = () => {
     topics,
     clearFilters,
   } = useTicketsFilter();
+
   return (
     <div className="flex flex-wrap items-center gap-3">
       <div className="relative flex-1 min-w-[200px] max-w-sm">
@@ -65,7 +66,14 @@ export const TicketsFilters = () => {
           <SelectItem value="all">Все темы</SelectItem>
           {topics.map((t) => (
             <SelectItem key={t.id} value={t.id}>
-              {t.name}
+              <div className="flex flex-col">
+                <span>{t.name}</span>
+                {t.description && (
+                  <span className="text-xs text-muted-foreground">
+                    {t.description}
+                  </span>
+                )}
+              </div>
             </SelectItem>
           ))}
         </SelectContent>

@@ -317,7 +317,16 @@ export function TicketDetail() {
               Тема / Категория
             </label>
             <div className="rounded-md border border-border bg-background px-3 py-2 text-sm">
-              {topic?.name} / {category?.name}
+              <div className="flex flex-col gap-1">
+                <span>
+                  {topic?.name} / {category?.name}
+                </span>
+                {topic?.description && (
+                  <span className="text-xs text-muted-foreground">
+                    {topic.description}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 

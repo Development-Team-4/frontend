@@ -111,7 +111,14 @@ export function CreateTicketForm() {
                 <SelectContent>
                   {topics.map((topic) => (
                     <SelectItem key={topic.id} value={topic.id}>
-                      {topic.name}
+                      <div className="flex flex-col">
+                        <span>{topic.name}</span>
+                        {topic.description && (
+                          <span className="text-xs text-muted-foreground">
+                            {topic.description}
+                          </span>
+                        )}
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>

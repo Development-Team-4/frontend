@@ -28,7 +28,14 @@ export const TopicList = () => {
             <AccordionTrigger className="hover:no-underline">
               <div className="flex items-center gap-3">
                 <FolderTree className="h-4 w-4 text-primary" />
-                <span className="font-medium">{topic.name}</span>
+                <div className="flex flex-col items-start">
+                  <span className="font-medium">{topic.name}</span>
+                  {topic.description && (
+                    <span className="text-xs text-muted-foreground">
+                      {topic.description}
+                    </span>
+                  )}
+                </div>
                 <Badge variant="secondary" className="text-[10px]">
                   {isTopicCategoriesLoading(topic.id)
                     ? '...'
