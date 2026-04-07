@@ -16,7 +16,6 @@ import {
   Users,
 } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
-import { currentUser } from '@/shared/lib/mock-data';
 import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { LoadingOverlay } from '@/components/loading-overlay';
