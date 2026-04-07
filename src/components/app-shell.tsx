@@ -76,7 +76,7 @@ const getRoleLabel = (role: string) => {
 };
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { isLoading, refetch } = useUser();
+  const { isLoading, isError, refetch } = useUser();
   const userData = useStore((state) => state.userData);
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
@@ -102,7 +102,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
-  if (isLoading) {
+  if (isLoading || isError) {
     return <LoadingOverlay />;
   }
 
