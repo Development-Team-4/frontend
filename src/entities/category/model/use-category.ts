@@ -13,7 +13,6 @@ export const useCategories = () => {
   const query = useQuery<Category[]>({
     queryKey: ['categories', topicFilter],
     queryFn: () => {
-      // Если выбран 'all', не делаем запрос
       if (topicFilter === 'all') {
         return Promise.resolve([]);
       }
@@ -29,4 +28,13 @@ export const useCategories = () => {
   }, [query.data, updateCategories]);
 
   return query;
+};
+
+export const useCategoryById = (categoryId: string | null) => {
+  return useQuery<Category>({
+    queryKey: ['category', categoryId],
+    queryFn: () => categoriesDataApi.getCategoryById(categoryId!),
+    enabled: !!categoryId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 };

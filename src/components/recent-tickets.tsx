@@ -1,13 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { getCategoryById } from '@/shared/lib/mock-data';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { formatDistanceToNow } from 'date-fns';
-import { ru } from 'date-fns/locale';
-import { Clock, ArrowUpRight } from 'lucide-react';
-import { statusLabels, statusStyles, tickets } from '@/shared/consts';
+import { ArrowUpRight } from 'lucide-react';
+import { tickets } from '@/shared/consts';
+import { RecentTicketItem } from './recent-ticket-item';
 
 export function RecentTickets() {
   const recent = [...tickets]
@@ -32,52 +29,9 @@ export function RecentTickets() {
         </Link>
       </div>
       <div className="flex flex-col gap-2">
-        {recent.map((ticket) => {
-          const category = getCategoryById(ticket.categoryId);
-          return (
-            <Link
-              key={ticket.id}
-              href={`/tickets/${ticket.id}`}
-              className="group flex items-center gap-3 rounded-md p-2.5 transition-colors hover:bg-accent"
-            >
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-mono text-muted-foreground">
-                    {ticket.id}
-                  </span>
-                  {category && (
-                    <span className="text-[10px] text-muted-foreground">
-                      {category.name}
-                    </span>
-                  )}
-                </div>
-                <p className="truncate text-sm text-card-foreground group-hover:text-primary transition-colors">
-                  {ticket.subject}
-                </p>
-                <div className="mt-1 flex items-center gap-2 text-[10px] text-muted-foreground">
-                  <Clock className="h-3 w-3" />
-                  {formatDistanceToNow(new Date(ticket.updatedAt), {
-                    addSuffix: true,
-                    locale: ru,
-                  })}
-                  {ticket.assignee && (
-                    <>
-                      <span>{'·'}</span>
-                      <span>{ticket.assignee.userName}</span>
-                    </>
-                  )}
-                </div>
-              </div>
-              <div className="shrink-0">
-                <Badge
-                  className={`border-0 text-[10px] ${statusStyles[ticket.status]}`}
-                >
-                  {statusLabels[ticket.status]}
-                </Badge>
-              </div>
-            </Link>
-          );
-        })}
+        {recent.map((ticket) => (
+          <RecentTicketItem key={ticket.id} ticket={ticket} />
+        ))}
       </div>
     </Card>
   );

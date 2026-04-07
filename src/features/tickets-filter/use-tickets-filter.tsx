@@ -8,27 +8,21 @@ import { SortIcon } from '@/components/ui/sort-icon';
 import { SortField } from '@/shared/types';
 import { useTopics } from '@/entities/topic/model';
 import { useCategories } from '@/entities/category/model/use-category';
+import { useTickets } from '@/entities/ticket/model';
 
 export const useTicketsFilter = () => {
   useTopics();
   useCategories();
+
+  const { data: backendTickets = [] } = useTickets();
   const topics = useStore((state) => state.topics);
   const store = useStore();
 
-  // Сбрасываем фильтр категории при изменении топика
   useEffect(() => {
     if (store.topicFilter !== 'all') {
       store.setCategoryFilter('all');
     }
-  }, [store.topicFilter]);
-
-  const supportStaff = useMemo(
-    () =>
-      store.users.filter(
-        (u) => u.userRole === 'SUPPORT' || u.userRole === 'ADMIN',
-      ),
-    [store.users],
-  );
+  }, [store.topicFilter, store.setCategoryFilter]);
 
   const filteredCategories = useMemo(() => {
     if (store.topicFilter === 'all') return store.categories;
@@ -40,15 +34,8 @@ export const useTicketsFilter = () => {
       store.statusFilter !== 'all' ||
       store.topicFilter !== 'all' ||
       store.categoryFilter !== 'all' ||
-      store.assigneeFilter !== 'all' ||
       store.search !== '',
-    [
-      store.statusFilter,
-      store.topicFilter,
-      store.categoryFilter,
-      store.assigneeFilter,
-      store.search,
-    ],
+    [store.statusFilter, store.topicFilter, store.categoryFilter, store.search],
   );
 
   const filtered = useFilterTickets({
@@ -56,8 +43,8 @@ export const useTicketsFilter = () => {
     statusFilter: store.statusFilter,
     topicFilter: store.topicFilter,
     categoryFilter: store.categoryFilter,
-    assigneeFilter: store.assigneeFilter,
     categories: store.categories,
+    tickets: backendTickets,
   });
 
   const sortedFiltered = useSortTickets({
@@ -83,14 +70,11 @@ export const useTicketsFilter = () => {
     setTopicFilter: store.setTopicFilter,
     categoryFilter: store.categoryFilter,
     setCategoryFilter: store.setCategoryFilter,
-    assigneeFilter: store.assigneeFilter,
-    setAssigneeFilter: store.setAssigneeFilter,
     sortField: store.sortField,
     sortDir: store.sortDir,
     toggleSort: store.toggleSort,
     clearFilters: store.clearFilters,
 
-    supportStaff,
     filteredCategories,
     hasFilters,
     filtered: sortedFiltered,

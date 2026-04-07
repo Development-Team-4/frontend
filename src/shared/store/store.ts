@@ -17,7 +17,6 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
   statusFilter: 'all',
   topicFilter: 'all',
   categoryFilter: 'all',
-  assigneeFilter: 'all',
   sortField: 'updatedAt',
   sortDir: 'desc',
 
@@ -46,7 +45,6 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
   setStatusFilter: (statusFilter) => set({ statusFilter }),
   setTopicFilter: (topicFilter) => set({ topicFilter }),
   setCategoryFilter: (categoryFilter) => set({ categoryFilter }),
-  setAssigneeFilter: (assigneeFilter) => set({ assigneeFilter }),
   setSortField: (sortField) => set({ sortField }),
   setSortDir: (sortDir) => set({ sortDir }),
   setCategories: (categories) => set({ categories }),
@@ -65,7 +63,6 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
       statusFilter: 'all',
       topicFilter: 'all',
       categoryFilter: 'all',
-      assigneeFilter: 'all',
     }),
 
   toggleSort: (field) => {

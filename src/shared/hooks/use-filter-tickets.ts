@@ -1,13 +1,14 @@
-import { tickets } from '@/shared/consts';
+import { tickets as mockTickets } from '@/shared/consts';
 import { useMemo } from 'react';
+import type { Ticket } from '@/shared/types';
 
 interface FilterOptions {
   search?: string;
   statusFilter?: string;
   topicFilter?: string;
   categoryFilter?: string;
-  assigneeFilter?: string;
   categories?: Array<{ id: string; topicId: string }>;
+  tickets?: Ticket[];
 }
 
 export const useFilterTickets = ({
@@ -15,11 +16,11 @@ export const useFilterTickets = ({
   statusFilter = 'all',
   topicFilter = 'all',
   categoryFilter = 'all',
-  assigneeFilter = 'all',
   categories = [],
+  tickets: externalTickets,
 }: FilterOptions) => {
   return useMemo(() => {
-    let result = [...tickets];
+    let result = [...(externalTickets || mockTickets)];
 
     if (search) {
       const q = search.toLowerCase();
@@ -46,21 +47,13 @@ export const useFilterTickets = ({
       result = result.filter((t) => t.categoryId === categoryFilter);
     }
 
-    if (assigneeFilter !== 'all') {
-      if (assigneeFilter === 'unassigned') {
-        result = result.filter((t) => !t.assignee);
-      } else {
-        result = result.filter((t) => t.assignee?.id === assigneeFilter);
-      }
-    }
-
     return result;
   }, [
     search,
     statusFilter,
     topicFilter,
     categoryFilter,
-    assigneeFilter,
     categories,
+    externalTickets,
   ]);
 };

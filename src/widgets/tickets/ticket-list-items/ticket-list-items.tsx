@@ -1,5 +1,4 @@
 'use client';
-import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -9,11 +8,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useTicketsFilter } from '@/features/tickets-filter';
-import { getCategoryById } from '@/shared/lib/mock-data';
-import { statusLabels, statusStyles } from '@/shared/consts';
-import { formatDistanceToNow } from 'date-fns';
-import { ru } from 'date-fns/locale';
-import Link from 'next/link';
+import { TicketRow } from './ticket-row';
 
 export const TicketListItems = () => {
   const { toggleSort, SortIcon, filtered } = useTicketsFilter();
@@ -57,56 +52,9 @@ export const TicketListItems = () => {
               </TableCell>
             </TableRow>
           ) : (
-            filtered.map((ticket) => {
-              const category = getCategoryById(ticket.categoryId);
-              return (
-                <TableRow key={ticket.id} className="group">
-                  <TableCell className="font-mono text-xs text-muted-foreground">
-                    <Link
-                      href={`/tickets/${ticket.id}`}
-                      className="hover:text-primary"
-                    >
-                      {ticket.id}
-                    </Link>
-                  </TableCell>
-                  <TableCell>
-                    <Link
-                      href={`/tickets/${ticket.id}`}
-                      className="text-sm text-card-foreground group-hover:text-primary transition-colors"
-                    >
-                      {ticket.subject}
-                    </Link>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      className={`border-0 text-[10px] ${statusStyles[ticket.status]}`}
-                    >
-                      {statusLabels[ticket.status]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">
-                    {category?.name || '—'}
-                  </TableCell>
-                  <TableCell className="text-xs">
-                    {ticket.assignee ? (
-                      <span className="text-card-foreground">
-                        {ticket.assignee.name}
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground italic">
-                        Не назначен
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">
-                    {formatDistanceToNow(new Date(ticket.updatedAt), {
-                      addSuffix: true,
-                      locale: ru,
-                    })}
-                  </TableCell>
-                </TableRow>
-              );
-            })
+            filtered.map((ticket) => (
+              <TicketRow key={ticket.id} ticket={ticket} />
+            ))
           )}
         </TableBody>
       </Table>

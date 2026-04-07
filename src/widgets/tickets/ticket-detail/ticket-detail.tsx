@@ -3,10 +3,10 @@
 import { useParams, useRouter } from 'next/navigation';
 import {
   currentUser,
-  getCategoryById,
   getTopicById,
   getStaffForCategory,
 } from '@/shared/lib/mock-data';
+import { useCategoryById } from '@/entities/category/model';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -45,23 +45,22 @@ export function TicketDetail() {
   const ticket = tickets.find((t) => t.id === ticketId);
   const ticketComments = comments[ticketId] || [];
   const [newComment, setNewComment] = useState('');
-  const [statusValue, setStatusValue] = useState(ticket?.status || 'CREATED');
+  const [statusValue, setStatusValue] = useState(ticket?.status || 'OPEN');
   const [assigneeValue, setAssigneeValue] = useState(
-    ticket?.assignee?.id || '',
+    ticket?.assignee?.userId || '',
   );
 
-  const category = ticket ? getCategoryById(ticket.categoryId) : null;
+  const { data: category } = useCategoryById(ticket?.categoryId || null);
   const topic = category ? getTopicById(category.topicId) : null;
   const categoryStaff = ticket ? getStaffForCategory(ticket.categoryId) : [];
 
-  const isOwner = ticket?.createdBy.id === currentUser.id;
-  const isAssignee = ticket?.assignee?.id === currentUser.id;
-  const isAdmin = currentUser.role === 'ADMIN';
-  const isSupport = currentUser.role === 'SUPPORT';
+  const isOwner = ticket?.createdBy.userId === currentUser.userId;
+  const isAssignee = ticket?.assignee?.userId === currentUser.userId;
+  const isAdmin = currentUser.userRole === 'ADMIN';
+  const isSupport = currentUser.userRole === 'SUPPORT';
 
   const canEdit = isOwner && ticket?.status !== 'CLOSED' && !ticket?.assignee;
-  const canDelete =
-    isOwner && ticket?.status === 'CREATED' && !ticket?.assignee;
+  const canDelete = isOwner && ticket?.status === 'OPEN' && !ticket?.assignee;
   const canChangeStatus = isAssignee || isAdmin;
   const canAssign = isAdmin || (isSupport && !ticket?.assignee);
   const canComment = isOwner || isAssignee || isAdmin;
@@ -116,7 +115,7 @@ export function TicketDetail() {
               <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <User className="h-3 w-3" />
-                  {ticket.createdBy.name}
+                  {ticket.createdBy.userName}
                 </div>
                 <div className="flex items-center gap-1">
                   <Clock className="h-3 w-3" />
@@ -178,18 +177,18 @@ export function TicketDetail() {
                   <div className="mb-2 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/20 text-[10px] font-medium text-primary">
-                        {comment.author.name
+                        {comment.author.userName
                           .split(' ')
                           .map((n) => n[0])
                           .join('')}
                       </div>
                       <span className="text-xs font-medium text-card-foreground">
-                        {comment.author.name}
+                        {comment.author.userName}
                       </span>
                       <Badge variant="outline" className="text-[9px]">
-                        {comment.author.role === 'ADMIN'
+                        {comment.author.userRole === 'ADMIN'
                           ? 'Админ'
-                          : comment.author.role === 'SUPPORT'
+                          : comment.author.userRole === 'SUPPORT'
                             ? 'Поддержка'
                             : 'Пользователь'}
                       </Badge>
@@ -253,8 +252,9 @@ export function TicketDetail() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="CREATED">Создан</SelectItem>
-                  <SelectItem value="IN_WORK">В работе</SelectItem>
+                  <SelectItem value="OPEN">Открыт</SelectItem>
+                  <SelectItem value="ASSIGNED">Назначен</SelectItem>
+                  <SelectItem value="IN_PROGRESS">В процессе</SelectItem>
                   <SelectItem value="RESOLVED">Решён</SelectItem>
                   {(isAdmin || (isAssignee && statusValue === 'RESOLVED')) && (
                     <SelectItem value="CLOSED">Закрыт</SelectItem>
@@ -293,8 +293,8 @@ export function TicketDetail() {
                   </SelectTrigger>
                   <SelectContent>
                     {categoryStaff.map((a) => (
-                      <SelectItem key={a.id} value={a.id}>
-                        {a.name}
+                      <SelectItem key={a.userId} value={a.userId}>
+                        {a.userName}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -311,7 +311,7 @@ export function TicketDetail() {
               </>
             ) : (
               <div className="rounded-md border border-border bg-background px-3 py-2 text-sm">
-                {ticket.assignee?.name || (
+                {ticket.assignee?.userName || (
                   <span className="text-muted-foreground italic">
                     Не назначен
                   </span>
@@ -326,7 +326,7 @@ export function TicketDetail() {
             <div className="flex justify-between">
               <span className="text-muted-foreground">Автор</span>
               <span className="text-card-foreground">
-                {ticket.createdBy.name}
+                {ticket.createdBy.userName}
               </span>
             </div>
             <div className="flex justify-between">

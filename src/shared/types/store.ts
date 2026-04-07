@@ -17,7 +17,6 @@ export interface TicketsFilterState {
   statusFilter: string;
   topicFilter: string;
   categoryFilter: string;
-  assigneeFilter: string;
   sortField: SortField;
   sortDir: SortDirection;
 
@@ -25,7 +24,6 @@ export interface TicketsFilterState {
   setStatusFilter: (status: string) => void;
   setTopicFilter: (topic: string) => void;
   setCategoryFilter: (category: string) => void;
-  setAssigneeFilter: (assignee: string) => void;
   setSortField: (field: SortField) => void;
   setSortDir: (dir: SortDirection) => void;
   clearFilters: () => void;

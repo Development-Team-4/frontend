@@ -23,9 +23,6 @@ export const TicketsFilters = () => {
     categoryFilter,
     setCategoryFilter,
     filteredCategories,
-    assigneeFilter,
-    setAssigneeFilter,
-    supportStaff,
     hasFilters,
     topics,
     clearFilters,
@@ -47,8 +44,9 @@ export const TicketsFilters = () => {
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Все статусы</SelectItem>
-          <SelectItem value="CREATED">Создан</SelectItem>
-          <SelectItem value="IN_WORK">В работе</SelectItem>
+          <SelectItem value="OPEN">Открыт</SelectItem>
+          <SelectItem value="ASSIGNED">Назначен</SelectItem>
+          <SelectItem value="IN_PROGRESS">В процессе</SelectItem>
           <SelectItem value="RESOLVED">Решён</SelectItem>
           <SelectItem value="CLOSED">Закрыт</SelectItem>
         </SelectContent>
@@ -89,20 +87,6 @@ export const TicketsFilters = () => {
           {filteredCategories.map((c) => (
             <SelectItem key={c.id} value={c.id}>
               {c.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Select value={assigneeFilter} onValueChange={setAssigneeFilter}>
-        <SelectTrigger className="w-[160px] bg-card">
-          <SelectValue placeholder="Исполнитель" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Все исполнители</SelectItem>
-          <SelectItem value="unassigned">Без исполнителя</SelectItem>
-          {supportStaff.map((a) => (
-            <SelectItem key={a.userId} value={a.userId}>
-              {a.userName}
             </SelectItem>
           ))}
         </SelectContent>
