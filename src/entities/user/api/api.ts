@@ -1,6 +1,10 @@
 import { api } from '@/shared/api/client';
 import type { User } from '@/shared/types';
 
+interface UpdateUserRolePayload {
+  userRole: 'SUPPORT' | 'USER' | 'ADMIN';
+}
+
 class UsersDataApi {
   private baseUrl = 'users';
 
@@ -14,6 +18,15 @@ class UsersDataApi {
 
   async getAllUsers(): Promise<User[]> {
     return api.get<User[]>(`${this.baseUrl}`).then((res) => res.data);
+  }
+
+  async updateUserRole(
+    userId: string,
+    userRole: UpdateUserRolePayload['userRole'],
+  ) {
+    return api
+      .patch<User>(`${this.baseUrl}/${userId}/role`, { userRole })
+      .then((res) => res.data);
   }
 }
 

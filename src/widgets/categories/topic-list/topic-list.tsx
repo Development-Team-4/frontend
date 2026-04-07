@@ -6,64 +6,152 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useTopicsList } from '@/features/topics-list/use-topics-list';
-import { FolderTree } from 'lucide-react';
+import { Edit2, FolderTree } from 'lucide-react';
 import { CategoryItem } from '../category-item';
 
 export const TopicList = () => {
-  const { topics, getCategoriesByTopicId, isTopicCategoriesLoading } =
-    useTopicsList();
+  const {
+    topics,
+    getCategoriesByTopicId,
+    isTopicCategoriesLoading,
+    isEditTopicOpen,
+    setIsEditTopicOpen,
+    editingTopicName,
+    setEditingTopicName,
+    editingTopicDescription,
+    setEditingTopicDescription,
+    isUpdatingTopic,
+    canUpdateTopic,
+    openEditTopic,
+    handleUpdateTopic,
+  } = useTopicsList();
 
   return (
-    <Accordion
-      type="multiple"
-      defaultValue={topics.map((t) => t.id)}
-      className="w-full"
-    >
-      {topics.map((topic) => {
-        const topicCategories = getCategoriesByTopicId(topic.id);
+    <>
+      <Accordion
+        type="multiple"
+        defaultValue={topics.map((t) => t.id)}
+        className="w-full"
+      >
+        {topics.map((topic) => {
+          const topicCategories = getCategoriesByTopicId(topic.id);
 
-        return (
-          <AccordionItem key={topic.id} value={topic.id}>
-            <AccordionTrigger className="hover:no-underline">
-              <div className="flex items-center gap-3">
-                <FolderTree className="h-4 w-4 text-primary" />
-                <div className="flex flex-col items-start">
-                  <span className="font-medium">{topic.name}</span>
-                  {topic.description && (
-                    <span className="text-xs text-muted-foreground">
-                      {topic.description}
-                    </span>
+          return (
+            <AccordionItem key={topic.id} value={topic.id}>
+              <div className="flex items-center gap-2">
+                <AccordionTrigger className="hover:no-underline">
+                  <div className="flex w-full items-center gap-3">
+                    <FolderTree className="h-4 w-4 text-primary" />
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">{topic.name}</span>
+                      {topic.description && (
+                        <span className="text-xs text-muted-foreground">
+                          {topic.description}
+                        </span>
+                      )}
+                    </div>
+                    <Badge variant="secondary" className="text-[10px]">
+                      {isTopicCategoriesLoading(topic.id)
+                        ? '...'
+                        : topicCategories.length}{' '}
+                      категорий
+                    </Badge>
+                  </div>
+                </AccordionTrigger>
+
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 w-7 shrink-0 p-0"
+                  onClick={() => openEditTopic(topic)}
+                >
+                  <Edit2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+
+              <AccordionContent>
+                <div className="ml-7 flex flex-col gap-2 pt-2">
+                  {isTopicCategoriesLoading(topic.id) ? (
+                    <p className="py-4 text-sm text-muted-foreground">
+                      Загрузка категорий...
+                    </p>
+                  ) : topicCategories.length === 0 ? (
+                    <p className="py-4 text-sm text-muted-foreground">
+                      В этой теме пока нет категорий
+                    </p>
+                  ) : (
+                    topicCategories.map((category) => (
+                      <CategoryItem key={category.id} category={category} />
+                    ))
                   )}
                 </div>
-                <Badge variant="secondary" className="text-[10px]">
-                  {isTopicCategoriesLoading(topic.id)
-                    ? '...'
-                    : topicCategories.length}{' '}
-                  категорий
-                </Badge>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="ml-7 flex flex-col gap-2 pt-2">
-                {isTopicCategoriesLoading(topic.id) ? (
-                  <p className="py-4 text-sm text-muted-foreground">
-                    Загрузка категорий...
-                  </p>
-                ) : topicCategories.length === 0 ? (
-                  <p className="py-4 text-sm text-muted-foreground">
-                    В этой теме пока нет категорий
-                  </p>
-                ) : (
-                  topicCategories.map((category) => (
-                    <CategoryItem key={category.id} category={category} />
-                  ))
-                )}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        );
-      })}
-    </Accordion>
+              </AccordionContent>
+            </AccordionItem>
+          );
+        })}
+      </Accordion>
+
+      <Dialog open={isEditTopicOpen} onOpenChange={setIsEditTopicOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Редактировать тему</DialogTitle>
+            <DialogDescription>
+              Обновите название и описание темы.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div>
+              <Label htmlFor="editTopicName" className="text-xs">
+                Название темы
+              </Label>
+              <Input
+                id="editTopicName"
+                value={editingTopicName}
+                onChange={(e) => setEditingTopicName(e.target.value)}
+                placeholder="Например: Техническая поддержка"
+                className="mt-1.5"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="editTopicDescription" className="text-xs">
+                Описание темы
+              </Label>
+              <Input
+                id="editTopicDescription"
+                value={editingTopicDescription}
+                onChange={(e) => setEditingTopicDescription(e.target.value)}
+                placeholder="Кратко опишите, для каких обращений эта тема"
+                className="mt-1.5"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              onClick={handleUpdateTopic}
+              disabled={!canUpdateTopic}
+            >
+              {isUpdatingTopic ? 'Сохранение...' : 'Сохранить'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };

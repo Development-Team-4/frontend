@@ -1,15 +1,21 @@
 'use client';
 import { categoriesDataApi } from '@/entities/category/api';
-import { useTopics } from '@/entities/topic/model';
+import { useTopics, useUpdateTopic } from '@/entities/topic/model';
 import { useStore } from '@/shared/store/store';
-import { Category } from '@/shared/types';
+import { Category, Topic } from '@/shared/types';
 import { useQueries } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 export const useTopicsList = () => {
   useTopics();
   const topics = useStore((state) => state.topics);
   const getStaffForCategory = useStore((state) => state.getStaffForCategory);
+  const { mutateAsync: updateTopic, isPending: isUpdatingTopic } =
+    useUpdateTopic();
+  const [isEditTopicOpen, setIsEditTopicOpen] = useState(false);
+  const [editingTopicId, setEditingTopicId] = useState<string | null>(null);
+  const [editingTopicName, setEditingTopicName] = useState('');
+  const [editingTopicDescription, setEditingTopicDescription] = useState('');
 
   const categoriesQueries = useQueries({
     queries: topics.map((topic) => ({
@@ -43,10 +49,56 @@ export const useTopicsList = () => {
     return categoriesLoadingByTopicId[topicId] ?? false;
   };
 
+  const canUpdateTopic =
+    editingTopicName.trim().length > 0 &&
+    editingTopicName.trim().length <= 255 &&
+    editingTopicDescription.trim().length <= 2000 &&
+    Boolean(editingTopicId) &&
+    !isUpdatingTopic;
+
+  const openEditTopic = (topic: Topic) => {
+    setEditingTopicId(topic.id);
+    setEditingTopicName(topic.name);
+    setEditingTopicDescription(topic.description || '');
+    setIsEditTopicOpen(true);
+  };
+
+  const closeEditTopic = () => {
+    setIsEditTopicOpen(false);
+    setEditingTopicId(null);
+    setEditingTopicName('');
+    setEditingTopicDescription('');
+  };
+
+  const handleUpdateTopic = async () => {
+    if (!canUpdateTopic || !editingTopicId) return;
+
+    await updateTopic({
+      id: editingTopicId,
+      payload: {
+        name: editingTopicName.trim(),
+        description: editingTopicDescription.trim() || undefined,
+      },
+    });
+
+    closeEditTopic();
+  };
+
   return {
     topics,
     getCategoriesByTopicId,
     isTopicCategoriesLoading,
     getStaffForCategory,
+    isEditTopicOpen,
+    setIsEditTopicOpen,
+    editingTopicName,
+    setEditingTopicName,
+    editingTopicDescription,
+    setEditingTopicDescription,
+    isUpdatingTopic,
+    canUpdateTopic,
+    openEditTopic,
+    closeEditTopic,
+    handleUpdateTopic,
   };
 };

@@ -39,7 +39,7 @@ const getNavigation = (role: string) => {
     { name: 'Настройки', href: '/settings', icon: Settings },
   ];
 
-  if (role === 'MODERATOR') {
+  if (role === 'SUPPORT') {
     return [
       { name: 'Тикеты категории', href: '/support/tickets', icon: Ticket },
       { name: 'Мои назначенные', href: '/support/assigned', icon: Ticket },

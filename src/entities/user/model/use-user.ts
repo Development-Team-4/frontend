@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { usersDataApi } from '../api';
 import { useStore } from '@/shared/store/store';
 import type { User } from '@/shared/types';
@@ -62,5 +62,34 @@ export const useUsers = () => {
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
     retry: 0,
+  });
+};
+
+export const useUpdateUserRole = () => {
+  const queryClient = useQueryClient();
+  const setUsers = useStore((state) => state.setUsers);
+
+  return useMutation({
+    mutationFn: ({
+      userId,
+      userRole,
+    }: {
+      userId: string;
+      userRole: User['userRole'];
+    }) => usersDataApi.updateUserRole(userId, userRole),
+    onSuccess: (updatedUser) => {
+      queryClient.setQueryData<User[]>(['users'], (prev = []) => {
+        const nextUsers = prev.map((user) =>
+          user.userId === updatedUser.userId ? updatedUser : user,
+        );
+        setUsers(nextUsers);
+        return nextUsers;
+      });
+
+      queryClient.setQueryData<User>(['user', updatedUser.userId], updatedUser);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
   });
 };

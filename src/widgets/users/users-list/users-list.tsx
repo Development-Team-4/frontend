@@ -1,6 +1,7 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -11,14 +12,20 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useUsers } from '@/entities/user/model/use-user';
+import { useUpdateUserRole, useUsers } from '@/entities/user/model/use-user';
 import { roleLabels, roleStyles } from '@/shared/consts';
 import { useStore } from '@/shared/store/store';
-import { Mail } from 'lucide-react';
+import { Loader2, Mail } from 'lucide-react';
 
 export const UsersList = () => {
   const { isLoading } = useUsers();
   const users = useStore((state) => state.users);
+  const { mutateAsync: updateUserRole, isPending: isUpdatingRole } =
+    useUpdateUserRole();
+
+  const handlePromoteToSupport = async (userId: string) => {
+    await updateUserRole({ userId, userRole: 'SUPPORT' });
+  };
 
   return (
     <div className="mt-6">
@@ -32,6 +39,7 @@ export const UsersList = () => {
               <TableHead>Пользователь</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Роль</TableHead>
+              <TableHead className="w-[190px]">Действия</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -47,8 +55,12 @@ export const UsersList = () => {
                   <TableCell>
                     <Skeleton className="h-4 w-20" />
                   </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-8 w-36" />
+                  </TableCell>
                 </TableRow>
               ))}
+
             {!isLoading &&
               users
                 .filter((u) => u.userRole === 'USER')
@@ -79,6 +91,21 @@ export const UsersList = () => {
                       >
                         {roleLabels[user.userRole]}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={isUpdatingRole}
+                        onClick={() => handlePromoteToSupport(user.userId)}
+                      >
+                        {isUpdatingRole ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          'Сделать поддержкой'
+                        )}
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}

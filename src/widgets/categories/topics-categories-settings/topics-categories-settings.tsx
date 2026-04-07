@@ -29,9 +29,21 @@ export const TopicsCategoriesSettings = () => {
     setNewTopicDescription,
     newCategoryName,
     setNewCategoryName,
+    newCategoryDescription,
+    setNewCategoryDescription,
     selectedTopicForCategory,
     setSelectedTopicForCategory,
     topics,
+    isCreateTopicOpen,
+    setIsCreateTopicOpen,
+    isCreatingTopic,
+    canCreateTopic,
+    handleCreateTopic,
+    isCreateCategoryOpen,
+    setIsCreateCategoryOpen,
+    isCreatingCategory,
+    canCreateCategory,
+    handleCreateCategory,
   } = useTopicsCategoriesSettings();
 
   return (
@@ -45,7 +57,7 @@ export const TopicsCategoriesSettings = () => {
         </p>
       </div>
       <div className="flex gap-2">
-        <Dialog>
+        <Dialog open={isCreateTopicOpen} onOpenChange={setIsCreateTopicOpen}>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm">
               <Plus className="mr-1 h-3.5 w-3.5" />
@@ -84,14 +96,21 @@ export const TopicsCategoriesSettings = () => {
               />
             </div>
             <DialogFooter>
-              <Button type="submit" disabled={!newTopicName.trim()}>
-                Создать тему
+              <Button
+                type="button"
+                onClick={handleCreateTopic}
+                disabled={!canCreateTopic}
+              >
+                {isCreatingTopic ? 'Создание...' : 'Создать тему'}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        <Dialog>
+        <Dialog
+          open={isCreateCategoryOpen}
+          onOpenChange={setIsCreateCategoryOpen}
+        >
           <DialogTrigger asChild>
             <Button size="sm">
               <Plus className="mr-1 h-3.5 w-3.5" />
@@ -144,13 +163,26 @@ export const TopicsCategoriesSettings = () => {
                   className="mt-1.5"
                 />
               </div>
+              <div>
+                <Label htmlFor="categoryDescription" className="text-xs">
+                  Описание категории
+                </Label>
+                <Input
+                  id="categoryDescription"
+                  value={newCategoryDescription}
+                  onChange={(e) => setNewCategoryDescription(e.target.value)}
+                  placeholder="Опишите, какие тикеты относятся к этой категории"
+                  className="mt-1.5"
+                />
+              </div>
             </div>
             <DialogFooter>
               <Button
-                type="submit"
-                disabled={!newCategoryName.trim() || !selectedTopicForCategory}
+                type="button"
+                onClick={handleCreateCategory}
+                disabled={!canCreateCategory}
               >
-                Создать категорию
+                {isCreatingCategory ? 'Создание...' : 'Создать категорию'}
               </Button>
             </DialogFooter>
           </DialogContent>

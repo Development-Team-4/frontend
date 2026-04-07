@@ -85,7 +85,8 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
   getStaffForCategory: (categoryId: string): User[] => {
     const category = get().getCategoryById(categoryId);
     if (!category) return [];
-    return get().users.filter((u) => category.assignedStaff.includes(u.userId));
+    const assignedStaff = category.assignedStaff || [];
+    return get().users.filter((u) => assignedStaff.includes(u.userId));
   },
 
   getCategoryById: (id: string): Category | undefined => {

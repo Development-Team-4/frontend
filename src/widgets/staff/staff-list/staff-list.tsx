@@ -16,7 +16,7 @@ import { StaffItem } from '../staff-item';
 
 export const StaffList = () => {
   const { isLoading } = useUsers();
-  const { supportStaff } = useStaffList();
+  const { supportStaff, isCategoriesLoading } = useStaffList();
   return (
     <Card>
       <Table>
@@ -51,7 +51,13 @@ export const StaffList = () => {
               </TableRow>
             ))}
           {!isLoading &&
-            supportStaff.map((user, id) => <StaffItem key={id} user={user} />)}
+            supportStaff.map((user) => (
+              <StaffItem
+                key={user.userId}
+                user={user}
+                isCategoriesLoading={isCategoriesLoading}
+              />
+            ))}
         </TableBody>
       </Table>
     </Card>
