@@ -34,17 +34,24 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { comments, statusLabels, statusStyles } from '@/shared/consts';
+import { statusLabels, statusStyles } from '@/shared/consts';
 import { TicketNotExist } from '../ticket-not-exist';
 import { TicketStatus } from '@/shared/types';
 import { useTicketDetail } from '@/features/ticket-detail';
 import { LoadingOverlay } from '@/components/loading-overlay';
 import { useUserById } from '@/entities/user/model/use-user';
+import {
+  useCreateTicketComment,
+  useTicketComments,
+} from '@/entities/comment/model';
 
 export function TicketDetail() {
   const router = useRouter();
   const { ticketId, data: ticket, isLoading } = useTicketDetail();
-  const ticketComments = comments[ticketId] || [];
+  const { data: ticketComments = [], isLoading: isCommentsLoading } =
+    useTicketComments(ticketId || null);
+  const { mutateAsync: createComment, isPending: isSendingComment } =
+    useCreateTicketComment(ticketId || null);
   const [newComment, setNewComment] = useState('');
   const [statusValue, setStatusValue] = useState<TicketStatus>('OPEN');
   const [assigneeValue, setAssigneeValue] = useState('');
@@ -73,6 +80,16 @@ export function TicketDetail() {
   const canChangeStatus = isAssignee || isAdmin;
   const canAssign = isAdmin || (isSupport && !ticket?.assignee);
   const canComment = isOwner || isAssignee || isAdmin;
+  const canSendComment =
+    canComment && ticket?.status !== 'CLOSED' && Boolean(newComment.trim());
+
+  const handleSendComment = async () => {
+    const content = newComment.trim();
+    if (!content) return;
+
+    await createComment(content);
+    setNewComment('');
+  };
 
   if (isLoading) {
     return <LoadingOverlay />;
@@ -177,7 +194,12 @@ export function TicketDetail() {
 
           <TabsContent value="comments" className="mt-4">
             <div className="flex flex-col gap-3">
-              {ticketComments.length === 0 && (
+              {isCommentsLoading && (
+                <p className="py-8 text-center text-sm text-muted-foreground">
+                  Загрузка комментариев...
+                </p>
+              )}
+              {!isCommentsLoading && ticketComments.length === 0 && (
                 <p className="py-8 text-center text-sm text-muted-foreground">
                   Комментариев пока нет
                 </p>
@@ -226,11 +248,16 @@ export function TicketDetail() {
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
                     className="min-h-[80px] bg-card"
+                    disabled={isSendingComment}
                   />
                   <div className="mt-2 flex justify-end">
-                    <Button size="sm" disabled={!newComment.trim()}>
+                    <Button
+                      size="sm"
+                      onClick={handleSendComment}
+                      disabled={!canSendComment || isSendingComment}
+                    >
                       <Send className="mr-1 h-3.5 w-3.5" />
-                      Отправить
+                      {isSendingComment ? 'Отправка...' : 'Отправить'}
                     </Button>
                   </div>
                 </div>

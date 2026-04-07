@@ -12,6 +12,8 @@ export interface TicketsFilterState {
   users: User[];
   categories: Category[];
   setCategories: (categories: Category[]) => void;
+  ticketComments: Comment[];
+  updateTicketComments: (newComments: Comment[]) => void;
 
   search: string;
   statusFilter: string;

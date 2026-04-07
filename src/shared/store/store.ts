@@ -40,6 +40,8 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
       label: 'Статус',
     },
   },
+  ticketComments: [],
+  updateTicketComments: (newComments) => set({ ticketComments: newComments }),
 
   setSearch: (search) => set({ search }),
   setStatusFilter: (statusFilter) => set({ statusFilter }),
