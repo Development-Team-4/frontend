@@ -14,6 +14,7 @@ import {
 import { TableCell, TableRow } from '@/components/ui/table';
 import {
   useAssignStaffToCategory,
+  useCheckStaffAssignments,
   useRemoveStaffFromCategory,
 } from '@/entities/category/model';
 import { roleLabels, roleStyles } from '@/shared/consts';
@@ -35,6 +36,7 @@ export const StaffItem = ({
   const { mutateAsync: removeStaffFromCategory, isPending: isRemoving } =
     useRemoveStaffFromCategory();
 
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingCategoryId, setPendingCategoryId] = useState<string | null>(
     null,
   );
@@ -54,13 +56,31 @@ export const StaffItem = ({
     ...userCategoryIds,
     ...assignedCategoryIdsFromCategories,
   ]);
+
+  const { assignmentByCategoryId } = useCheckStaffAssignments({
+    staffId: user.userId,
+    categoryIds: categories.map((category) => category.id),
+    enabled: isDialogOpen && user.userRole !== 'ADMIN',
+  });
+
+  const isAssignedToCategory = (categoryId: string) =>
+    assignmentByCategoryId[categoryId] ?? assignedCategoryIds.has(categoryId);
+
+  const checkedAssignedCategoryIds = new Set(
+    categories
+      .filter((category) => isAssignedToCategory(category.id))
+      .map((category) => category.id),
+  );
+
   const userCategories =
     categories.length > 0
-      ? categories.filter((category) => assignedCategoryIds.has(category.id))
+      ? categories.filter((category) =>
+          checkedAssignedCategoryIds.has(category.id),
+        )
       : userCategoryIds.map((id) => getCategoryById(id)).filter(Boolean);
 
   const handleAssignCategory = async (categoryId: string) => {
-    if (assignedCategoryIds.has(categoryId)) return;
+    if (isAssignedToCategory(categoryId)) return;
 
     setPendingCategoryId(categoryId);
     setPendingAction('assign');
@@ -78,7 +98,7 @@ export const StaffItem = ({
   };
 
   const handleRemoveCategory = async (categoryId: string) => {
-    if (!assignedCategoryIds.has(categoryId)) return;
+    if (!isAssignedToCategory(categoryId)) return;
 
     setPendingCategoryId(categoryId);
     setPendingAction('remove');
@@ -144,7 +164,7 @@ export const StaffItem = ({
       </TableCell>
       <TableCell>
         {user.userRole !== 'ADMIN' && (
-          <Dialog>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm" className="h-8 gap-1.5">
                 <Edit2 className="h-3.5 w-3.5" />
@@ -195,7 +215,11 @@ export const StaffItem = ({
                   ) : (
                     <div className="grid max-h-64 gap-2 overflow-y-auto pr-1">
                       {categories.map((category) => {
-                        const isAssigned = assignedCategoryIds.has(category.id);
+                        const checkedAssignment =
+                          assignmentByCategoryId[category.id];
+                        const isAssigned = isAssignedToCategory(category.id);
+                        const isCheckingAssignment =
+                          isDialogOpen && checkedAssignment === null;
                         const isCurrentPending =
                           pendingCategoryId === category.id;
 
@@ -222,12 +246,17 @@ export const StaffItem = ({
                                   handleAssignCategory(category.id)
                                 }
                                 disabled={
-                                  isAssigned || isAssigning || isRemoving
+                                  isAssigned ||
+                                  isCheckingAssignment ||
+                                  isAssigning ||
+                                  isRemoving
                                 }
                               >
                                 {isCurrentPending &&
                                 pendingAction === 'assign' ? (
                                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : isCheckingAssignment ? (
+                                  '...'
                                 ) : isAssigned ? (
                                   'Назначен'
                                 ) : (
@@ -242,12 +271,17 @@ export const StaffItem = ({
                                   handleRemoveCategory(category.id)
                                 }
                                 disabled={
-                                  !isAssigned || isAssigning || isRemoving
+                                  !isAssigned ||
+                                  isCheckingAssignment ||
+                                  isAssigning ||
+                                  isRemoving
                                 }
                               >
                                 {isCurrentPending &&
                                 pendingAction === 'remove' ? (
                                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : isCheckingAssignment ? (
+                                  '...'
                                 ) : (
                                   'Удалить'
                                 )}

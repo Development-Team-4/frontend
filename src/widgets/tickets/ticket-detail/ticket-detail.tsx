@@ -1,11 +1,6 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import {
-  currentUser,
-  getTopicById,
-  getStaffForCategory,
-} from '@/shared/lib/mock-data';
 import { useCategoryById } from '@/entities/category/model';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -32,21 +27,29 @@ import {
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { useEffect, useState } from 'react';
+import { KeyboardEvent, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { statusLabels, statusStyles } from '@/shared/consts';
 import { TicketNotExist } from '../ticket-not-exist';
 import { TicketStatus } from '@/shared/types';
 import { useTicketDetail } from '@/features/ticket-detail';
 import { LoadingOverlay } from '@/components/loading-overlay';
-import { useUserById } from '@/entities/user/model/use-user';
+import { useUserById, useUsers } from '@/entities/user/model/use-user';
 import {
   useCreateTicketComment,
   useTicketComments,
 } from '@/entities/comment/model';
+import { useStore } from '@/shared/store/store';
+import { useTopics } from '@/entities/topic/model';
 
 export function TicketDetail() {
   const router = useRouter();
+  useTopics();
+  useUsers();
+
+  const userData = useStore((state) => state.userData);
+  const topics = useStore((state) => state.topics);
+  const getStaffForCategory = useStore((state) => state.getStaffForCategory);
   const { ticketId, data: ticket, isLoading } = useTicketDetail();
   const { data: ticketComments = [], isLoading: isCommentsLoading } =
     useTicketComments(ticketId || null);
@@ -59,7 +62,11 @@ export function TicketDetail() {
   const { data: category } = useCategoryById(ticket?.categoryId || null);
   const { data: createdByUser } = useUserById(ticket?.createdBy.userId || null);
   const { data: assigneeUser } = useUserById(ticket?.assignee?.userId || null);
-  const topic = category ? getTopicById(category.topicId) : null;
+  const topic = useMemo(
+    () =>
+      category ? topics.find((item) => item.id === category.topicId) : null,
+    [category, topics],
+  );
   const categoryStaff = ticket ? getStaffForCategory(ticket.categoryId) : [];
   const createdByName = createdByUser?.userName || ticket?.createdBy.userName;
   const assigneeName = assigneeUser?.userName || ticket?.assignee?.userName;
@@ -70,10 +77,12 @@ export function TicketDetail() {
     setAssigneeValue(ticket.assignee?.userId || '');
   }, [ticket]);
 
-  const isOwner = ticket?.createdBy.userId === currentUser.userId;
-  const isAssignee = ticket?.assignee?.userId === currentUser.userId;
-  const isAdmin = currentUser.userRole === 'ADMIN';
-  const isSupport = currentUser.userRole === 'SUPPORT';
+  const currentUserId = userData?.userId;
+  const currentUserRole = userData?.userRole;
+  const isOwner = ticket?.createdBy.userId === currentUserId;
+  const isAssignee = ticket?.assignee?.userId === currentUserId;
+  const isAdmin = currentUserRole === 'ADMIN';
+  const isSupport = currentUserRole === 'SUPPORT';
 
   const canEdit = isOwner && ticket?.status !== 'CLOSED' && !ticket?.assignee;
   const canDelete = isOwner && ticket?.status === 'OPEN' && !ticket?.assignee;
@@ -89,6 +98,16 @@ export function TicketDetail() {
 
     await createComment(content);
     setNewComment('');
+  };
+
+  const handleCommentKeyDown = async (
+    event: KeyboardEvent<HTMLTextAreaElement>,
+  ) => {
+    if (event.key !== 'Enter' || event.shiftKey) return;
+    event.preventDefault();
+
+    if (!canSendComment || isSendingComment) return;
+    await handleSendComment();
   };
 
   if (isLoading) {
@@ -247,6 +266,7 @@ export function TicketDetail() {
                     placeholder="Написать комментарий..."
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
+                    onKeyDown={handleCommentKeyDown}
                     className="min-h-[80px] bg-card"
                     disabled={isSendingComment}
                   />
@@ -319,7 +339,8 @@ export function TicketDetail() {
             <div className="rounded-md border border-border bg-background px-3 py-2 text-sm">
               <div className="flex flex-col gap-1">
                 <span>
-                  {topic?.name} / {category?.name}
+                  {topic?.name || 'Без темы'} /{' '}
+                  {category?.name || 'Без категории'}
                 </span>
                 {topic?.description && (
                   <span className="text-xs text-muted-foreground">

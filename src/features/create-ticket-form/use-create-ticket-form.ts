@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   CreateTicketFormData,
   createTicketSchema,
@@ -10,10 +11,12 @@ import {
 import { useTopics } from '@/entities/topic/model';
 import { useCategories } from '@/entities/category/model';
 import { createTicketApi } from './api';
+import { Ticket } from '@/shared/types';
 
 export const useCreateTicketForm = () => {
   useTopics();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const topics = useStore((state) => state.topics);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -63,9 +66,16 @@ export const useCreateTicketForm = () => {
         description: data.description,
         categoryId: data.categoryId,
       };
-      await createTicketApi.createTicket(newData);
+      const createdTicket = await createTicketApi.createTicket(newData);
 
-      router.push('/tickets');
+      queryClient.setQueryData<Ticket[]>(['tickets'], (prev = []) => [
+        createdTicket,
+        ...prev.filter((ticket) => ticket.id !== createdTicket.id),
+      ]);
+      queryClient.setQueryData(['ticket', createdTicket.id], createdTicket);
+      queryClient.invalidateQueries({ queryKey: ['tickets'] });
+
+      router.replace('/tickets');
     } finally {
       setIsSubmitting(false);
     }

@@ -15,7 +15,12 @@ export interface UpdateCategoryPayload {
 
 export interface AssignCategoryStaffPayload {
   staffId: string;
-  categoryId?: string;
+}
+
+export interface CheckCategoryStaffAssignmentResponse {
+  assigned: boolean;
+  categoryId: string;
+  staffId: string;
 }
 
 class CategoryDataApi {
@@ -46,16 +51,21 @@ class CategoryDataApi {
     payload: AssignCategoryStaffPayload,
   ) {
     return api
-      .put<Category | null>(`/categories/${categoryId}/staff`, {
-        ...payload,
-        categoryId,
-      })
+      .post<Category | null>(`/categories/${categoryId}/staff`, payload)
       .then((res) => res.data);
   }
 
   async removeStaffFromCategory(categoryId: string, staffId: string) {
     return api
       .delete<Category | null>(`/categories/${categoryId}/staff/${staffId}`)
+      .then((res) => res.data);
+  }
+
+  async checkStaffCategoryAssignment(categoryId: string, staffId: string) {
+    return api
+      .get<CheckCategoryStaffAssignmentResponse>(
+        `/categories/${categoryId}/staff/${staffId}/check`,
+      )
       .then((res) => res.data);
   }
 }

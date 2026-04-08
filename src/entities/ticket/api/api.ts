@@ -26,6 +26,22 @@ interface TicketsFilterParams {
   createdBefore?: string;
 }
 
+type TicketsQueryParams = TicketsFilterParams & {
+  'filterRequest.categoryId'?: string;
+  'filterRequest.assignedTo'?: string;
+  'filterRequest.createdBy'?: string;
+  'filterRequest.status'?: string;
+  'filterRequest.createdAfter'?: string;
+  'filterRequest.createdBefore'?: string;
+  'filterRequest[categoryId]'?: string;
+  'filterRequest[assignedTo]'?: string;
+  'filterRequest[createdBy]'?: string;
+  'filterRequest[status]'?: string;
+  'filterRequest[createdAfter]'?: string;
+  'filterRequest[createdBefore]'?: string;
+  filterRequest?: string;
+};
+
 const mapBackendTicket = (ticket: TicketBackend): Ticket => {
   const createdByUser = getUserById(ticket.createdBy);
   const assigneeUser = ticket.assigneeId
@@ -61,13 +77,65 @@ const mapBackendTicket = (ticket: TicketBackend): Ticket => {
 
 class TicketsDataApi {
   async getTickets(params: TicketsFilterParams): Promise<Ticket[]> {
-    const backendTickets = await api
-      .get<TicketBackend[]>('/tickets', {
-        params,
-      })
-      .then((res) => res.data);
+    const plainParams: TicketsQueryParams = { ...params };
+    const dotParams: TicketsQueryParams = {
+      ...(params.categoryId
+        ? { 'filterRequest.categoryId': params.categoryId }
+        : {}),
+      ...(params.assignedTo
+        ? { 'filterRequest.assignedTo': params.assignedTo }
+        : {}),
+      ...(params.createdBy
+        ? { 'filterRequest.createdBy': params.createdBy }
+        : {}),
+      ...(params.status ? { 'filterRequest.status': params.status } : {}),
+      ...(params.createdAfter
+        ? { 'filterRequest.createdAfter': params.createdAfter }
+        : {}),
+      ...(params.createdBefore
+        ? { 'filterRequest.createdBefore': params.createdBefore }
+        : {}),
+    };
+    const bracketParams: TicketsQueryParams = {
+      ...(params.categoryId
+        ? { 'filterRequest[categoryId]': params.categoryId }
+        : {}),
+      ...(params.assignedTo
+        ? { 'filterRequest[assignedTo]': params.assignedTo }
+        : {}),
+      ...(params.createdBy
+        ? { 'filterRequest[createdBy]': params.createdBy }
+        : {}),
+      ...(params.status ? { 'filterRequest[status]': params.status } : {}),
+      ...(params.createdAfter
+        ? { 'filterRequest[createdAfter]': params.createdAfter }
+        : {}),
+      ...(params.createdBefore
+        ? { 'filterRequest[createdBefore]': params.createdBefore }
+        : {}),
+    };
+    const jsonParam: TicketsQueryParams = {
+      filterRequest: JSON.stringify(params),
+    };
 
-    return backendTickets.map(mapBackendTicket);
+    const requestVariants = [plainParams, dotParams, bracketParams, jsonParam];
+    let lastError: unknown;
+
+    for (const queryParams of requestVariants) {
+      try {
+        const backendTickets = await api
+          .get<TicketBackend[]>('/tickets', {
+            params: queryParams,
+          })
+          .then((res) => res.data);
+
+        return backendTickets.map(mapBackendTicket);
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw lastError;
   }
 
   async getTicketById(id: string): Promise<Ticket> {

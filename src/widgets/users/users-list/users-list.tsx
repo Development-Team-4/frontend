@@ -20,6 +20,7 @@ import { Loader2, Mail } from 'lucide-react';
 export const UsersList = () => {
   const { isLoading } = useUsers();
   const users = useStore((state) => state.users);
+  const regularUsers = users.filter((u) => u.userRole === 'USER');
   const { mutateAsync: updateUserRole, isPending: isUpdatingRole } =
     useUpdateUserRole();
 
@@ -62,53 +63,61 @@ export const UsersList = () => {
               ))}
 
             {!isLoading &&
-              users
-                .filter((u) => u.userRole === 'USER')
-                .map((user) => (
-                  <TableRow key={user.userId}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
-                          {user.userName
-                            .split(' ')
-                            .map((n) => n[0])
-                            .join('')}
-                        </div>
-                        <span className="text-sm font-medium text-card-foreground">
-                          {user.userName}
-                        </span>
+              regularUsers.map((user) => (
+                <TableRow key={user.userId}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
+                        {user.userName
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')}
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                        <Mail className="h-3.5 w-3.5" />
-                        {user.userEmail}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        className={`border-0 text-[10px] ${roleStyles[user.userRole]}`}
-                      >
-                        {roleLabels[user.userRole]}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        disabled={isUpdatingRole}
-                        onClick={() => handlePromoteToSupport(user.userId)}
-                      >
-                        {isUpdatingRole ? (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        ) : (
-                          'Сделать поддержкой'
-                        )}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      <span className="text-sm font-medium text-card-foreground">
+                        {user.userName}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                      <Mail className="h-3.5 w-3.5" />
+                      {user.userEmail}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      className={`border-0 text-[10px] ${roleStyles[user.userRole]}`}
+                    >
+                      {roleLabels[user.userRole]}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      disabled={isUpdatingRole}
+                      onClick={() => handlePromoteToSupport(user.userId)}
+                    >
+                      {isUpdatingRole ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        'Сделать поддержкой'
+                      )}
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            {!isLoading && regularUsers.length === 0 && (
+              <TableRow>
+                <TableCell
+                  colSpan={4}
+                  className="h-28 text-center text-sm text-muted-foreground"
+                >
+                  Пользователи не найдены
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </Card>

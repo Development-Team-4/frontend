@@ -1,7 +1,12 @@
 'use client';
 
 import { Category } from '@/shared/types';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { useStore } from '@/shared/store/store';
 import {
   AssignCategoryStaffPayload,
@@ -174,6 +179,13 @@ export const useAssignStaffToCategory = () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       queryClient.invalidateQueries({ queryKey: ['topic-categories'] });
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({
+        queryKey: [
+          'category-staff-check',
+          variables.categoryId,
+          variables.payload.staffId,
+        ],
+      });
     },
   });
 };
@@ -219,6 +231,50 @@ export const useRemoveStaffFromCategory = () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       queryClient.invalidateQueries({ queryKey: ['topic-categories'] });
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({
+        queryKey: [
+          'category-staff-check',
+          variables.categoryId,
+          variables.staffId,
+        ],
+      });
     },
   });
+};
+
+export const useCheckStaffAssignments = ({
+  staffId,
+  categoryIds,
+  enabled = true,
+}: {
+  staffId: string;
+  categoryIds: string[];
+  enabled?: boolean;
+}) => {
+  const queries = useQueries({
+    queries: categoryIds.map((categoryId) => ({
+      queryKey: ['category-staff-check', categoryId, staffId],
+      queryFn: () =>
+        categoriesDataApi.checkStaffCategoryAssignment(categoryId, staffId),
+      enabled: enabled && Boolean(staffId) && Boolean(categoryId),
+      staleTime: 60 * 1000,
+    })),
+  });
+
+  const assignmentByCategoryId: Record<string, boolean | null> = {};
+
+  categoryIds.forEach((categoryId, index) => {
+    const query = queries[index];
+    assignmentByCategoryId[categoryId] =
+      typeof query?.data?.assigned === 'boolean' ? query.data.assigned : null;
+  });
+
+  const isCheckingAssignments = queries.some(
+    (query) => query.isLoading || query.isFetching,
+  );
+
+  return {
+    assignmentByCategoryId,
+    isCheckingAssignments,
+  };
 };

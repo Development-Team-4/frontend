@@ -9,7 +9,6 @@ import { useMemo, useState } from 'react';
 export const useTopicsList = () => {
   useTopics();
   const topics = useStore((state) => state.topics);
-  const getStaffForCategory = useStore((state) => state.getStaffForCategory);
   const { mutateAsync: updateTopic, isPending: isUpdatingTopic } =
     useUpdateTopic();
   const [isEditTopicOpen, setIsEditTopicOpen] = useState(false);
@@ -88,7 +87,6 @@ export const useTopicsList = () => {
     topics,
     getCategoriesByTopicId,
     isTopicCategoriesLoading,
-    getStaffForCategory,
     isEditTopicOpen,
     setIsEditTopicOpen,
     editingTopicName,

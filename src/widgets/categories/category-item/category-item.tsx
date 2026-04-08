@@ -12,19 +12,15 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useUpdateCategory } from '@/entities/category/model';
-import { useStore } from '@/shared/store/store';
 import { Category } from '@/shared/types';
-import { Edit2, Users } from 'lucide-react';
+import { Edit2 } from 'lucide-react';
 
 export const CategoryItem = ({ category }: { category: Category }) => {
-  const getStaffForCategory = useStore((state) => state.getStaffForCategory);
   const { mutateAsync: updateCategory, isPending: isUpdatingCategory } =
     useUpdateCategory();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [name, setName] = useState(category.name);
   const [description, setDescription] = useState(category.description || '');
-
-  const staff = getStaffForCategory(category.id);
 
   const canSave =
     name.trim().length > 0 &&
@@ -70,15 +66,6 @@ export const CategoryItem = ({ category }: { category: Category }) => {
                 {category.description}
               </p>
             )}
-            <div className="mt-2 flex items-center gap-1">
-              <Users className="h-3 w-3 text-muted-foreground" />
-              <span className="text-[10px] text-muted-foreground">
-                Сотрудники:{' '}
-                {staff.length > 0
-                  ? staff.map((s) => s.userName).join(', ')
-                  : 'Не назначены'}
-              </span>
-            </div>
           </div>
           <div className="flex gap-1">
             <Button

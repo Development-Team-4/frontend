@@ -58,6 +58,16 @@ export const StaffList = () => {
                 isCategoriesLoading={isCategoriesLoading}
               />
             ))}
+          {!isLoading && supportStaff.length === 0 && (
+            <TableRow>
+              <TableCell
+                colSpan={5}
+                className="h-28 text-center text-sm text-muted-foreground"
+              >
+                Сотрудники пока не добавлены
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </Card>
