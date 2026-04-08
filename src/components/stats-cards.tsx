@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { useStatsCard } from '@/features/stats-card';
 
 export function StatsCards() {
-  const { stats } = useStatsCard();
+  const { stats, isLoading } = useStatsCard();
 
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -17,7 +17,7 @@ export function StatsCards() {
           </div>
           <div>
             <p className="text-2xl font-semibold text-card-foreground">
-              {stat.value}
+              {isLoading ? '...' : stat.value}
             </p>
             <p className="text-xs text-muted-foreground">{stat.label}</p>
           </div>

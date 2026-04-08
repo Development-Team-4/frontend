@@ -60,7 +60,7 @@ export const StaffItem = ({
   const { assignmentByCategoryId } = useCheckStaffAssignments({
     staffId: user.userId,
     categoryIds: categories.map((category) => category.id),
-    enabled: isDialogOpen && user.userRole !== 'ADMIN',
+    enabled: user.userRole !== 'ADMIN' && categories.length > 0,
   });
 
   const isAssignedToCategory = (categoryId: string) =>

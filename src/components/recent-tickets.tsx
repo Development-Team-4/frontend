@@ -3,10 +3,12 @@
 import Link from 'next/link';
 import { Card } from '@/components/ui/card';
 import { ArrowUpRight } from 'lucide-react';
-import { tickets } from '@/shared/consts';
 import { RecentTicketItem } from './recent-ticket-item';
+import { useTickets } from '@/entities/ticket/model';
 
 export function RecentTickets() {
+  const { data: tickets = [] } = useTickets();
+
   const recent = [...tickets]
     .sort(
       (a, b) =>

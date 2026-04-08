@@ -1,6 +1,5 @@
-'use client';
+﻿'use client';
 
-import { getCategoryById, getTopicById } from '@/shared/lib/mock-data';
 import { Card } from '@/components/ui/card';
 import {
   BarChart,
@@ -13,56 +12,90 @@ import {
   Cell,
   Tooltip,
 } from 'recharts';
-import { STATUS_COLORS, STATUS_LABELS, tickets } from '@/shared/consts';
+import { STATUS_COLORS, STATUS_LABELS } from '@/shared/consts';
 import { TicketStatus } from '@/shared/types';
+import {
+  useTicketCategoriesStatistics,
+  useTicketStatusesStatistics,
+  useTicketTopicsStatistics,
+} from '@/entities/statistics/model';
+import { useTopics } from '@/entities/topic/model';
+import { categoriesDataApi } from '@/entities/category/api';
+import { useMemo } from 'react';
+import { useQueries } from '@tanstack/react-query';
+
+const TOPIC_COLORS = [
+  'oklch(0.65 0.19 250)',
+  'oklch(0.72 0.16 165)',
+  'oklch(0.68 0.19 45)',
+  'oklch(0.62 0.2 20)',
+  'oklch(0.7 0.16 300)',
+];
+
+const STATUS_ORDER: TicketStatus[] = [
+  'OPEN',
+  'ASSIGNED',
+  'IN_PROGRESS',
+  'RESOLVED',
+  'CLOSED',
+];
 
 export function TicketCharts() {
-  const statusData = Object.entries(
-    tickets.reduce(
-      (acc, t) => {
-        acc[t.status] = (acc[t.status] || 0) + 1;
-        return acc;
-      },
-      {} as Record<TicketStatus, number>,
-    ),
-  ).map(([name, value]) => ({
-    name: STATUS_LABELS[name as TicketStatus] || name,
-    value,
-    fill: STATUS_COLORS[name as TicketStatus],
+  const { data: topics = [], isLoading: isTopicsLoading } = useTopics();
+  const { data: topicStats = {}, isLoading: isTopicStatsLoading } =
+    useTicketTopicsStatistics();
+  const { data: categoryStats = {}, isLoading: isCategoryStatsLoading } =
+    useTicketCategoriesStatistics();
+  const { data: statusStats, isLoading: isStatusStatsLoading } =
+    useTicketStatusesStatistics();
+
+  const categoriesQueries = useQueries({
+    queries: topics.map((topic) => ({
+      queryKey: ['topic-categories', topic.id],
+      queryFn: () => categoriesDataApi.getCategoriesDataByTopicId(topic.id),
+      enabled: Boolean(topic.id),
+      staleTime: 5 * 60 * 1000,
+    })),
+  });
+
+  const categoriesById = useMemo(() => {
+    const map = new Map<string, string>();
+
+    categoriesQueries.forEach((query) => {
+      (query.data ?? []).forEach((category) => {
+        map.set(category.id, category.name);
+      });
+    });
+
+    return map;
+  }, [categoriesQueries]);
+
+  const statusData = STATUS_ORDER.map((status) => ({
+    name: STATUS_LABELS[status],
+    value: statusStats?.[status] || 0,
+    fill: STATUS_COLORS[status],
   }));
 
-  const categoryData = Object.entries(
-    tickets.reduce(
-      (acc, t) => {
-        const category = getCategoryById(t.categoryId);
-        const name = category?.name || 'Без категории';
-        acc[name] = (acc[name] || 0) + 1;
-        return acc;
-      },
-      {} as Record<string, number>,
-    ),
-  ).map(([name, value]) => ({ name, value }));
+  const categoryData = Object.entries(categoryStats)
+    .map(([categoryId, value]) => ({
+      name: categoriesById.get(categoryId) || categoryId,
+      value,
+    }))
+    .sort((a, b) => b.value - a.value);
 
-  const topicData = Object.entries(
-    tickets.reduce(
-      (acc, t) => {
-        const category = getCategoryById(t.categoryId);
-        const topic = category ? getTopicById(category.topicId) : null;
-        const name = topic?.name || 'Без темы';
-        acc[name] = (acc[name] || 0) + 1;
-        return acc;
-      },
-      {} as Record<string, number>,
-    ),
-  ).map(([name, value], index) => ({
-    name,
-    value,
-    fill: [
-      'oklch(0.65 0.19 250)',
-      'oklch(0.72 0.16 165)',
-      'oklch(0.68 0.19 45)',
-    ][index % 3],
-  }));
+  const topicData = Object.entries(topicStats)
+    .map(([topicId, value], index) => ({
+      name: topics.find((topic) => topic.id === topicId)?.name || topicId,
+      value,
+      fill: TOPIC_COLORS[index % TOPIC_COLORS.length],
+    }))
+    .sort((a, b) => b.value - a.value);
+
+  const isLoading =
+    isTopicsLoading ||
+    isTopicStatsLoading ||
+    isCategoryStatsLoading ||
+    isStatusStatsLoading;
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -107,7 +140,7 @@ export function TicketCharts() {
                 style={{ backgroundColor: item.fill }}
               />
               <span className="text-[10px] text-muted-foreground">
-                {item.name} ({item.value})
+                {item.name} ({isLoading ? '...' : item.value})
               </span>
             </div>
           ))}
@@ -191,7 +224,7 @@ export function TicketCharts() {
                 style={{ backgroundColor: item.fill }}
               />
               <span className="text-[10px] text-muted-foreground">
-                {item.name} ({item.value})
+                {item.name} ({isLoading ? '...' : item.value})
               </span>
             </div>
           ))}
