@@ -175,6 +175,10 @@ class TicketsDataApi {
 
     return mapBackendTicket(backendTicket);
   }
+
+  async deleteTicket(ticketId: string): Promise<void> {
+    await api.delete(`/tickets/${ticketId}`);
+  }
 }
 
 export const ticketsDataApi = new TicketsDataApi();

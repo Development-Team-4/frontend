@@ -84,3 +84,23 @@ export const useUpdateTicketStatus = () => {
     },
   });
 };
+
+export const useDeleteTicket = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ ticketId }: { ticketId: string }) =>
+      ticketsDataApi.deleteTicket(ticketId),
+    onSuccess: (_, variables) => {
+      queryClient.setQueryData<Ticket[]>(['tickets'], (prev = []) =>
+        prev.filter((ticket) => ticket.id !== variables.ticketId),
+      );
+      queryClient.removeQueries({ queryKey: ['ticket', variables.ticketId] });
+      queryClient.removeQueries({
+        queryKey: ['ticket-comments', variables.ticketId],
+      });
+      queryClient.invalidateQueries({ queryKey: ['tickets'] });
+      queryClient.invalidateQueries({ queryKey: ['statistics'] });
+    },
+  });
+};
