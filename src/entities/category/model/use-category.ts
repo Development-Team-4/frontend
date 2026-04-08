@@ -51,7 +51,7 @@ export const useCategoryById = (categoryId: string | null) => {
     queryKey: ['category', categoryId],
     queryFn: () => categoriesDataApi.getCategoryById(categoryId!),
     enabled: !!categoryId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 };
 

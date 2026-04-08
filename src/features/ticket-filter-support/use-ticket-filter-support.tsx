@@ -68,7 +68,6 @@ export const useTicketFilterSupport = () => {
         : false;
       const fallbackAssignment = fallbackFromCategory || fallbackFromUser;
 
-      // Prefer `true` from explicit check, but never drop valid fallback data on `false`.
       return checkedAssignment === true || fallbackAssignment;
     });
   }, [allCategories, assignmentByCategoryId, userData]);

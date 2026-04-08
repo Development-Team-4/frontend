@@ -49,7 +49,6 @@ export const useLoginForm = () => {
         localStorage.setItem('access_token', response.data.accessToken);
         localStorage.setItem('refresh_token', response.data.refreshToken);
 
-        // Получаем данные пользователя для определения редиректа
         try {
           const userData = await usersDataApi.getUserData();
           const redirectPath = getRedirectPath(userData.userRole);
