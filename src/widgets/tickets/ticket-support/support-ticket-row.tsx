@@ -1,11 +1,16 @@
-'use client';
+﻿'use client';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { useCategoryById } from '@/entities/category/model';
+import {
+  useAssignTicketAssignee,
+  useUpdateTicketStatus,
+} from '@/entities/ticket/model';
 import { useUserById } from '@/entities/user/model/use-user';
 import { statusLabels, statusStyles } from '@/shared/consts';
+import { useStore } from '@/shared/store/store';
 import { Ticket } from '@/shared/types';
 import { User } from 'lucide-react';
 import Link from 'next/link';
@@ -18,12 +23,30 @@ interface SupportTicketRowProps {
 
 export const SupportTicketRow = ({ ticket }: SupportTicketRowProps) => {
   const { data: category } = useCategoryById(ticket.categoryId);
+  const userData = useStore((state) => state.userData);
+  const { mutateAsync: assignTicket, isPending: isAssigning } =
+    useAssignTicketAssignee();
+  const { mutateAsync: updateTicketStatus, isPending: isUpdatingStatus } =
+    useUpdateTicketStatus();
   const { data: createdByUser } = useUserById(ticket.createdBy.userId || null);
+  const { data: assigneeUser } = useUserById(ticket.assignee?.userId || null);
+
   const createdByName =
     createdByUser?.userName ||
     ticket.createdBy.userName ||
     ticket.createdBy.userId;
+  const assigneeName =
+    assigneeUser?.userName ||
+    ticket.assignee?.userName ||
+    ticket.assignee?.userId;
+
   const canTake = !ticket.assignee && ticket.status === 'OPEN';
+
+  const handleTakeTicket = async () => {
+    if (!userData?.userId) return;
+    await assignTicket({ ticketId: ticket.id, assigneeId: userData.userId });
+    await updateTicketStatus({ ticketId: ticket.id, status: 'ASSIGNED' });
+  };
 
   return (
     <TableRow className="group">
@@ -57,10 +80,8 @@ export const SupportTicketRow = ({ ticket }: SupportTicketRowProps) => {
         </div>
       </TableCell>
       <TableCell className="text-xs">
-        {ticket.assignee ? (
-          <span className="text-card-foreground">
-            {ticket.assignee.userName}
-          </span>
+        {assigneeName ? (
+          <span className="text-card-foreground">{assigneeName}</span>
         ) : (
           <span className="text-muted-foreground italic">Не назначен</span>
         )}
@@ -73,8 +94,16 @@ export const SupportTicketRow = ({ ticket }: SupportTicketRowProps) => {
       </TableCell>
       <TableCell>
         {canTake && (
-          <Button size="sm" variant="outline" className="h-7 text-xs">
-            Взять в работу
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 text-xs"
+            onClick={handleTakeTicket}
+            disabled={isAssigning || isUpdatingStatus || !userData?.userId}
+          >
+            {isAssigning || isUpdatingStatus
+              ? 'Назначение...'
+              : 'Взять в работу'}
           </Button>
         )}
       </TableCell>

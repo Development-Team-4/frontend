@@ -26,6 +26,14 @@ interface TicketsFilterParams {
   createdBefore?: string;
 }
 
+interface AssignTicketAssigneePayload {
+  assigneeId: string;
+}
+
+interface UpdateTicketStatusPayload {
+  status: TicketStatus;
+}
+
 type TicketsQueryParams = TicketsFilterParams & {
   'filterRequest.categoryId'?: string;
   'filterRequest.assignedTo'?: string;
@@ -141,6 +149,28 @@ class TicketsDataApi {
   async getTicketById(id: string): Promise<Ticket> {
     const backendTicket = await api
       .get<TicketBackend>(`/tickets/${id}`)
+      .then((res) => res.data);
+
+    return mapBackendTicket(backendTicket);
+  }
+
+  async assignTicketAssignee(
+    ticketId: string,
+    payload: AssignTicketAssigneePayload,
+  ): Promise<Ticket> {
+    const backendTicket = await api
+      .put<TicketBackend>(`/tickets/${ticketId}/assignee`, payload)
+      .then((res) => res.data);
+
+    return mapBackendTicket(backendTicket);
+  }
+
+  async updateTicketStatus(
+    ticketId: string,
+    payload: UpdateTicketStatusPayload,
+  ): Promise<Ticket> {
+    const backendTicket = await api
+      .put<TicketBackend>(`/tickets/${ticketId}/status`, payload)
       .then((res) => res.data);
 
     return mapBackendTicket(backendTicket);

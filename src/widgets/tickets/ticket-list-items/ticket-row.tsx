@@ -1,8 +1,9 @@
-'use client';
+﻿'use client';
 
 import { Badge } from '@/components/ui/badge';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { useCategoryById } from '@/entities/category/model';
+import { useUserById } from '@/entities/user/model/use-user';
 import { statusLabels, statusStyles } from '@/shared/consts';
 import { Ticket } from '@/shared/types';
 import { formatDistanceToNow } from 'date-fns';
@@ -15,6 +16,11 @@ interface TicketRowProps {
 
 export const TicketRow = ({ ticket }: TicketRowProps) => {
   const { data: category } = useCategoryById(ticket.categoryId);
+  const { data: assigneeUser } = useUserById(ticket.assignee?.userId || null);
+  const assigneeName =
+    assigneeUser?.userName ||
+    ticket.assignee?.userName ||
+    ticket.assignee?.userId;
 
   return (
     <TableRow className="group">
@@ -42,10 +48,8 @@ export const TicketRow = ({ ticket }: TicketRowProps) => {
         {category?.name || '—'}
       </TableCell>
       <TableCell className="text-xs">
-        {ticket.assignee ? (
-          <span className="text-card-foreground">
-            {ticket.assignee.userName}
-          </span>
+        {assigneeName ? (
+          <span className="text-card-foreground">{assigneeName}</span>
         ) : (
           <span className="text-muted-foreground italic">Не назначен</span>
         )}
