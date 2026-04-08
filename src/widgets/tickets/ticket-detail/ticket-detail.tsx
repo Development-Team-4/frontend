@@ -18,6 +18,7 @@ import {
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,6 +33,15 @@ import {
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -45,6 +55,7 @@ import { useCategoryById } from '@/entities/category/model';
 import { useUserById, useUsers } from '@/entities/user/model/use-user';
 import {
   useDeleteTicket,
+  useUpdateTicket,
   useUpdateTicketStatus,
 } from '@/entities/ticket/model';
 import { useTopics } from '@/entities/topic/model';
@@ -108,12 +119,17 @@ export function TicketDetail() {
     useCreateTicketComment(ticketId || null);
   const { mutateAsync: updateTicketStatus, isPending: isUpdatingStatus } =
     useUpdateTicketStatus();
+  const { mutateAsync: updateTicket, isPending: isUpdatingTicket } =
+    useUpdateTicket();
   const { mutateAsync: deleteTicket, isPending: isDeletingTicket } =
     useDeleteTicket();
 
   const [newComment, setNewComment] = useState('');
   const [statusValue, setStatusValue] = useState<TicketStatus>('OPEN');
   const [assigneeValue, setAssigneeValue] = useState('');
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editSubject, setEditSubject] = useState('');
+  const [editDescription, setEditDescription] = useState('');
 
   const { data: category } = useCategoryById(ticket?.categoryId || null);
   const { data: createdByUser } = useUserById(ticket?.createdBy.userId || null);
@@ -133,6 +149,8 @@ export function TicketDetail() {
     if (!ticket) return;
     setStatusValue(ticket.status);
     setAssigneeValue(ticket.assignee?.userId || '');
+    setEditSubject(ticket.subject);
+    setEditDescription(ticket.description);
   }, [ticket]);
 
   const currentUserId = userData?.userId;
@@ -150,7 +168,11 @@ export function TicketDetail() {
       userData?.categoryIds?.includes(ticket.categoryId)),
   );
 
-  const canEdit = isOwner && ticket?.status !== 'CLOSED' && !ticket?.assignee;
+  const canEdit = Boolean(
+    ticket &&
+    ticket.status !== 'CLOSED' &&
+    (isAdmin || (isSupport && isAssignee) || (isUser && isOwner)),
+  );
   const canDelete = Boolean(
     ticket &&
     ((isAdmin && ticket.status === 'OPEN') ||
@@ -200,6 +222,22 @@ export function TicketDetail() {
     }
 
     router.push('/tickets');
+  };
+
+  const canSaveTicketChanges = Boolean(
+    editSubject.trim() && editDescription.trim() && !isUpdatingTicket,
+  );
+
+  const handleUpdateTicket = async () => {
+    if (!ticket || !canEdit) return;
+
+    await updateTicket({
+      ticketId: ticket.id,
+      subject: editSubject.trim(),
+      description: editDescription.trim(),
+    });
+
+    setIsEditDialogOpen(false);
   };
 
   if (isLoading) return <LoadingOverlay />;
@@ -265,10 +303,69 @@ export function TicketDetail() {
             {(canEdit || canDelete) && (
               <div className="flex gap-2">
                 {canEdit && (
-                  <Button variant="outline" size="sm">
-                    <Edit3 className="mr-1 h-3.5 w-3.5" />
-                    Редактировать
-                  </Button>
+                  <Dialog
+                    open={isEditDialogOpen}
+                    onOpenChange={setIsEditDialogOpen}
+                  >
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Edit3 className="mr-1 h-3.5 w-3.5" />
+                        Редактировать
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Редактирование тикета</DialogTitle>
+                        <DialogDescription>
+                          Можно изменить только тему и описание тикета.
+                        </DialogDescription>
+                      </DialogHeader>
+
+                      <div className="space-y-3">
+                        <div>
+                          <label className="mb-1 block text-xs text-muted-foreground">
+                            Тема
+                          </label>
+                          <Input
+                            value={editSubject}
+                            onChange={(e) => setEditSubject(e.target.value)}
+                            placeholder="Введите тему"
+                            disabled={isUpdatingTicket}
+                          />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs text-muted-foreground">
+                            Описание
+                          </label>
+                          <Textarea
+                            value={editDescription}
+                            onChange={(e) => setEditDescription(e.target.value)}
+                            placeholder="Введите описание"
+                            className="min-h-[140px]"
+                            disabled={isUpdatingTicket}
+                          />
+                        </div>
+                      </div>
+
+                      <DialogFooter>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setIsEditDialogOpen(false)}
+                          disabled={isUpdatingTicket}
+                        >
+                          Отмена
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={handleUpdateTicket}
+                          disabled={!canSaveTicketChanges}
+                        >
+                          {isUpdatingTicket ? 'Сохранение...' : 'Сохранить'}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 )}
                 {canDelete && (
                   <AlertDialog>
