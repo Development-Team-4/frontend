@@ -26,9 +26,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { notifications } from '@/shared/consts';
 import { useStore } from '@/shared/store/store';
 import { useUser } from '@/entities/user/model/use-user';
+import { useNotifications } from '@/entities/notification/model';
 import { useLogout } from '@/features/logout/model';
 
 const getNavigation = (role: string) => {
@@ -43,7 +43,6 @@ const getNavigation = (role: string) => {
     return [
       { name: 'Тикеты категории', href: '/support/tickets', icon: Ticket },
       { name: 'Мои назначенные', href: '/support/assigned', icon: Ticket },
-      { name: 'Уведомления', href: '/notifications', icon: Bell },
       { name: 'Настройки', href: '/settings', icon: Settings },
     ];
   }
@@ -66,7 +65,7 @@ const getRoleLabel = (role: string) => {
   switch (role) {
     case 'ADMIN':
       return 'Администратор';
-    case 'MODERATOR':
+    case 'SUPPORT':
       return 'Поддержка';
     case 'USER':
       return 'Пользователь';
@@ -77,9 +76,13 @@ const getRoleLabel = (role: string) => {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { isLoading, isError, refetch } = useUser();
+  useNotifications();
+
   const userData = useStore((state) => state.userData);
+  const notifications = useStore((state) => state.notifications);
   const pathname = usePathname();
   const router = useRouter();
+
   const [collapsed, setCollapsed] = useState(false);
   const hasMountedRef = useRef(false);
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -92,10 +95,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    if (pathname === '/login' || pathname === '/register') {
-      return;
-    }
-
+    if (pathname === '/login' || pathname === '/register') return;
     refetch();
   }, [pathname, refetch]);
 
@@ -109,6 +109,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       }
 
       router.replace('/tickets');
+      return;
+    }
+
+    if (pathname.startsWith('/admin') && userData.userRole !== 'ADMIN') {
+      if (userData.userRole === 'SUPPORT') {
+        router.replace('/support/tickets');
+        return;
+      }
+
+      router.replace('/tickets');
+      return;
+    }
+
+    if (pathname === '/notifications' && userData.userRole === 'SUPPORT') {
+      router.replace('/support/tickets');
     }
   }, [pathname, router, userData]);
 
@@ -117,6 +132,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   if (isLoading || isError) {
+    return <LoadingOverlay />;
+  }
+
+  if (pathname === '/' && userData?.userRole !== 'ADMIN') {
+    return <LoadingOverlay />;
+  }
+
+  if (pathname === '/notifications' && userData?.userRole === 'SUPPORT') {
+    return <LoadingOverlay />;
+  }
+
+  if (pathname.startsWith('/admin') && userData?.userRole !== 'ADMIN') {
     return <LoadingOverlay />;
   }
 
@@ -134,7 +161,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Shield className="h-4 w-4 text-primary-foreground" />
             </div>
             {!collapsed && (
-              <span className="text-sm font-semibold text-sidebar-foreground tracking-tight">
+              <span className="tracking-tight text-sm font-semibold text-sidebar-foreground">
                 TicketFlow
               </span>
             )}
@@ -162,7 +189,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     <item.icon className="h-4 w-4 shrink-0" />
                     {!collapsed && <span>{item.name}</span>}
                     {!collapsed &&
-                      item.name === 'Уведомления' &&
+                      item.href === '/notifications' &&
                       unreadCount > 0 && (
                         <Badge
                           variant="destructive"
@@ -172,7 +199,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         </Badge>
                       )}
                     {collapsed &&
-                      item.name === 'Уведомления' &&
+                      item.href === '/notifications' &&
                       unreadCount > 0 && (
                         <span className="absolute right-1.5 top-1 h-2 w-2 rounded-full bg-destructive" />
                       )}
@@ -200,7 +227,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="border-t border-sidebar-border px-2 py-3">
             <button
               onClick={() => setCollapsed(!collapsed)}
-              className="flex w-full items-center justify-center rounded-md p-2 text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
+              className="flex w-full items-center justify-center rounded-md p-2 text-sidebar-foreground/50 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
             >
               {collapsed ? (
                 <ChevronRight className="h-4 w-4" />
@@ -216,7 +243,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   .join('')}
               </div>
               {!collapsed && (
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="truncate text-xs font-medium text-sidebar-foreground">
                     {userData?.userName}
                   </p>
@@ -227,7 +254,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               )}
               {!collapsed && (
                 <button
-                  className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                  className="cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
                   onClick={() => logout()}
                 >
                   <LogOut className="h-3.5 w-3.5" />

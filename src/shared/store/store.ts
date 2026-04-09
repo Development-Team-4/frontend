@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { MessageSquare, RefreshCw, UserPlus } from 'lucide-react';
 import { Category, Ticket, TicketsFilterState, User } from '@/shared/types';
-import { notifications, tickets } from '../consts';
+import { tickets } from '../consts';
 
 export const useStore = create<TicketsFilterState>((set, get) => ({
   userData: null,
@@ -12,7 +12,7 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
   tickets,
   topics: [],
   categories: [],
-  notifications,
+  notifications: [],
 
   search: '',
   statusFilter: 'all',

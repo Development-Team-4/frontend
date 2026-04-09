@@ -1,7 +1,9 @@
 'use client';
+import { useNotifications } from '@/entities/notification/model';
 import { useStore } from '@/shared/store/store';
 
 export const useNotificationInfo = () => {
+  const { isLoading, isFetching } = useNotifications();
   const notifications = useStore((state) => state.notifications);
   const setNotifications = useStore((state) => state.setNotifications);
   const typeConfig = useStore((state) => state.typeConfig);
@@ -17,6 +19,7 @@ export const useNotificationInfo = () => {
 
   const unreadCount = notifications.filter((n) => !n.read).length;
   return {
+    isLoading: isLoading || isFetching,
     unreadCount,
     markAllRead,
     markRead,

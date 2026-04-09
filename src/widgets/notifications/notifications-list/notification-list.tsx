@@ -7,7 +7,20 @@ import { useNotificationInfo } from '@/features/notification-info';
 import { ru } from 'date-fns/locale';
 
 export const NotificationList = () => {
-  const { notifications, markRead, typeConfig } = useNotificationInfo();
+  const { notifications, markRead, typeConfig, isLoading } =
+    useNotificationInfo();
+
+  if (isLoading) {
+    return (
+      <Card className="flex flex-col items-center justify-center p-8 text-center">
+        <Bell className="h-10 w-10 text-muted-foreground/50" />
+        <p className="mt-3 text-sm text-muted-foreground">
+          Загрузка уведомлений...
+        </p>
+      </Card>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-2">
       {notifications.length === 0 ? (
@@ -30,7 +43,7 @@ export const NotificationList = () => {
               >
                 <config.icon className={`h-4 w-4 ${config.color}`} />
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-medium text-card-foreground">
                     {n.title}
