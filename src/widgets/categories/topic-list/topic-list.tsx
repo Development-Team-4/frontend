@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import {
   Accordion,
@@ -65,27 +65,29 @@ export const TopicList = () => {
     <>
       <Accordion
         type="multiple"
-        defaultValue={topics.map((t) => t.id)}
-        className="w-full"
+        defaultValue={topics.map((topic) => topic.id)}
+        className="w-full rounded-lg border border-border bg-card px-3 sm:px-4"
       >
         {topics.map((topic) => {
           const topicCategories = getCategoriesByTopicId(topic.id);
 
           return (
             <AccordionItem key={topic.id} value={topic.id}>
-              <div className="flex items-center gap-2">
-                <AccordionTrigger className="hover:no-underline">
-                  <div className="flex w-full items-center gap-3">
-                    <FolderTree className="h-4 w-4 text-primary" />
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">{topic.name}</span>
+              <div className="flex items-start gap-2">
+                <AccordionTrigger className="min-w-0 flex-1 py-3 hover:no-underline">
+                  <div className="flex w-full min-w-0 items-start gap-2 sm:gap-3">
+                    <FolderTree className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    <div className="min-w-0 flex-1 text-left">
+                      <span className="block truncate font-medium">
+                        {topic.name}
+                      </span>
                       {topic.description && (
-                        <span className="text-xs text-muted-foreground">
+                        <span className="mt-0.5 block text-xs text-muted-foreground">
                           {topic.description}
                         </span>
                       )}
                     </div>
-                    <Badge variant="secondary" className="text-[10px]">
+                    <Badge variant="secondary" className="shrink-0 text-[10px]">
                       {isTopicCategoriesLoading(topic.id)
                         ? '...'
                         : topicCategories.length}{' '}
@@ -98,7 +100,7 @@ export const TopicList = () => {
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="h-7 w-7 shrink-0 p-0"
+                  className="mt-2 h-7 w-7 shrink-0 p-0"
                   onClick={() => openEditTopic(topic)}
                 >
                   <Edit2 className="h-3.5 w-3.5" />
@@ -106,13 +108,13 @@ export const TopicList = () => {
               </div>
 
               <AccordionContent>
-                <div className="ml-7 flex flex-col gap-2 pt-2">
+                <div className="flex flex-col gap-2 pb-2 pl-0 pt-1 sm:pl-7 sm:pt-2">
                   {isTopicCategoriesLoading(topic.id) ? (
-                    <p className="py-4 text-sm text-muted-foreground">
+                    <p className="py-3 text-sm text-muted-foreground">
                       Загрузка категорий...
                     </p>
                   ) : topicCategories.length === 0 ? (
-                    <p className="py-4 text-sm text-muted-foreground">
+                    <p className="py-3 text-sm text-muted-foreground">
                       В этой теме пока нет категорий
                     </p>
                   ) : (
@@ -169,6 +171,7 @@ export const TopicList = () => {
               type="button"
               onClick={handleUpdateTopic}
               disabled={!canUpdateTopic}
+              className="w-full sm:w-auto"
             >
               {isUpdatingTopic ? 'Сохранение...' : 'Сохранить'}
             </Button>

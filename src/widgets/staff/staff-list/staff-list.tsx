@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -10,8 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useStaffList } from '@/features/staff-list/use-staff-list';
 import { useUsers } from '@/entities/user/model/use-user';
+import { useStaffList } from '@/features/staff-list/use-staff-list';
 import { StaffItem } from '../staff-item';
 
 export const StaffList = () => {
@@ -20,59 +20,64 @@ export const StaffList = () => {
 
   return (
     <Card>
-      <Table>
-        <TableHeader>
-          <TableRow className="hover:bg-transparent">
-            <TableHead>Сотрудник</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Роль</TableHead>
-            <TableHead>Категории</TableHead>
-            <TableHead className="w-[80px]">Действия</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {isLoading &&
-            Array.from({ length: 4 }).map((_, id) => (
-              <TableRow key={`staff-skeleton-${id}`}>
-                <TableCell>
-                  <Skeleton className="h-4 w-40" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-4 w-48" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-4 w-20" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-4 w-32" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-8 w-8" />
+      <p className="px-4 pt-3 text-[11px] text-muted-foreground md:hidden">
+        Проведите влево/вправо, чтобы посмотреть всю таблицу
+      </p>
+      <div className="overflow-x-auto">
+        <Table className="min-w-[760px]">
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead>Сотрудник</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Роль</TableHead>
+              <TableHead>Категории</TableHead>
+              <TableHead className="w-[80px]">Действия</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading &&
+              Array.from({ length: 4 }).map((_, id) => (
+                <TableRow key={`staff-skeleton-${id}`}>
+                  <TableCell>
+                    <Skeleton className="h-4 w-40" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-48" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-20" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-32" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-8 w-8" />
+                  </TableCell>
+                </TableRow>
+              ))}
+
+            {!isLoading &&
+              supportStaff.map((user) => (
+                <StaffItem
+                  key={user.userId}
+                  user={user}
+                  isCategoriesLoading={isCategoriesLoading}
+                />
+              ))}
+
+            {!isLoading && supportStaff.length === 0 && (
+              <TableRow>
+                <TableCell
+                  colSpan={5}
+                  className="h-28 text-center text-sm text-muted-foreground"
+                >
+                  Сотрудники поддержки пока не добавлены
                 </TableCell>
               </TableRow>
-            ))}
-
-          {!isLoading &&
-            supportStaff.map((user) => (
-              <StaffItem
-                key={user.userId}
-                user={user}
-                isCategoriesLoading={isCategoriesLoading}
-              />
-            ))}
-
-          {!isLoading && supportStaff.length === 0 && (
-            <TableRow>
-              <TableCell
-                colSpan={5}
-                className="h-28 text-center text-sm text-muted-foreground"
-              >
-                Сотрудники поддержки пока не добавлены
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </Card>
   );
 };

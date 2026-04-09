@@ -291,8 +291,8 @@ export function TicketDetail() {
 
   return (
     <div className="flex flex-col lg:flex-row">
-      <div className="flex-1 p-6">
-        <div className="mb-4 flex items-center gap-2 text-xs text-muted-foreground">
+      <div className="flex-1 p-3 sm:p-4 lg:p-6">
+        <div className="mb-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           <Link
             href="/tickets"
             className="hover:text-foreground transition-colors"
@@ -303,7 +303,7 @@ export function TicketDetail() {
           <span className="text-foreground">{ticket.id}</span>
         </div>
 
-        <div className="mb-6">
+        <div className="mb-5 sm:mb-6">
           <div className="flex items-start gap-3">
             <Button
               variant="ghost"
@@ -315,7 +315,7 @@ export function TicketDetail() {
             </Button>
             <div className="flex-1">
               <div className="mb-2 flex flex-wrap items-center gap-2">
-                <span className="font-mono text-xs text-muted-foreground">
+                <span className="break-all font-mono text-xs text-muted-foreground">
                   {ticket.id}
                 </span>
                 <Badge
@@ -329,13 +329,13 @@ export function TicketDetail() {
                   </Badge>
                 )}
               </div>
-              <h1 className="text-xl font-semibold text-foreground text-balance">
+              <h1 className="text-balance text-lg font-semibold text-foreground sm:text-xl">
                 {ticket.subject}
               </h1>
-              <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
+              <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <User className="h-3 w-3" />
-                  {createdByName}
+                  <span className="break-words">{createdByName}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Clock className="h-3 w-3" />
@@ -347,14 +347,18 @@ export function TicketDetail() {
             </div>
 
             {(canEdit || canDelete) && (
-              <div className="flex gap-2">
+              <div className="flex flex-wrap justify-end gap-2">
                 {canEdit && (
                   <Dialog
                     open={isEditDialogOpen}
                     onOpenChange={setIsEditDialogOpen}
                   >
                     <DialogTrigger asChild>
-                      <Button variant="outline" size="sm">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full sm:w-auto"
+                      >
                         <Edit3 className="mr-1 h-3.5 w-3.5" />
                         Редактировать
                       </Button>
@@ -419,7 +423,7 @@ export function TicketDetail() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="text-destructive hover:bg-destructive/10"
+                        className="w-full text-destructive hover:bg-destructive/10 sm:w-auto"
                         disabled={isDeletingTicket}
                       >
                         <Trash2 className="mr-1 h-3.5 w-3.5" />
@@ -552,7 +556,7 @@ export function TicketDetail() {
         </Tabs>
       </div>
 
-      <div className="w-full border-t border-border bg-card p-6 lg:w-80 lg:border-l lg:border-t-0">
+      <div className="w-full border-t border-border bg-card p-3 sm:p-4 lg:w-80 lg:border-l lg:border-t-0 lg:p-6">
         <h3 className="mb-4 text-sm font-medium text-card-foreground">
           Детали
         </h3>
@@ -629,7 +633,7 @@ export function TicketDetail() {
             </label>
             <div className="rounded-md border border-border bg-background px-3 py-2 text-sm">
               <div className="flex flex-col gap-1">
-                <span>
+                <span className="break-words">
                   {topic?.name || 'Без темы'} /{' '}
                   {category?.name || 'Без категории'}
                 </span>
@@ -723,21 +727,23 @@ export function TicketDetail() {
           <Separator />
 
           <div className="flex flex-col gap-2 text-xs">
-            <div className="flex justify-between">
+            <div className="flex items-start justify-between gap-2">
               <span className="text-muted-foreground">Автор</span>
-              <span className="text-card-foreground">{createdByName}</span>
+              <span className="max-w-[60%] break-words text-right text-card-foreground">
+                {createdByName}
+              </span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex items-start justify-between gap-2">
               <span className="text-muted-foreground">Создан</span>
-              <span className="text-card-foreground">
+              <span className="text-right text-card-foreground">
                 {format(new Date(ticket.createdAt), 'd MMM, HH:mm', {
                   locale: ru,
                 })}
               </span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex items-start justify-between gap-2">
               <span className="text-muted-foreground">Обновлен</span>
-              <span className="text-card-foreground">
+              <span className="text-right text-card-foreground">
                 {formatDistanceToNow(new Date(ticket.updatedAt), {
                   addSuffix: true,
                   locale: ru,

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -52,6 +52,7 @@ export const StaffItem = ({
         category.assignedStaff.includes(user.userId),
     )
     .map((category) => category.id);
+
   const assignedCategoryIds = new Set([
     ...userCategoryIds,
     ...assignedCategoryIdsFromCategories,
@@ -84,12 +85,11 @@ export const StaffItem = ({
 
     setPendingCategoryId(categoryId);
     setPendingAction('assign');
+
     try {
       await assignStaffToCategory({
         categoryId,
-        payload: {
-          staffId: user.userId,
-        },
+        payload: { staffId: user.userId },
       });
     } finally {
       setPendingCategoryId(null);
@@ -102,6 +102,7 @@ export const StaffItem = ({
 
     setPendingCategoryId(categoryId);
     setPendingAction('remove');
+
     try {
       await removeStaffFromCategory({
         categoryId,
@@ -128,17 +129,20 @@ export const StaffItem = ({
           </span>
         </div>
       </TableCell>
+
       <TableCell>
         <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
           <Mail className="h-3.5 w-3.5" />
           {user.userEmail}
         </div>
       </TableCell>
+
       <TableCell>
         <Badge className={`border-0 text-[10px] ${roleStyles[user.userRole]}`}>
           {roleLabels[user.userRole]}
         </Badge>
       </TableCell>
+
       <TableCell>
         {user.userRole === 'ADMIN' ? (
           <span className="text-xs italic text-muted-foreground">
@@ -162,6 +166,7 @@ export const StaffItem = ({
           </span>
         )}
       </TableCell>
+
       <TableCell>
         {user.userRole !== 'ADMIN' && (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -171,6 +176,7 @@ export const StaffItem = ({
                 Назначить
               </Button>
             </DialogTrigger>
+
             <DialogContent className="sm:max-w-xl">
               <DialogHeader>
                 <DialogTitle>Назначение категорий</DialogTitle>
@@ -226,7 +232,7 @@ export const StaffItem = ({
                         return (
                           <div
                             key={category.id}
-                            className="flex items-start justify-between gap-3 rounded-lg border border-border p-3"
+                            className="flex flex-col gap-3 rounded-lg border border-border p-3 sm:flex-row sm:items-start sm:justify-between"
                           >
                             <div className="min-w-0">
                               <p className="text-sm font-medium text-card-foreground">
@@ -238,10 +244,12 @@ export const StaffItem = ({
                                 </p>
                               )}
                             </div>
-                            <div className="flex gap-2">
+
+                            <div className="flex w-full gap-2 sm:w-auto">
                               <Button
                                 type="button"
                                 size="sm"
+                                className="flex-1 sm:flex-none"
                                 onClick={() =>
                                   handleAssignCategory(category.id)
                                 }
@@ -263,10 +271,12 @@ export const StaffItem = ({
                                   'Назначить'
                                 )}
                               </Button>
+
                               <Button
                                 type="button"
                                 size="sm"
                                 variant="outline"
+                                className="flex-1 sm:flex-none"
                                 onClick={() =>
                                   handleRemoveCategory(category.id)
                                 }
