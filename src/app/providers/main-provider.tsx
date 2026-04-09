@@ -8,8 +8,9 @@ export function MainProvider({ children }: PropsWithChildren<unknown>) {
     <TanstackQueryProvider>
       <ThemeProvider
         attribute="class"
-        defaultTheme="dark"
-        enableSystem
+        themes={['light', 'dark']}
+        defaultTheme="light"
+        enableSystem={false}
         disableTransitionOnChange
       >
         {children}

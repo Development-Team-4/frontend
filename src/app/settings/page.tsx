@@ -1,6 +1,5 @@
-﻿import { NotificationsChannels } from '@/widgets/notifications/notifications-channels';
+import { NotificationsChannels } from '@/widgets/notifications/notifications-channels';
 import { ProfileSettings } from '@/widgets/profile/profile-settings';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 export default function SettingsPage() {
   return (
@@ -12,13 +11,6 @@ export default function SettingsPage() {
         <p className="mt-1 text-sm text-muted-foreground">
           Профиль и каналы уведомлений
         </p>
-      </div>
-
-      <div className="mb-4 sm:mb-6">
-        <h2 className="mb-3 text-base font-medium text-foreground sm:mb-4 sm:text-lg">
-          Тема
-        </h2>
-        <ThemeToggle />
       </div>
 
       <ProfileSettings />

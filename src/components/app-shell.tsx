@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -22,6 +22,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { LoadingOverlay } from '@/components/loading-overlay';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import {
   Tooltip,
   TooltipContent,
@@ -272,12 +273,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </div>
               )}
               {!collapsed && (
-                <button
-                  className="cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
-                  onClick={() => logout()}
-                >
-                  <LogOut className="h-3.5 w-3.5" />
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <ThemeToggle />
+                  <button
+                    className="cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
+                    onClick={() => logout()}
+                  >
+                    <LogOut className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               )}
             </div>
           </div>
@@ -304,7 +308,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </span>
             </div>
 
-            <div className="min-w-10 text-right">
+            <div className="flex min-w-10 items-center justify-end gap-2">
+              <ThemeToggle />
               {unreadCount > 0 && (
                 <Badge variant="destructive" className="h-5 px-1.5 text-[10px]">
                   {unreadCount}
