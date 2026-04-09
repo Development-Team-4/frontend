@@ -58,7 +58,7 @@ export const useLoginForm = () => {
             'Failed to fetch user data, redirecting to dashboard:',
             error,
           );
-          router.push('/');
+          router.push('/tickets');
         }
       }
     } finally {

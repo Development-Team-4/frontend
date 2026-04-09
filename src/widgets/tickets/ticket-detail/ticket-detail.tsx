@@ -54,6 +54,7 @@ import { Separator } from '@/components/ui/separator';
 import { useCategoryById } from '@/entities/category/model';
 import { useUserById, useUsers } from '@/entities/user/model/use-user';
 import {
+  useAssignTicketAssignee,
   useDeleteTicket,
   useUpdateTicket,
   useUpdateTicketStatus,
@@ -111,6 +112,7 @@ export function TicketDetail() {
   const userData = useStore((state) => state.userData);
   const topics = useStore((state) => state.topics);
   const getStaffForCategory = useStore((state) => state.getStaffForCategory);
+  const users = useStore((state) => state.users);
 
   const { ticketId, data: ticket, isLoading } = useTicketDetail();
   const { data: ticketComments = [], isLoading: isCommentsLoading } =
@@ -119,6 +121,8 @@ export function TicketDetail() {
     useCreateTicketComment(ticketId || null);
   const { mutateAsync: updateTicketStatus, isPending: isUpdatingStatus } =
     useUpdateTicketStatus();
+  const { mutateAsync: assignTicketAssignee, isPending: isAssigningAssignee } =
+    useAssignTicketAssignee();
   const { mutateAsync: updateTicket, isPending: isUpdatingTicket } =
     useUpdateTicket();
   const { mutateAsync: deleteTicket, isPending: isDeletingTicket } =
@@ -144,6 +148,7 @@ export function TicketDetail() {
   const categoryStaff = ticket ? getStaffForCategory(ticket.categoryId) : [];
   const createdByName = createdByUser?.userName || ticket?.createdBy.userName;
   const assigneeName = assigneeUser?.userName || ticket?.assignee?.userName;
+  const currentAssigneeId = ticket?.assignee?.userId || '';
 
   useEffect(() => {
     if (!ticket) return;
@@ -161,6 +166,14 @@ export function TicketDetail() {
   const isAdmin = currentUserRole === 'ADMIN';
   const isSupport = currentUserRole === 'SUPPORT';
   const isUser = currentUserRole === 'USER';
+  const allSupportUsers = useMemo(
+    () => users.filter((user) => user.userRole === 'SUPPORT'),
+    [users],
+  );
+  const assignableStaff = useMemo(() => {
+    if (isAdmin) return allSupportUsers;
+    return categoryStaff.filter((user) => user.userRole === 'SUPPORT');
+  }, [allSupportUsers, categoryStaff, isAdmin]);
   const isSupportAssignedToCategory = Boolean(
     currentUserId &&
     ticket &&
@@ -180,7 +193,10 @@ export function TicketDetail() {
       (isUser && isOwner && ticket.status === 'OPEN')),
   );
   const canChangeStatus = isAssignee || isAdmin;
-  const canAssign = isAdmin || (isSupport && !ticket?.assignee);
+  const canAssign = Boolean(
+    ticket &&
+    (isAdmin || (isSupport && !ticket.assignee && isSupportAssignedToCategory)),
+  );
   const canComment = isOwner || isAssignee || isAdmin;
   const canSendComment =
     canComment && ticket?.status !== 'CLOSED' && Boolean(newComment.trim());
@@ -210,6 +226,36 @@ export function TicketDetail() {
     if (!ticket || nextStatus === statusValue) return;
     await updateTicketStatus({ ticketId: ticket.id, status: nextStatus });
     setStatusValue(nextStatus);
+  };
+
+  const handleAssignAssignee = async () => {
+    if (!ticket || !canAssign || !assigneeValue) return;
+    if (assigneeValue === currentAssigneeId) return;
+
+    await assignTicketAssignee({
+      ticketId: ticket.id,
+      assigneeId: assigneeValue,
+    });
+
+    if (ticket.status !== 'ASSIGNED') {
+      await updateTicketStatus({ ticketId: ticket.id, status: 'ASSIGNED' });
+      setStatusValue('ASSIGNED');
+    }
+  };
+
+  const handleTakeInWork = async () => {
+    if (!ticket || !currentUserId || !canAssign) return;
+
+    await assignTicketAssignee({
+      ticketId: ticket.id,
+      assigneeId: currentUserId,
+    });
+    setAssigneeValue(currentUserId);
+
+    if (ticket.status !== 'ASSIGNED') {
+      await updateTicketStatus({ ticketId: ticket.id, status: 'ASSIGNED' });
+      setStatusValue('ASSIGNED');
+    }
   };
 
   const handleDeleteTicket = async () => {
@@ -607,22 +653,61 @@ export function TicketDetail() {
                     <SelectValue placeholder="Не назначен" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categoryStaff.map((a) => (
+                    {assignableStaff.map((a) => (
                       <SelectItem key={a.userId} value={a.userId}>
                         {a.userName}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {isAdmin && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-2 w-full text-xs"
+                    onClick={handleAssignAssignee}
+                    disabled={
+                      !assigneeValue ||
+                      assigneeValue === currentAssigneeId ||
+                      isAssigningAssignee ||
+                      isUpdatingStatus ||
+                      ticket.status === 'CLOSED'
+                    }
+                  >
+                    {isAssigningAssignee || isUpdatingStatus
+                      ? 'Назначение...'
+                      : 'Назначить исполнителя'}
+                  </Button>
+                )}
                 {isSupport && !ticket.assignee && (
                   <Button
                     variant="outline"
                     size="sm"
                     className="mt-2 w-full text-xs"
+                    onClick={handleTakeInWork}
+                    disabled={
+                      isAssigningAssignee ||
+                      isUpdatingStatus ||
+                      ticket.status === 'CLOSED'
+                    }
                   >
-                    Взять в работу
+                    {isAssigningAssignee || isUpdatingStatus
+                      ? 'Назначение...'
+                      : 'Взять в работу'}
                   </Button>
                 )}
+                {assigneeName && (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Текущий исполнитель: {assigneeName}
+                  </p>
+                )}
+                {isAdmin &&
+                  assigneeValue &&
+                  assigneeValue === currentAssigneeId && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Этот сотрудник уже назначен на тикет
+                    </p>
+                  )}
               </>
             ) : (
               <div className="rounded-md border border-border bg-background px-3 py-2 text-sm">

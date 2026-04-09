@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   Ticket,
@@ -79,6 +79,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { isLoading, isError, refetch } = useUser();
   const userData = useStore((state) => state.userData);
   const pathname = usePathname();
+  const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const hasMountedRef = useRef(false);
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -97,6 +98,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
     refetch();
   }, [pathname, refetch]);
+
+  useEffect(() => {
+    if (!userData) return;
+
+    if (pathname === '/' && userData.userRole !== 'ADMIN') {
+      if (userData.userRole === 'SUPPORT') {
+        router.replace('/support/tickets');
+        return;
+      }
+
+      router.replace('/tickets');
+    }
+  }, [pathname, router, userData]);
 
   if (pathname === '/login' || pathname === '/register') {
     return <>{children}</>;
