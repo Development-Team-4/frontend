@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { Card } from '@/components/ui/card';
@@ -7,7 +7,7 @@ import { RecentTicketItem } from './recent-ticket-item';
 import { useTickets } from '@/entities/ticket/model';
 
 export function RecentTickets() {
-  const { data: tickets = [] } = useTickets();
+  const { data: tickets = [], isLoading } = useTickets();
 
   const recent = [...tickets]
     .sort(
@@ -31,9 +31,19 @@ export function RecentTickets() {
         </Link>
       </div>
       <div className="flex flex-col gap-2">
-        {recent.map((ticket) => (
-          <RecentTicketItem key={ticket.id} ticket={ticket} />
-        ))}
+        {isLoading ? (
+          <div className="rounded-md border border-dashed border-border/70 px-3 py-4 text-center text-xs text-muted-foreground">
+            Загрузка тикетов...
+          </div>
+        ) : recent.length === 0 ? (
+          <div className="rounded-md border border-dashed border-border/70 px-3 py-4 text-center text-xs text-muted-foreground">
+            Пока нет недавних тикетов
+          </div>
+        ) : (
+          recent.map((ticket) => (
+            <RecentTicketItem key={ticket.id} ticket={ticket} />
+          ))
+        )}
       </div>
     </Card>
   );

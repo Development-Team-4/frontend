@@ -7,7 +7,7 @@ import { useQueries } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 
 export const useTopicsList = () => {
-  useTopics();
+  const { isLoading: isTopicsLoading } = useTopics();
   const topics = useStore((state) => state.topics);
   const { mutateAsync: updateTopic, isPending: isUpdatingTopic } =
     useUpdateTopic();
@@ -85,6 +85,7 @@ export const useTopicsList = () => {
 
   return {
     topics,
+    isTopicsLoading,
     getCategoriesByTopicId,
     isTopicCategoriesLoading,
     isEditTopicOpen,

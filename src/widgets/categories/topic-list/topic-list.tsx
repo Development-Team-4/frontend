@@ -1,4 +1,5 @@
 'use client';
+
 import {
   Accordion,
   AccordionContent,
@@ -24,6 +25,7 @@ import { CategoryItem } from '../category-item';
 export const TopicList = () => {
   const {
     topics,
+    isTopicsLoading,
     getCategoriesByTopicId,
     isTopicCategoriesLoading,
     isEditTopicOpen,
@@ -37,6 +39,27 @@ export const TopicList = () => {
     openEditTopic,
     handleUpdateTopic,
   } = useTopicsList();
+
+  if (isTopicsLoading) {
+    return (
+      <div className="rounded-lg border border-dashed border-border/70 bg-muted/10 px-4 py-8 text-center text-sm text-muted-foreground">
+        Загрузка тем...
+      </div>
+    );
+  }
+
+  if (topics.length === 0) {
+    return (
+      <div className="rounded-lg border border-dashed border-border/70 bg-muted/10 px-4 py-8 text-center">
+        <p className="text-sm font-medium text-card-foreground">
+          Темы пока не созданы
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Добавьте первую тему в блоке настроек выше
+        </p>
+      </div>
+    );
+  }
 
   return (
     <>

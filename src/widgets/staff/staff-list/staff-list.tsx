@@ -17,6 +17,7 @@ import { StaffItem } from '../staff-item';
 export const StaffList = () => {
   const { isLoading } = useUsers();
   const { supportStaff, isCategoriesLoading } = useStaffList();
+
   return (
     <Card>
       <Table>
@@ -50,6 +51,7 @@ export const StaffList = () => {
                 </TableCell>
               </TableRow>
             ))}
+
           {!isLoading &&
             supportStaff.map((user) => (
               <StaffItem
@@ -58,13 +60,14 @@ export const StaffList = () => {
                 isCategoriesLoading={isCategoriesLoading}
               />
             ))}
+
           {!isLoading && supportStaff.length === 0 && (
             <TableRow>
               <TableCell
                 colSpan={5}
                 className="h-28 text-center text-sm text-muted-foreground"
               >
-                Сотрудники пока не добавлены
+                Сотрудники поддержки пока не добавлены
               </TableCell>
             </TableRow>
           )}

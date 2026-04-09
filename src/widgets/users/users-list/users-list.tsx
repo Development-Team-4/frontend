@@ -108,6 +108,7 @@ export const UsersList = () => {
                   </TableCell>
                 </TableRow>
               ))}
+
             {!isLoading && regularUsers.length === 0 && (
               <TableRow>
                 <TableCell
