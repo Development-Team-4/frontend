@@ -1,7 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { normalizeApiError } from './errors';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ticketsystem.braverto.com/api/';
 let isAuthRedirectInProgress = false;
 
 export const api = axios.create({
