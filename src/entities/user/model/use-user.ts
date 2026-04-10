@@ -94,6 +94,44 @@ export const useUpdateUserRole = () => {
   });
 };
 
+export const useCreateUserByAdmin = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      userName,
+      userEmail,
+      userPassword,
+      userRole,
+    }: {
+      userName: string;
+      userEmail: string;
+      userPassword: string;
+      userRole: User['userRole'];
+    }) => {
+      await usersDataApi.createUser({
+        userName,
+        userEmail,
+        userPassword,
+      });
+
+      if (userRole === 'SUPPORT') {
+        const users = await usersDataApi.getAllUsers();
+        const createdUser = users.find(
+          (user) => user.userEmail.toLowerCase() === userEmail.toLowerCase(),
+        );
+
+        if (createdUser) {
+          await usersDataApi.updateUserRole(createdUser.userId, 'SUPPORT');
+        }
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+  });
+};
+
 export const useUpdateUserProfile = () => {
   const queryClient = useQueryClient();
   const updateUserData = useStore((state) => state.updateUserData);
