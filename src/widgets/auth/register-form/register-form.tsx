@@ -14,6 +14,7 @@ export const RegisterForm = () => {
     formState: { errors },
     onSubmit,
     isLoading,
+    serverError,
   } = useRegisterForm();
 
   return (
@@ -91,6 +92,10 @@ export const RegisterForm = () => {
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? 'Creating account...' : 'Create Account'}
         </Button>
+
+        {serverError && (
+          <p className="text-center text-xs text-destructive">{serverError}</p>
+        )}
       </form>
 
       <div className="mt-4 text-center">

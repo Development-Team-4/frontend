@@ -2,6 +2,17 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { useCategoryById } from '@/entities/category/model';
 import {
@@ -9,6 +20,7 @@ import {
   useUpdateTicketStatus,
 } from '@/entities/ticket/model';
 import { useUserById } from '@/entities/user/model/use-user';
+import { normalizeApiError } from '@/shared/api/errors';
 import { statusLabels, statusStyles } from '@/shared/consts';
 import { useStore } from '@/shared/store/store';
 import { Ticket } from '@/shared/types';
@@ -16,6 +28,7 @@ import { User } from 'lucide-react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { toast } from 'sonner';
 
 interface SupportTicketRowProps {
   ticket: Ticket;
@@ -44,8 +57,17 @@ export const SupportTicketRow = ({ ticket }: SupportTicketRowProps) => {
 
   const handleTakeTicket = async () => {
     if (!userData?.userId) return;
-    await assignTicket({ ticketId: ticket.id, assigneeId: userData.userId });
-    await updateTicketStatus({ ticketId: ticket.id, status: 'ASSIGNED' });
+    try {
+      await assignTicket({ ticketId: ticket.id, assigneeId: userData.userId });
+      await updateTicketStatus({ ticketId: ticket.id, status: 'ASSIGNED' });
+      toast.success('Тикет взят в работу');
+    } catch (error) {
+      const apiError = normalizeApiError(
+        error,
+        'Не удалось взять тикет в работу',
+      );
+      toast.error(apiError.message);
+    }
   };
 
   return (
@@ -94,17 +116,40 @@ export const SupportTicketRow = ({ ticket }: SupportTicketRowProps) => {
       </TableCell>
       <TableCell>
         {canTake && (
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-7 text-xs"
-            onClick={handleTakeTicket}
-            disabled={isAssigning || isUpdatingStatus || !userData?.userId}
-          >
-            {isAssigning || isUpdatingStatus
-              ? 'Назначение...'
-              : 'Взять в работу'}
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 text-xs"
+                disabled={isAssigning || isUpdatingStatus || !userData?.userId}
+              >
+                {isAssigning || isUpdatingStatus
+                  ? 'Назначение...'
+                  : 'Взять в работу'}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Взять тикет в работу?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Вы будете назначены исполнителем, а статус тикета изменится на
+                  «Назначен».
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={isAssigning || isUpdatingStatus}>
+                  Отмена
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleTakeTicket}
+                  disabled={isAssigning || isUpdatingStatus}
+                >
+                  Подтвердить
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         )}
       </TableCell>
     </TableRow>

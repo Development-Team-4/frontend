@@ -2,6 +2,17 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -13,9 +24,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useUpdateUserRole, useUsers } from '@/entities/user/model/use-user';
+import { normalizeApiError } from '@/shared/api/errors';
 import { roleLabels, roleStyles } from '@/shared/consts';
 import { useStore } from '@/shared/store/store';
 import { Loader2, Mail } from 'lucide-react';
+import { toast } from 'sonner';
 
 export const UsersList = () => {
   const { isLoading } = useUsers();
@@ -25,7 +38,16 @@ export const UsersList = () => {
     useUpdateUserRole();
 
   const handlePromoteToSupport = async (userId: string) => {
-    await updateUserRole({ userId, userRole: 'SUPPORT' });
+    try {
+      const updatedUser = await updateUserRole({ userId, userRole: 'SUPPORT' });
+      toast.success(`${updatedUser.userName} назначен агентом поддержки`);
+    } catch (error) {
+      const apiError = normalizeApiError(
+        error,
+        'Не удалось изменить роль пользователя',
+      );
+      toast.error(apiError.message);
+    }
   };
 
   return (
@@ -96,19 +118,46 @@ export const UsersList = () => {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        disabled={isUpdatingRole}
-                        onClick={() => handlePromoteToSupport(user.userId)}
-                      >
-                        {isUpdatingRole ? (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        ) : (
-                          'Сделать поддержкой'
-                        )}
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            disabled={isUpdatingRole}
+                          >
+                            {isUpdatingRole ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              'Сделать поддержкой'
+                            )}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              Подтвердите изменение роли
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Перевести пользователя {user.userName} в агента
+                              поддержки?
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel disabled={isUpdatingRole}>
+                              Отмена
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                              disabled={isUpdatingRole}
+                              onClick={() =>
+                                handlePromoteToSupport(user.userId)
+                              }
+                            >
+                              Подтвердить
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </TableCell>
                   </TableRow>
                 ))}

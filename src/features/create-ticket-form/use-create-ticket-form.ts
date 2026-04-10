@@ -12,6 +12,8 @@ import { useTopics } from '@/entities/topic/model';
 import { useCategories } from '@/entities/category/model';
 import { createTicketApi } from './api';
 import { Ticket } from '@/shared/types';
+import { getApiFieldErrors, normalizeApiError } from '@/shared/api/errors';
+import { toast } from 'sonner';
 
 export const useCreateTicketForm = () => {
   useTopics();
@@ -19,6 +21,7 @@ export const useCreateTicketForm = () => {
   const queryClient = useQueryClient();
   const topics = useStore((state) => state.topics);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serverError, setServerError] = useState('');
 
   const form = useForm<CreateTicketFormData>({
     resolver: zodResolver(createTicketSchema),
@@ -57,6 +60,8 @@ export const useCreateTicketForm = () => {
 
   const onSubmit = async (data: CreateTicketFormData) => {
     setIsSubmitting(true);
+    setServerError('');
+    form.clearErrors();
 
     try {
       console.log('ticket data:', data);
@@ -74,8 +79,35 @@ export const useCreateTicketForm = () => {
       ]);
       queryClient.setQueryData(['ticket', createdTicket.id], createdTicket);
       queryClient.invalidateQueries({ queryKey: ['tickets'] });
+      toast.success('Тикет успешно создан');
 
       router.replace('/tickets');
+    } catch (error) {
+      const normalizedError = normalizeApiError(
+        error,
+        'Не удалось создать тикет',
+      );
+
+      const fieldErrors = getApiFieldErrors(normalizedError, {
+        subject: 'subject',
+        description: 'description',
+        categoryId: 'categoryId',
+      });
+
+      (
+        Object.entries(fieldErrors) as Array<
+          [keyof CreateTicketFormData, string]
+        >
+      ).forEach(([field, message]) => {
+        if (field in data) {
+          form.setError(field, { type: 'server', message });
+        }
+      });
+
+      if (Object.keys(fieldErrors).length === 0) {
+        setServerError(normalizedError.message);
+      }
+      toast.error(normalizedError.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -100,5 +132,6 @@ export const useCreateTicketForm = () => {
     topics,
     topicId,
     categoryId,
+    serverError,
   };
 };

@@ -1,11 +1,14 @@
 'use client';
 import { useUpdateUserProfile } from '@/entities/user/model/use-user';
+import { getApiFieldErrors, normalizeApiError } from '@/shared/api/errors';
 import { useStore } from '@/shared/store/store';
 import { useEffect, useState } from 'react';
 
 export const useUpdateProfile = () => {
   const userData = useStore((state) => state.userData);
   const [userName, setUserName] = useState('');
+  const [nameError, setNameError] = useState('');
+  const [serverError, setServerError] = useState('');
   const { mutateAsync: updateUserProfile, isPending: isUpdating } =
     useUpdateUserProfile();
 
@@ -21,10 +24,30 @@ export const useUpdateProfile = () => {
 
   const handleSave = async () => {
     if (!userData?.userId || !canSave) return;
-    await updateUserProfile({
-      userId: userData.userId,
-      userName: userName.trim(),
-    });
+    setNameError('');
+    setServerError('');
+
+    try {
+      await updateUserProfile({
+        userId: userData.userId,
+        userName: userName.trim(),
+      });
+    } catch (error) {
+      const normalizedError = normalizeApiError(
+        error,
+        'Не удалось обновить профиль',
+      );
+      const fieldErrors = getApiFieldErrors(normalizedError, {
+        userName: 'userName',
+        name: 'userName',
+      });
+
+      if (fieldErrors.userName) {
+        setNameError(fieldErrors.userName);
+      } else {
+        setServerError(normalizedError.message);
+      }
+    }
   };
 
   return {
@@ -34,5 +57,7 @@ export const useUpdateProfile = () => {
     isUpdating,
     canSave,
     handleSave,
+    nameError,
+    serverError,
   };
 };

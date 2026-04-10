@@ -1,4 +1,5 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { normalizeApiError } from './errors';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081';
 
@@ -23,7 +24,7 @@ api.interceptors.request.use(
   },
   (error) => {
     console.error('API Request Interceptor Error:', error);
-    return Promise.reject(error);
+    return Promise.reject(normalizeApiError(error));
   },
 );
 
@@ -38,7 +39,7 @@ api.interceptors.response.use(
       // window.location.href = '/login'
     }
 
-    return Promise.reject(error);
+    return Promise.reject(normalizeApiError(error));
   },
 );
 

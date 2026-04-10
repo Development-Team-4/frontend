@@ -7,10 +7,12 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginApi } from './api';
 import { usersDataApi } from '@/entities/user/api';
+import { getApiFieldErrors, normalizeApiError } from '@/shared/api/errors';
 
 export const useLoginForm = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [serverError, setServerError] = useState('');
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -35,6 +37,8 @@ export const useLoginForm = () => {
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
+    setServerError('');
+    form.clearErrors();
 
     try {
       console.log(data);
@@ -61,6 +65,30 @@ export const useLoginForm = () => {
           router.push('/tickets');
         }
       }
+    } catch (error) {
+      const normalizedError = normalizeApiError(
+        error,
+        'Не удалось выполнить вход',
+      );
+
+      const fieldErrors = getApiFieldErrors(normalizedError, {
+        userEmail: 'email',
+        userPassword: 'password',
+        email: 'email',
+        password: 'password',
+      });
+
+      (
+        Object.entries(fieldErrors) as Array<[keyof LoginFormData, string]>
+      ).forEach(([field, message]) => {
+        if (field in data) {
+          form.setError(field, { type: 'server', message });
+        }
+      });
+
+      if (Object.keys(fieldErrors).length === 0) {
+        setServerError(normalizedError.message);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -70,5 +98,6 @@ export const useLoginForm = () => {
     ...form,
     onSubmit,
     isLoading,
+    serverError,
   };
 };

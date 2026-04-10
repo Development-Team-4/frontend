@@ -13,6 +13,7 @@ export const LoginForm = () => {
     handleSubmit,
     formState: { errors },
     isLoading,
+    serverError,
     onSubmit,
   } = useLoginForm();
 
@@ -64,6 +65,10 @@ export const LoginForm = () => {
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? 'Signing in...' : 'Sign In'}
         </Button>
+
+        {serverError && (
+          <p className="text-center text-xs text-destructive">{serverError}</p>
+        )}
       </form>
 
       <div className="mt-4 text-center">

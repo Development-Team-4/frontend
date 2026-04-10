@@ -50,6 +50,7 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { toast } from 'sonner';
 
 import { useCategoryById } from '@/entities/category/model';
 import { useUserById, useUsers } from '@/entities/user/model/use-user';
@@ -68,6 +69,7 @@ import {
 import { useStore } from '@/shared/store/store';
 import { statusLabels, statusStyles } from '@/shared/consts';
 import { TicketStatus } from '@/shared/types';
+import { normalizeApiError } from '@/shared/api/errors';
 
 import { useTicketDetail } from '@/features/ticket-detail';
 import { LoadingOverlay } from '@/components/loading-overlay';
@@ -200,6 +202,9 @@ export function TicketDetail() {
   const canComment = isOwner || isAssignee || isAdmin;
   const canSendComment =
     canComment && ticket?.status !== 'CLOSED' && Boolean(newComment.trim());
+  const selectedAssigneeName = assignableStaff.find(
+    (staff) => staff.userId === assigneeValue,
+  )?.userName;
 
   const allowedNextStatuses =
     canChangeStatus && ticket ? (STATUS_TRANSITIONS[statusValue] ?? []) : [];
@@ -208,8 +213,17 @@ export function TicketDetail() {
     const content = newComment.trim();
     if (!content) return;
 
-    await createComment(content);
-    setNewComment('');
+    try {
+      await createComment(content);
+      setNewComment('');
+      toast.success('Комментарий отправлен');
+    } catch (error) {
+      const apiError = normalizeApiError(
+        error,
+        'Не удалось отправить комментарий',
+      );
+      toast.error(apiError.message);
+    }
   };
 
   const handleCommentKeyDown = async (
@@ -224,50 +238,89 @@ export function TicketDetail() {
 
   const handleStatusChange = async (nextStatus: TicketStatus) => {
     if (!ticket || nextStatus === statusValue) return;
-    await updateTicketStatus({ ticketId: ticket.id, status: nextStatus });
-    setStatusValue(nextStatus);
+    try {
+      await updateTicketStatus({ ticketId: ticket.id, status: nextStatus });
+      setStatusValue(nextStatus);
+      toast.success(`Статус обновлен: ${getStatusLabel(nextStatus)}`);
+    } catch (error) {
+      const apiError = normalizeApiError(
+        error,
+        'Не удалось обновить статус тикета',
+      );
+      toast.error(apiError.message);
+    }
   };
 
   const handleAssignAssignee = async () => {
     if (!ticket || !canAssign || !assigneeValue) return;
     if (assigneeValue === currentAssigneeId) return;
 
-    await assignTicketAssignee({
-      ticketId: ticket.id,
-      assigneeId: assigneeValue,
-    });
+    try {
+      await assignTicketAssignee({
+        ticketId: ticket.id,
+        assigneeId: assigneeValue,
+      });
 
-    if (ticket.status !== 'ASSIGNED') {
-      await updateTicketStatus({ ticketId: ticket.id, status: 'ASSIGNED' });
-      setStatusValue('ASSIGNED');
+      if (ticket.status !== 'ASSIGNED') {
+        await updateTicketStatus({ ticketId: ticket.id, status: 'ASSIGNED' });
+        setStatusValue('ASSIGNED');
+      }
+
+      toast.success(
+        selectedAssigneeName
+          ? `Исполнитель назначен: ${selectedAssigneeName}`
+          : 'Исполнитель назначен',
+      );
+    } catch (error) {
+      const apiError = normalizeApiError(
+        error,
+        'Не удалось назначить сотрудника',
+      );
+      toast.error(apiError.message);
     }
   };
 
   const handleTakeInWork = async () => {
     if (!ticket || !currentUserId || !canAssign) return;
 
-    await assignTicketAssignee({
-      ticketId: ticket.id,
-      assigneeId: currentUserId,
-    });
-    setAssigneeValue(currentUserId);
+    try {
+      await assignTicketAssignee({
+        ticketId: ticket.id,
+        assigneeId: currentUserId,
+      });
+      setAssigneeValue(currentUserId);
 
-    if (ticket.status !== 'ASSIGNED') {
-      await updateTicketStatus({ ticketId: ticket.id, status: 'ASSIGNED' });
-      setStatusValue('ASSIGNED');
+      if (ticket.status !== 'ASSIGNED') {
+        await updateTicketStatus({ ticketId: ticket.id, status: 'ASSIGNED' });
+        setStatusValue('ASSIGNED');
+      }
+
+      toast.success('Тикет взят в работу');
+    } catch (error) {
+      const apiError = normalizeApiError(
+        error,
+        'Не удалось взять тикет в работу',
+      );
+      toast.error(apiError.message);
     }
   };
 
   const handleDeleteTicket = async () => {
     if (!ticket || !canDelete) return;
-    await deleteTicket({ ticketId: ticket.id });
+    try {
+      await deleteTicket({ ticketId: ticket.id });
+      toast.success('Тикет удален');
 
-    if (currentUserRole === 'SUPPORT') {
-      router.push('/support/tickets');
-      return;
+      if (currentUserRole === 'SUPPORT') {
+        router.push('/support/tickets');
+        return;
+      }
+
+      router.push('/tickets');
+    } catch (error) {
+      const apiError = normalizeApiError(error, 'Не удалось удалить тикет');
+      toast.error(apiError.message);
     }
-
-    router.push('/tickets');
   };
 
   const canSaveTicketChanges = Boolean(
@@ -277,13 +330,19 @@ export function TicketDetail() {
   const handleUpdateTicket = async () => {
     if (!ticket || !canEdit) return;
 
-    await updateTicket({
-      ticketId: ticket.id,
-      subject: editSubject.trim(),
-      description: editDescription.trim(),
-    });
+    try {
+      await updateTicket({
+        ticketId: ticket.id,
+        subject: editSubject.trim(),
+        description: editDescription.trim(),
+      });
 
-    setIsEditDialogOpen(false);
+      setIsEditDialogOpen(false);
+      toast.success('Тикет обновлен');
+    } catch (error) {
+      const apiError = normalizeApiError(error, 'Не удалось обновить тикет');
+      toast.error(apiError.message);
+    }
   };
 
   if (isLoading) return <LoadingOverlay />;
@@ -665,40 +724,95 @@ export function TicketDetail() {
                   </SelectContent>
                 </Select>
                 {isAdmin && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="mt-2 w-full text-xs"
-                    onClick={handleAssignAssignee}
-                    disabled={
-                      !assigneeValue ||
-                      assigneeValue === currentAssigneeId ||
-                      isAssigningAssignee ||
-                      isUpdatingStatus ||
-                      ticket.status === 'CLOSED'
-                    }
-                  >
-                    {isAssigningAssignee || isUpdatingStatus
-                      ? 'Назначение...'
-                      : 'Назначить исполнителя'}
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-2 w-full text-xs"
+                        disabled={
+                          !assigneeValue ||
+                          assigneeValue === currentAssigneeId ||
+                          isAssigningAssignee ||
+                          isUpdatingStatus ||
+                          ticket.status === 'CLOSED'
+                        }
+                      >
+                        {isAssigningAssignee || isUpdatingStatus
+                          ? 'Назначение...'
+                          : 'Назначить исполнителя'}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Подтвердите назначение
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Назначить сотрудника{' '}
+                          {selectedAssigneeName || 'без имени'} исполнителем
+                          этого тикета?
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel
+                          disabled={isAssigningAssignee || isUpdatingStatus}
+                        >
+                          Отмена
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleAssignAssignee}
+                          disabled={isAssigningAssignee || isUpdatingStatus}
+                        >
+                          Подтвердить
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 )}
                 {isSupport && !ticket.assignee && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="mt-2 w-full text-xs"
-                    onClick={handleTakeInWork}
-                    disabled={
-                      isAssigningAssignee ||
-                      isUpdatingStatus ||
-                      ticket.status === 'CLOSED'
-                    }
-                  >
-                    {isAssigningAssignee || isUpdatingStatus
-                      ? 'Назначение...'
-                      : 'Взять в работу'}
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-2 w-full text-xs"
+                        disabled={
+                          isAssigningAssignee ||
+                          isUpdatingStatus ||
+                          ticket.status === 'CLOSED'
+                        }
+                      >
+                        {isAssigningAssignee || isUpdatingStatus
+                          ? 'Назначение...'
+                          : 'Взять в работу'}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Взять тикет в работу?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          После подтверждения вы станете исполнителем этого
+                          тикета, а статус изменится на «Назначен».
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel
+                          disabled={isAssigningAssignee || isUpdatingStatus}
+                        >
+                          Отмена
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleTakeInWork}
+                          disabled={isAssigningAssignee || isUpdatingStatus}
+                        >
+                          Подтвердить
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 )}
                 {assigneeName && (
                   <p className="mt-1 text-xs text-muted-foreground">

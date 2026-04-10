@@ -31,6 +31,7 @@ export function CreateTicketForm() {
     canSubmit,
     topics,
     onSubmit,
+    serverError,
     formState: { errors },
   } = useCreateTicketForm();
 
@@ -170,6 +171,10 @@ export function CreateTicketForm() {
               изменении статуса или добавлении комментария.
             </p>
           </div>
+
+          {serverError && (
+            <p className="text-xs text-destructive">{serverError}</p>
+          )}
 
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3">
             <Button

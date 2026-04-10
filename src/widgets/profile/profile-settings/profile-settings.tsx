@@ -7,8 +7,16 @@ import { Label } from '@/components/ui/label';
 import { useUpdateProfile } from '@/features/update-profile';
 
 export const ProfileSettings = () => {
-  const { userData, userName, setUserName, isUpdating, canSave, handleSave } =
-    useUpdateProfile();
+  const {
+    userData,
+    userName,
+    setUserName,
+    isUpdating,
+    canSave,
+    handleSave,
+    nameError,
+    serverError,
+  } = useUpdateProfile();
 
   return (
     <Card className="mb-4 p-4 sm:mb-6 sm:p-6">
@@ -24,6 +32,9 @@ export const ProfileSettings = () => {
               className="bg-background"
               disabled={isUpdating}
             />
+            {nameError && (
+              <p className="mt-1 text-xs text-destructive">{nameError}</p>
+            )}
           </div>
 
           <div>
@@ -55,6 +66,10 @@ export const ProfileSettings = () => {
             {isUpdating ? 'Сохранение...' : 'Сохранить изменения'}
           </Button>
         </div>
+
+        {serverError && (
+          <p className="text-xs text-destructive">{serverError}</p>
+        )}
       </div>
     </Card>
   );

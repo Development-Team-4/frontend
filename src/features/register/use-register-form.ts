@@ -4,10 +4,12 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { RegisterFormData, registerSchema } from './model/register.schema';
 import { regApi } from './api';
+import { getApiFieldErrors, normalizeApiError } from '@/shared/api/errors';
 
 export const useRegisterForm = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [serverError, setServerError] = useState('');
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -22,6 +24,8 @@ export const useRegisterForm = () => {
 
   const onSubmit = async (values: RegisterFormData) => {
     setIsLoading(true);
+    setServerError('');
+    form.clearErrors();
 
     try {
       const response = await regApi.registration({
@@ -37,7 +41,32 @@ export const useRegisterForm = () => {
         router.push('/tickets');
       }
     } catch (error) {
-      console.error('Registration error:', error);
+      const normalizedError = normalizeApiError(
+        error,
+        'Не удалось зарегистрироваться',
+      );
+
+      const fieldErrors = getApiFieldErrors(normalizedError, {
+        userName: 'fullname',
+        userEmail: 'email',
+        userPassword: 'password',
+        password: 'password',
+        confirmPassword: 'confirmPassword',
+      });
+
+      (
+        Object.entries(fieldErrors) as Array<[keyof RegisterFormData, string]>
+      ).forEach(([field, message]) => {
+        if (field in values) {
+          form.setError(field, { type: 'server', message });
+        }
+      });
+
+      if (Object.keys(fieldErrors).length === 0) {
+        setServerError(normalizedError.message);
+      }
+
+      console.error('Registration error:', normalizedError);
     } finally {
       setIsLoading(false);
     }
@@ -47,5 +76,6 @@ export const useRegisterForm = () => {
     ...form,
     onSubmit,
     isLoading,
+    serverError,
   };
 };
