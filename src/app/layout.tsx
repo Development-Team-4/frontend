@@ -3,7 +3,7 @@ import { Inter, JetBrains_Mono } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 import { AppShell } from '@/components/app-shell';
-import { ThemeProvider } from 'next-themes';
+import { MainProvider } from './providers';
 
 const _inter = Inter({ subsets: ['latin', 'cyrillic'] });
 const _jetbrainsMono = JetBrains_Mono({ subsets: ['latin'] });
@@ -39,15 +39,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="font-sans antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <MainProvider>
           <AppShell>{children}</AppShell>
-        </ThemeProvider>
-        <Analytics />
+          <Analytics />
+        </MainProvider>
       </body>
     </html>
   );

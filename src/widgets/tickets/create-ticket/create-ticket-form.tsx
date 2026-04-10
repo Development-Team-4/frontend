@@ -31,23 +31,24 @@ export function CreateTicketForm() {
     canSubmit,
     topics,
     onSubmit,
+    serverError,
     formState: { errors },
   } = useCreateTicketForm();
 
   return (
-    <div className="mx-auto max-w-2xl p-6">
-      <div className="mb-6">
+    <div className="mx-auto w-full max-w-2xl px-3 py-3 sm:p-4 lg:p-6">
+      <div className="mb-4 sm:mb-6">
         <Button
           variant="ghost"
           size="sm"
-          className="mb-3"
+          className="mb-2 -ml-2"
           onClick={() => router.push('/tickets')}
         >
           <ArrowLeft className="mr-1 h-4 w-4" />
           Назад к тикетам
         </Button>
 
-        <h1 className="text-2xl font-semibold text-foreground">
+        <h1 className="text-xl font-semibold text-foreground sm:text-2xl">
           Создать тикет
         </h1>
 
@@ -56,7 +57,7 @@ export function CreateTicketForm() {
         </p>
       </div>
 
-      <Card className="p-6">
+      <Card className="p-4 sm:p-6">
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-5"
@@ -86,7 +87,7 @@ export function CreateTicketForm() {
             </Label>
             <Textarea
               id="description"
-              placeholder="Подробное описание проблемы, шаги для воспроизведения, ожидаемое поведение..."
+              placeholder="Подробно опишите проблему, шаги для воспроизведения и ожидаемое поведение..."
               className="min-h-[140px] bg-background"
               aria-invalid={Boolean(errors.description)}
               {...register('description')}
@@ -98,7 +99,7 @@ export function CreateTicketForm() {
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <Label className="mb-1.5 text-xs">Тема</Label>
               <Select value={topicId} onValueChange={handleTopicChange}>
@@ -111,7 +112,14 @@ export function CreateTicketForm() {
                 <SelectContent>
                   {topics.map((topic) => (
                     <SelectItem key={topic.id} value={topic.id}>
-                      {topic.name}
+                      <div className="flex flex-col">
+                        <span>{topic.name}</span>
+                        {topic.description && (
+                          <span className="text-xs text-muted-foreground">
+                            {topic.description}
+                          </span>
+                        )}
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -141,9 +149,9 @@ export function CreateTicketForm() {
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  {filteredCategories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      {cat.name}
+                  {filteredCategories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -157,23 +165,32 @@ export function CreateTicketForm() {
           </div>
 
           <div className="rounded-lg border border-border bg-muted/30 p-3">
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs leading-relaxed text-muted-foreground">
               После создания тикета сотрудники поддержки получат уведомление и
-              смогут взять ваш запрос в работу. Вы получите уведомление при
+              смогут взять запрос в работу. Вы получите уведомление при
               изменении статуса или добавлении комментария.
             </p>
           </div>
 
-          <div className="flex justify-end gap-3">
+          {serverError && (
+            <p className="text-xs text-destructive">{serverError}</p>
+          )}
+
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3">
             <Button
               type="button"
               variant="outline"
+              className="w-full sm:w-auto"
               onClick={() => router.push('/tickets')}
             >
               Отмена
             </Button>
 
-            <Button type="submit" disabled={!canSubmit || isSubmitting}>
+            <Button
+              type="submit"
+              className="w-full sm:w-auto"
+              disabled={!canSubmit || isSubmitting}
+            >
               {isSubmitting ? 'Создание...' : 'Создать тикет'}
             </Button>
           </div>

@@ -1,20 +1,23 @@
 import { create } from 'zustand';
 import { MessageSquare, RefreshCw, UserPlus } from 'lucide-react';
 import { Category, Ticket, TicketsFilterState, User } from '@/shared/types';
-import { categories, notifications, tickets, topics, users } from '../consts';
+import { tickets } from '../consts';
 
 export const useStore = create<TicketsFilterState>((set, get) => ({
-  users,
+  userData: null,
+  updateUserData: (newUserData) => set({ userData: newUserData }),
+  updateTopics: (topics) => set({ topics }),
+  users: [],
+  setUsers: (users) => set({ users }),
   tickets,
-  topics,
-  categories,
-  notifications,
+  topics: [],
+  categories: [],
+  notifications: [],
 
   search: '',
   statusFilter: 'all',
   topicFilter: 'all',
   categoryFilter: 'all',
-  assigneeFilter: 'all',
   sortField: 'updatedAt',
   sortDir: 'desc',
 
@@ -38,14 +41,16 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
       label: 'Статус',
     },
   },
+  ticketComments: [],
+  updateTicketComments: (newComments) => set({ ticketComments: newComments }),
 
   setSearch: (search) => set({ search }),
   setStatusFilter: (statusFilter) => set({ statusFilter }),
   setTopicFilter: (topicFilter) => set({ topicFilter }),
   setCategoryFilter: (categoryFilter) => set({ categoryFilter }),
-  setAssigneeFilter: (assigneeFilter) => set({ assigneeFilter }),
   setSortField: (sortField) => set({ sortField }),
   setSortDir: (sortDir) => set({ sortDir }),
+  setCategories: (categories) => set({ categories }),
 
   setNotifications: (notifications) =>
     set((state) => ({
@@ -61,7 +66,6 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
       statusFilter: 'all',
       topicFilter: 'all',
       categoryFilter: 'all',
-      assigneeFilter: 'all',
     }),
 
   toggleSort: (field) => {
@@ -81,7 +85,8 @@ export const useStore = create<TicketsFilterState>((set, get) => ({
   getStaffForCategory: (categoryId: string): User[] => {
     const category = get().getCategoryById(categoryId);
     if (!category) return [];
-    return get().users.filter((u) => category.assignedStaff.includes(u.id));
+    const assignedStaff = category.assignedStaff || [];
+    return get().users.filter((u) => assignedStaff.includes(u.userId));
   },
 
   getCategoryById: (id: string): Category | undefined => {

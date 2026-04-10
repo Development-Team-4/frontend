@@ -1,18 +1,27 @@
-import { getCategoriesByTopicId } from '@/shared/lib/mock-data';
 import { useStore } from '@/shared/store/store';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   CreateTicketFormData,
   createTicketSchema,
 } from './model/createTicket.schema';
+import { useTopics } from '@/entities/topic/model';
+import { useCategories } from '@/entities/category/model';
+import { createTicketApi } from './api';
+import { Ticket } from '@/shared/types';
+import { getApiFieldErrors, normalizeApiError } from '@/shared/api/errors';
+import { toast } from 'sonner';
 
 export const useCreateTicketForm = () => {
+  useTopics();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const topics = useStore((state) => state.topics);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serverError, setServerError] = useState('');
 
   const form = useForm<CreateTicketFormData>({
     resolver: zodResolver(createTicketSchema),
@@ -29,11 +38,7 @@ export const useCreateTicketForm = () => {
   const categoryId = form.watch('categoryId');
   const subject = form.watch('subject');
   const description = form.watch('description');
-
-  const filteredCategories = useMemo(() => {
-    if (!topicId) return [];
-    return getCategoriesByTopicId(topicId);
-  }, [topicId]);
+  const { data: filteredCategories = [] } = useCategories(topicId || null);
 
   const handleTopicChange = (value: string) => {
     form.setValue('topicId', value, {
@@ -55,14 +60,54 @@ export const useCreateTicketForm = () => {
 
   const onSubmit = async (data: CreateTicketFormData) => {
     setIsSubmitting(true);
+    setServerError('');
+    form.clearErrors();
 
     try {
       console.log('ticket data:', data);
 
-      // await createTicket(data)
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      const newData = {
+        subject: data.subject,
+        description: data.description,
+        categoryId: data.categoryId,
+      };
+      const createdTicket = await createTicketApi.createTicket(newData);
 
-      router.push('/tickets');
+      queryClient.setQueryData<Ticket[]>(['tickets'], (prev = []) => [
+        createdTicket,
+        ...prev.filter((ticket) => ticket.id !== createdTicket.id),
+      ]);
+      queryClient.setQueryData(['ticket', createdTicket.id], createdTicket);
+      queryClient.invalidateQueries({ queryKey: ['tickets'] });
+      toast.success('Тикет успешно создан');
+
+      router.replace('/tickets');
+    } catch (error) {
+      const normalizedError = normalizeApiError(
+        error,
+        'Не удалось создать тикет',
+      );
+
+      const fieldErrors = getApiFieldErrors(normalizedError, {
+        subject: 'subject',
+        description: 'description',
+        categoryId: 'categoryId',
+      });
+
+      (
+        Object.entries(fieldErrors) as Array<
+          [keyof CreateTicketFormData, string]
+        >
+      ).forEach(([field, message]) => {
+        if (field in data) {
+          form.setError(field, { type: 'server', message });
+        }
+      });
+
+      if (Object.keys(fieldErrors).length === 0) {
+        setServerError(normalizedError.message);
+      }
+      toast.error(normalizedError.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -87,5 +132,6 @@ export const useCreateTicketForm = () => {
     topics,
     topicId,
     categoryId,
+    serverError,
   };
 };

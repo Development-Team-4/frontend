@@ -37,8 +37,9 @@ export const TicketsAssignedFilters = ({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Все статусы</SelectItem>
-            <SelectItem value="CREATED">Создан</SelectItem>
-            <SelectItem value="IN_WORK">В работе</SelectItem>
+            <SelectItem value="OPEN">Открыт</SelectItem>
+            <SelectItem value="ASSIGNED">Назначен</SelectItem>
+            <SelectItem value="IN_PROGRESS">В процессе</SelectItem>
             <SelectItem value="RESOLVED">Решён</SelectItem>
             <SelectItem value="CLOSED">Закрыт</SelectItem>
           </SelectContent>

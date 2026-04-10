@@ -19,10 +19,13 @@ export type NotificationType =
 
 export interface Notification {
   id: string;
+  userId?: string;
   type: NotificationType;
   title: string;
   message: string;
   ticketId: string;
+  sent?: boolean;
   read: boolean;
   createdAt: string;
+  updatedAt?: string;
 }

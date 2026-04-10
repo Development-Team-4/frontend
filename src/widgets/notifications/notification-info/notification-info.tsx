@@ -6,6 +6,7 @@ import { Check } from 'lucide-react';
 
 export const NotificationInfo = () => {
   const { unreadCount, markAllRead } = useNotificationInfo();
+
   return (
     <div className="mb-6 flex items-center justify-between">
       <div>

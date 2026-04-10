@@ -1,27 +1,34 @@
-'use client';
-import { currentUser } from '@/shared/lib/mock-data';
+﻿'use client';
+
+import { useTickets } from '@/entities/ticket/model';
 import { useStore } from '@/shared/store/store';
 import { useMemo, useState } from 'react';
 
 export const useAssignedTicketSupport = () => {
-  const tickets = useStore((state) => state.tickets);
+  const { data: tickets = [] } = useTickets();
+  const userData = useStore((state) => state.userData);
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   const assignedTickets = useMemo(() => {
-    let result = tickets.filter((t) => t.assignee?.id === currentUser.id);
+    const currentUserId = userData?.userId;
+    if (!currentUserId) return [];
+
+    let result = tickets.filter(
+      (ticket) => ticket.assignee?.userId === currentUserId,
+    );
 
     if (statusFilter !== 'all') {
-      result = result.filter((t) => t.status === statusFilter);
+      result = result.filter((ticket) => ticket.status === statusFilter);
     }
 
     return result.sort(
       (a, b) =>
         new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
     );
-  }, [statusFilter]);
+  }, [tickets, userData?.userId, statusFilter]);
 
   const activeCount = assignedTickets.filter(
-    (t) => t.status === 'IN_WORK' || t.status === 'CREATED',
+    (ticket) => ticket.status === 'ASSIGNED' || ticket.status === 'IN_PROGRESS',
   ).length;
 
   return {

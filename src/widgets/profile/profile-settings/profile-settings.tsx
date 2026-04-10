@@ -1,3 +1,5 @@
+﻿'use client';
+
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -5,29 +7,69 @@ import { Label } from '@/components/ui/label';
 import { useUpdateProfile } from '@/features/update-profile';
 
 export const ProfileSettings = () => {
-  const { currentUser } = useUpdateProfile();
+  const {
+    userData,
+    userName,
+    setUserName,
+    isUpdating,
+    canSave,
+    handleSave,
+    nameError,
+    serverError,
+  } = useUpdateProfile();
 
   return (
-    <Card className="mb-6 p-6">
-      <h2 className="mb-4 text-sm font-medium text-card-foreground">Profile</h2>
+    <Card className="mb-4 p-4 sm:mb-6 sm:p-6">
+      <h2 className="mb-4 text-sm font-medium text-card-foreground">Профиль</h2>
+
       <div className="flex flex-col gap-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <Label className="mb-1.5 text-xs">Name</Label>
-            <Input defaultValue={currentUser.name} className="bg-background" />
+            <Label className="mb-1.5 text-xs">Имя</Label>
+            <Input
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
+              className="bg-background"
+              disabled={isUpdating}
+            />
+            {nameError && (
+              <p className="mt-1 text-xs text-destructive">{nameError}</p>
+            )}
           </div>
+
           <div>
             <Label className="mb-1.5 text-xs">Email</Label>
-            <Input defaultValue={currentUser.email} className="bg-background" />
+            <Input
+              value={userData?.userEmail || ''}
+              className="bg-background"
+              disabled
+            />
           </div>
         </div>
+
         <div>
-          <Label className="mb-1.5 text-xs">Role</Label>
-          <Input value={currentUser.role} disabled className="bg-muted" />
+          <Label className="mb-1.5 text-xs">Роль</Label>
+          <Input
+            value={userData?.userRole || ''}
+            disabled
+            className="bg-muted"
+          />
         </div>
-        <div className="flex justify-end">
-          <Button size="sm">Save Changes</Button>
+
+        <div className="flex justify-stretch sm:justify-end">
+          <Button
+            size="sm"
+            className="w-full sm:w-auto"
+            onClick={handleSave}
+            disabled={!canSave}
+          >
+            {isUpdating ? 'Сохранение...' : 'Сохранить изменения'}
+          </Button>
         </div>
+
+        {serverError && (
+          <p className="text-xs text-destructive">{serverError}</p>
+        )}
       </div>
     </Card>
   );

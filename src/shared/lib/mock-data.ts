@@ -16,17 +16,17 @@ export function getCategoriesByTopicId(topicId: string): Category[] {
 }
 
 export function getUserById(id: string): User | undefined {
-  return users.find((u) => u.id === id);
+  return users.find((u) => u.userId === id);
 }
 
 export function getStaffForCategory(categoryId: string): User[] {
   const category = getCategoryById(categoryId);
   if (!category) return [];
-  return users.filter((u) => category.assignedStaff.includes(u.id));
+  return users.filter((u) => category.assignedStaff.includes(u.userId));
 }
 
 export function getTicketsByUser(userId: string): Ticket[] {
-  return tickets.filter((t) => t.createdBy.id === userId);
+  return tickets.filter((t) => t.createdBy.userId === userId);
 }
 
 export function getTicketsByCategory(categoryId: string): Ticket[] {
@@ -34,5 +34,5 @@ export function getTicketsByCategory(categoryId: string): Ticket[] {
 }
 
 export function getTicketsByAssignee(userId: string): Ticket[] {
-  return tickets.filter((t) => t.assignee?.id === userId);
+  return tickets.filter((t) => t.assignee?.userId === userId);
 }

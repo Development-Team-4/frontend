@@ -13,8 +13,8 @@ import { User } from 'lucide-react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { getCategoryById } from '@/shared/lib/mock-data';
 import { Ticket } from '@/shared/types';
+import { AssignedTicketRow } from './assigned-ticket-row';
 
 export const TicketsAssignedList = ({
   assignedTickets,
@@ -45,51 +45,9 @@ export const TicketsAssignedList = ({
               </TableCell>
             </TableRow>
           ) : (
-            assignedTickets.map((ticket) => {
-              const category = getCategoryById(ticket.categoryId);
-              return (
-                <TableRow key={ticket.id} className="group">
-                  <TableCell className="font-mono text-xs text-muted-foreground">
-                    <Link
-                      href={`/tickets/${ticket.id}`}
-                      className="hover:text-primary"
-                    >
-                      {ticket.id}
-                    </Link>
-                  </TableCell>
-                  <TableCell>
-                    <Link
-                      href={`/tickets/${ticket.id}`}
-                      className="text-sm text-card-foreground group-hover:text-primary transition-colors"
-                    >
-                      {ticket.subject}
-                    </Link>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      className={`border-0 text-[10px] ${statusStyles[ticket.status]}`}
-                    >
-                      {statusLabels[ticket.status]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">
-                    {category?.name || '—'}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <User className="h-3 w-3" />
-                      {ticket.createdBy.name}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">
-                    {formatDistanceToNow(new Date(ticket.updatedAt), {
-                      addSuffix: true,
-                      locale: ru,
-                    })}
-                  </TableCell>
-                </TableRow>
-              );
-            })
+            assignedTickets.map((ticket) => (
+              <AssignedTicketRow key={ticket.id} ticket={ticket} />
+            ))
           )}
         </TableBody>
       </Table>
