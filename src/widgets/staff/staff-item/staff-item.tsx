@@ -1,6 +1,7 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { MarkdownContent } from '@/components/ui/markdown-content';
 import {
   DialogClose,
   Dialog,
@@ -239,9 +240,10 @@ export const StaffItem = ({
                                 {category.name}
                               </p>
                               {category.description && (
-                                <p className="line-clamp-2 text-xs text-muted-foreground">
-                                  {category.description}
-                                </p>
+                                <MarkdownContent
+                                  content={category.description}
+                                  className="line-clamp-2 text-xs text-muted-foreground"
+                                />
                               )}
                             </div>
 

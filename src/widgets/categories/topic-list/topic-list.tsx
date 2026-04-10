@@ -8,6 +8,8 @@ import {
 } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { MarkdownContent } from '@/components/ui/markdown-content';
+import { MarkdownEditor } from '@/components/ui/markdown-editor';
 import {
   Dialog,
   DialogContent,
@@ -186,9 +188,10 @@ export const TopicList = ({ readOnly = false }: TopicListProps) => {
                           {topic.name}
                         </span>
                         {topic.description && (
-                          <span className="mt-0.5 block text-xs text-muted-foreground">
-                            {topic.description}
-                          </span>
+                          <MarkdownContent
+                            content={topic.description}
+                            className="mt-0.5 block text-xs text-muted-foreground"
+                          />
                         )}
                       </div>
                       <Badge
@@ -271,12 +274,12 @@ export const TopicList = ({ readOnly = false }: TopicListProps) => {
                 <Label htmlFor="editTopicDescription" className="text-xs">
                   Описание темы
                 </Label>
-                <Input
+                <MarkdownEditor
                   id="editTopicDescription"
                   value={editingTopicDescription}
-                  onChange={(e) => setEditingTopicDescription(e.target.value)}
+                  onChange={setEditingTopicDescription}
                   placeholder="Кратко опишите, для каких обращений эта тема"
-                  className="mt-1.5"
+                  heightClassName="h-[120px]"
                 />
               </div>
             </div>

@@ -1,6 +1,8 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { MarkdownContent } from '@/components/ui/markdown-content';
+import { MarkdownEditor } from '@/components/ui/markdown-editor';
 import {
   Dialog,
   DialogContent,
@@ -9,8 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { useUpdateCategory } from '@/entities/category/model';
 import { Category } from '@/shared/types';
 import { Edit2 } from 'lucide-react';
@@ -70,9 +72,10 @@ export const CategoryItem = ({
               </span>
             </div>
             {category.description && (
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                {category.description}
-              </p>
+              <MarkdownContent
+                content={category.description}
+                className="mt-0.5 text-xs text-muted-foreground"
+              />
             )}
           </div>
           {!readOnly && (
@@ -125,12 +128,12 @@ export const CategoryItem = ({
                 >
                   Описание категории
                 </Label>
-                <Input
+                <MarkdownEditor
                   id={`category-description-${category.id}`}
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={setDescription}
                   placeholder="Опишите, какие тикеты относятся к этой категории"
-                  className="mt-1.5"
+                  heightClassName="h-[120px]"
                 />
               </div>
             </div>

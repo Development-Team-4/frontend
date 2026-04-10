@@ -2,6 +2,7 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { normalizeApiError } from './errors';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081';
+let isAuthRedirectInProgress = false;
 
 export const api = axios.create({
   baseURL: API_URL,
@@ -33,10 +34,21 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     console.error('API Error:', error.response?.data);
 
-    if (error.response?.status === 401 && typeof window !== 'undefined') {
+    const isUnauthorized =
+      error.response?.status === 401 || error.response?.status === 403;
+
+    if (
+      isUnauthorized &&
+      typeof window !== 'undefined' &&
+      !isAuthRedirectInProgress
+    ) {
+      isAuthRedirectInProgress = true;
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
-      // window.location.href = '/login'
+
+      if (window.location.pathname !== '/login') {
+        window.location.replace('/login');
+      }
     }
 
     return Promise.reject(normalizeApiError(error));

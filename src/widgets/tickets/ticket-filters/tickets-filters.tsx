@@ -1,7 +1,8 @@
-﻿'use client';
+'use client';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { MarkdownContent } from '@/components/ui/markdown-content';
 import {
   Select,
   SelectContent,
@@ -76,9 +77,10 @@ export const TicketsFilters = () => {
                   <div className="flex flex-col">
                     <span>{topic.name}</span>
                     {topic.description && (
-                      <span className="text-xs text-muted-foreground">
-                        {topic.description}
-                      </span>
+                      <MarkdownContent
+                        content={topic.description}
+                        className="text-xs text-muted-foreground"
+                      />
                     )}
                   </div>
                 </SelectItem>
