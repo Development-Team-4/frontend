@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { KeyboardEvent, useEffect, useMemo, useState } from 'react';
+import { KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft,
   Clock,
@@ -19,6 +19,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { MarkdownContent } from '@/components/ui/markdown-content';
+import { MarkdownEditor } from '@/components/ui/markdown-editor';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -80,6 +82,8 @@ type TransitionAction = {
   label: string;
 };
 
+const COMMENTS_PER_PAGE = 5;
+
 const STATUS_TRANSITIONS: Record<TicketStatus, TransitionAction[]> = {
   OPEN: [
     { to: 'ASSIGNED', label: 'Начать обработку' },
@@ -136,6 +140,8 @@ export function TicketDetail() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editSubject, setEditSubject] = useState('');
   const [editDescription, setEditDescription] = useState('');
+  const [commentsPage, setCommentsPage] = useState(1);
+  const commentsEndRef = useRef<HTMLDivElement | null>(null);
 
   const { data: category } = useCategoryById(ticket?.categoryId || null);
   const { data: createdByUser } = useUserById(ticket?.createdBy.userId || null);
@@ -208,6 +214,25 @@ export function TicketDetail() {
 
   const allowedNextStatuses =
     canChangeStatus && ticket ? (STATUS_TRANSITIONS[statusValue] ?? []) : [];
+  const totalCommentsPages = Math.max(
+    1,
+    Math.ceil(ticketComments.length / COMMENTS_PER_PAGE),
+  );
+  const paginatedComments = useMemo(() => {
+    const start = (commentsPage - 1) * COMMENTS_PER_PAGE;
+    return ticketComments.slice(start, start + COMMENTS_PER_PAGE);
+  }, [commentsPage, ticketComments]);
+
+  const scrollCommentsToBottom = () => {
+    commentsEndRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'end',
+    });
+  };
+
+  useEffect(() => {
+    setCommentsPage((currentPage) => Math.min(currentPage, totalCommentsPages));
+  }, [totalCommentsPages]);
 
   const handleSendComment = async () => {
     const content = newComment.trim();
@@ -216,6 +241,14 @@ export function TicketDetail() {
     try {
       await createComment(content);
       setNewComment('');
+      const nextPage = Math.max(
+        1,
+        Math.ceil((ticketComments.length + 1) / COMMENTS_PER_PAGE),
+      );
+      setCommentsPage(nextPage);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(scrollCommentsToBottom);
+      });
       toast.success('Комментарий отправлен');
     } catch (error) {
       const apiError = normalizeApiError(
@@ -422,7 +455,7 @@ export function TicketDetail() {
                         Редактировать
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="max-h-[90vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle>Редактирование тикета</DialogTitle>
                         <DialogDescription>
@@ -446,11 +479,12 @@ export function TicketDetail() {
                           <label className="mb-1 block text-xs text-muted-foreground">
                             Описание
                           </label>
-                          <Textarea
+                          <MarkdownEditor
+                            id="ticket-edit-description"
                             value={editDescription}
-                            onChange={(e) => setEditDescription(e.target.value)}
-                            placeholder="Введите описание"
-                            className="min-h-[140px]"
+                            onChange={setEditDescription}
+                            placeholder="Введите описание в Markdown"
+                            heightClassName="h-[180px]"
                             disabled={isUpdatingTicket}
                           />
                         </div>
@@ -518,9 +552,10 @@ export function TicketDetail() {
         </div>
 
         <Card className="mb-6 p-4">
-          <p className="whitespace-pre-wrap text-sm leading-relaxed text-card-foreground">
-            {ticket.description}
-          </p>
+          <MarkdownContent
+            content={ticket.description}
+            className="text-sm leading-relaxed text-card-foreground"
+          />
         </Card>
 
         <Tabs defaultValue="comments" className="w-full">
@@ -545,7 +580,7 @@ export function TicketDetail() {
                 </p>
               )}
 
-              {ticketComments.map((comment) => (
+              {paginatedComments.map((comment) => (
                 <div
                   key={comment.id}
                   className="rounded-lg border border-border bg-card p-3"
@@ -576,22 +611,95 @@ export function TicketDetail() {
                       })}
                     </span>
                   </div>
-                  <p className="text-sm leading-relaxed text-card-foreground">
-                    {comment.content}
-                  </p>
+                  <MarkdownContent
+                    content={comment.content}
+                    className="text-sm leading-relaxed text-card-foreground"
+                  />
                 </div>
               ))}
 
+              {!isCommentsLoading &&
+                ticketComments.length > COMMENTS_PER_PAGE && (
+                  <div className="flex items-center justify-between rounded-md border border-border bg-card px-3 py-2">
+                    <p className="text-xs text-muted-foreground">
+                      Страница {commentsPage} из {totalCommentsPages}
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setCommentsPage(1)}
+                        disabled={commentsPage === 1}
+                      >
+                        В начало
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          setCommentsPage((page) => Math.max(1, page - 1))
+                        }
+                        disabled={commentsPage === 1}
+                      >
+                        Назад
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          setCommentsPage((page) =>
+                            Math.min(totalCommentsPages, page + 1),
+                          )
+                        }
+                        disabled={commentsPage === totalCommentsPages}
+                      >
+                        Вперед
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setCommentsPage(totalCommentsPages)}
+                        disabled={commentsPage === totalCommentsPages}
+                      >
+                        В конец
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
               {canComment && ticket.status !== 'CLOSED' && (
                 <div className="mt-2">
-                  <Textarea
-                    placeholder="Написать комментарий..."
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    onKeyDown={handleCommentKeyDown}
-                    className="min-h-[80px] bg-card"
-                    disabled={isSendingComment}
-                  />
+                  <Tabs defaultValue="editor" className="w-full">
+                    <TabsList>
+                      <TabsTrigger value="editor">Editor</TabsTrigger>
+                      <TabsTrigger value="preview">Preview</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="editor" className="mt-2">
+                      <Textarea
+                        placeholder="Написать комментарий..."
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        onKeyDown={handleCommentKeyDown}
+                        className="h-[110px] bg-card"
+                        disabled={isSendingComment}
+                      />
+                    </TabsContent>
+
+                    <TabsContent value="preview" className="mt-2">
+                      <div className="h-[110px] overflow-y-auto rounded-md border border-input bg-card p-3">
+                        <MarkdownContent
+                          content={newComment}
+                          className="text-sm leading-relaxed text-card-foreground"
+                          emptyText='Пока пусто. Начните писать комментарий во вкладке "Editor".'
+                        />
+                      </div>
+                    </TabsContent>
+                  </Tabs>
                   <div className="mt-2 flex justify-end">
                     <Button
                       size="sm"
@@ -610,6 +718,8 @@ export function TicketDetail() {
                   Тикет закрыт. Комментарии недоступны.
                 </p>
               )}
+
+              <div ref={commentsEndRef} />
             </div>
           </TabsContent>
         </Tabs>
@@ -697,9 +807,10 @@ export function TicketDetail() {
                   {category?.name || 'Без категории'}
                 </span>
                 {topic?.description && (
-                  <span className="text-xs text-muted-foreground">
-                    {topic.description}
-                  </span>
+                  <MarkdownContent
+                    content={topic.description}
+                    className="text-xs text-muted-foreground"
+                  />
                 )}
               </div>
             </div>

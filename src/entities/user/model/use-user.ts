@@ -4,12 +4,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { usersDataApi } from '../api';
 import { useStore } from '@/shared/store/store';
 import type { User } from '@/shared/types';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 
 export const useUser = () => {
   const updateUserData = useStore((state) => state.updateUserData);
-  const router = useRouter();
 
   const query = useQuery<User>({
     queryKey: ['userData'],
@@ -23,15 +20,6 @@ export const useUser = () => {
     refetchOnWindowFocus: false,
     retry: 0,
   });
-
-  useEffect(() => {
-    if (query.error) {
-      console.error('Failed to fetch user:', query.error);
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      router.push('/login');
-    }
-  }, [query.error, router]);
 
   return query;
 };
@@ -87,6 +75,44 @@ export const useUpdateUserRole = () => {
       });
 
       queryClient.setQueryData<User>(['user', updatedUser.userId], updatedUser);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+  });
+};
+
+export const useCreateUserByAdmin = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      userName,
+      userEmail,
+      userPassword,
+      userRole,
+    }: {
+      userName: string;
+      userEmail: string;
+      userPassword: string;
+      userRole: User['userRole'];
+    }) => {
+      await usersDataApi.createUser({
+        userName,
+        userEmail,
+        userPassword,
+      });
+
+      if (userRole === 'SUPPORT') {
+        const users = await usersDataApi.getAllUsers();
+        const createdUser = users.find(
+          (user) => user.userEmail.toLowerCase() === userEmail.toLowerCase(),
+        );
+
+        if (createdUser) {
+          await usersDataApi.updateUserRole(createdUser.userId, 'SUPPORT');
+        }
+      }
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });

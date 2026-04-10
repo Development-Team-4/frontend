@@ -1,6 +1,8 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { MarkdownContent } from '@/components/ui/markdown-content';
+import { MarkdownEditor } from '@/components/ui/markdown-editor';
 import {
   Dialog,
   DialogContent,
@@ -9,13 +11,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { useUpdateCategory } from '@/entities/category/model';
 import { Category } from '@/shared/types';
 import { Edit2 } from 'lucide-react';
 
-export const CategoryItem = ({ category }: { category: Category }) => {
+type CategoryItemProps = {
+  category: Category;
+  readOnly?: boolean;
+};
+
+export const CategoryItem = ({
+  category,
+  readOnly = false,
+}: CategoryItemProps) => {
   const { mutateAsync: updateCategory, isPending: isUpdatingCategory } =
     useUpdateCategory();
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -62,75 +72,80 @@ export const CategoryItem = ({ category }: { category: Category }) => {
               </span>
             </div>
             {category.description && (
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                {category.description}
-              </p>
+              <MarkdownContent
+                content={category.description}
+                className="mt-0.5 text-xs text-muted-foreground"
+              />
             )}
           </div>
-          <div className="flex gap-1">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-7 w-7 p-0"
-              onClick={() => handleOpen(true)}
-            >
-              <Edit2 className="h-3.5 w-3.5" />
-            </Button>
-          </div>
+          {!readOnly && (
+            <div className="flex gap-1">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0"
+                onClick={() => handleOpen(true)}
+              >
+                <Edit2 className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          )}
         </div>
       </Card>
 
-      <Dialog open={isEditOpen} onOpenChange={handleOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Редактировать категорию</DialogTitle>
-            <DialogDescription>
-              Измените название и описание категории.
-            </DialogDescription>
-          </DialogHeader>
+      {!readOnly && (
+        <Dialog open={isEditOpen} onOpenChange={handleOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Редактировать категорию</DialogTitle>
+              <DialogDescription>
+                Измените название и описание категории.
+              </DialogDescription>
+            </DialogHeader>
 
-          <div className="space-y-4 py-2">
-            <div>
-              <Label
-                htmlFor={`category-name-${category.id}`}
-                className="text-xs"
-              >
-                Название категории
-              </Label>
-              <Input
-                id={`category-name-${category.id}`}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Например: Ошибки и баги"
-                className="mt-1.5"
-              />
+            <div className="space-y-4 py-2">
+              <div>
+                <Label
+                  htmlFor={`category-name-${category.id}`}
+                  className="text-xs"
+                >
+                  Название категории
+                </Label>
+                <Input
+                  id={`category-name-${category.id}`}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Например: Ошибки и баги"
+                  className="mt-1.5"
+                />
+              </div>
+
+              <div>
+                <Label
+                  htmlFor={`category-description-${category.id}`}
+                  className="text-xs"
+                >
+                  Описание категории
+                </Label>
+                <MarkdownEditor
+                  id={`category-description-${category.id}`}
+                  value={description}
+                  onChange={setDescription}
+                  placeholder="Опишите, какие тикеты относятся к этой категории"
+                  heightClassName="h-[120px]"
+                />
+              </div>
             </div>
 
-            <div>
-              <Label
-                htmlFor={`category-description-${category.id}`}
-                className="text-xs"
-              >
-                Описание категории
-              </Label>
-              <Input
-                id={`category-description-${category.id}`}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Опишите, какие тикеты относятся к этой категории"
-                className="mt-1.5"
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button type="button" onClick={handleSave} disabled={!canSave}>
-              {isUpdatingCategory ? 'Сохранение...' : 'Сохранить'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter>
+              <Button type="button" onClick={handleSave} disabled={!canSave}>
+                {isUpdatingCategory ? 'Сохранение...' : 'Сохранить'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 };

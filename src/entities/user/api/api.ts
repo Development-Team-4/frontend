@@ -7,9 +7,15 @@ interface UpdateUserRolePayload {
 interface UpdateUserProfilePayload {
   userName: string;
 }
+interface CreateUserPayload {
+  userName: string;
+  userEmail: string;
+  userPassword: string;
+}
 
 class UsersDataApi {
   private baseUrl = 'users';
+  private authBaseUrl = 'auth';
 
   async getUserData(): Promise<User> {
     return api.get<User>(`${this.baseUrl}/me`).then((res) => res.data);
@@ -21,6 +27,10 @@ class UsersDataApi {
 
   async getAllUsers(): Promise<User[]> {
     return api.get<User[]>(`${this.baseUrl}`).then((res) => res.data);
+  }
+
+  async createUser(payload: CreateUserPayload): Promise<void> {
+    await api.post(`${this.authBaseUrl}/register`, payload);
   }
 
   async updateUserRole(
