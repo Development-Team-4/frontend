@@ -46,6 +46,11 @@ const getNavigation = (role: string) => {
   const baseNav = [
     { name: 'Мои тикеты', href: '/tickets', icon: Ticket },
     { name: 'Создать тикет', href: '/tickets/new', icon: Plus },
+    {
+      name: 'Темы и категории',
+      href: '/categories',
+      icon: FolderTree,
+    },
     { name: 'Уведомления', href: '/notifications', icon: Bell },
     { name: 'Настройки', href: '/settings', icon: Settings },
   ];

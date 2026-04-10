@@ -30,7 +30,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-export const TopicList = () => {
+type TopicListProps = {
+  readOnly?: boolean;
+};
+
+export const TopicList = ({ readOnly = false }: TopicListProps) => {
   const [searchValue, setSearchValue] = useState('');
   const [topicsFilter, setTopicsFilter] = useState<
     'all' | 'with-categories' | 'without-categories'
@@ -96,7 +100,9 @@ export const TopicList = () => {
           Темы пока не созданы
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
-          Добавьте первую тему в блоке настроек выше
+          {readOnly
+            ? 'Список тем появится здесь, как только их создаст администратор'
+            : 'Добавьте первую тему в блоке настроек выше'}
         </p>
       </div>
     );
@@ -197,15 +203,17 @@ export const TopicList = () => {
                     </div>
                   </AccordionTrigger>
 
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="mt-2 h-7 w-7 shrink-0 p-0"
-                    onClick={() => openEditTopic(topic)}
-                  >
-                    <Edit2 className="h-3.5 w-3.5" />
-                  </Button>
+                  {!readOnly && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="mt-2 h-7 w-7 shrink-0 p-0"
+                      onClick={() => openEditTopic(topic)}
+                    >
+                      <Edit2 className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
                 </div>
 
                 <AccordionContent>
@@ -220,7 +228,11 @@ export const TopicList = () => {
                       </p>
                     ) : (
                       topicCategories.map((category) => (
-                        <CategoryItem key={category.id} category={category} />
+                        <CategoryItem
+                          key={category.id}
+                          category={category}
+                          readOnly={readOnly}
+                        />
                       ))
                     )}
                   </div>
@@ -231,55 +243,57 @@ export const TopicList = () => {
         </Accordion>
       )}
 
-      <Dialog open={isEditTopicOpen} onOpenChange={setIsEditTopicOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Редактировать тему</DialogTitle>
-            <DialogDescription>
-              Обновите название и описание темы.
-            </DialogDescription>
-          </DialogHeader>
+      {!readOnly && (
+        <Dialog open={isEditTopicOpen} onOpenChange={setIsEditTopicOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Редактировать тему</DialogTitle>
+              <DialogDescription>
+                Обновите название и описание темы.
+              </DialogDescription>
+            </DialogHeader>
 
-          <div className="space-y-4 py-2">
-            <div>
-              <Label htmlFor="editTopicName" className="text-xs">
-                Название темы
-              </Label>
-              <Input
-                id="editTopicName"
-                value={editingTopicName}
-                onChange={(e) => setEditingTopicName(e.target.value)}
-                placeholder="Например: Техническая поддержка"
-                className="mt-1.5"
-              />
+            <div className="space-y-4 py-2">
+              <div>
+                <Label htmlFor="editTopicName" className="text-xs">
+                  Название темы
+                </Label>
+                <Input
+                  id="editTopicName"
+                  value={editingTopicName}
+                  onChange={(e) => setEditingTopicName(e.target.value)}
+                  placeholder="Например: Техническая поддержка"
+                  className="mt-1.5"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="editTopicDescription" className="text-xs">
+                  Описание темы
+                </Label>
+                <Input
+                  id="editTopicDescription"
+                  value={editingTopicDescription}
+                  onChange={(e) => setEditingTopicDescription(e.target.value)}
+                  placeholder="Кратко опишите, для каких обращений эта тема"
+                  className="mt-1.5"
+                />
+              </div>
             </div>
 
-            <div>
-              <Label htmlFor="editTopicDescription" className="text-xs">
-                Описание темы
-              </Label>
-              <Input
-                id="editTopicDescription"
-                value={editingTopicDescription}
-                onChange={(e) => setEditingTopicDescription(e.target.value)}
-                placeholder="Кратко опишите, для каких обращений эта тема"
-                className="mt-1.5"
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              onClick={handleUpdateTopic}
-              disabled={!canUpdateTopic}
-              className="w-full sm:w-auto"
-            >
-              {isUpdatingTopic ? 'Сохранение...' : 'Сохранить'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter>
+              <Button
+                type="button"
+                onClick={handleUpdateTopic}
+                disabled={!canUpdateTopic}
+                className="w-full sm:w-auto"
+              >
+                {isUpdatingTopic ? 'Сохранение...' : 'Сохранить'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 };

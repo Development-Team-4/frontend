@@ -117,7 +117,7 @@ export const tickets: Ticket[] = [
     subject: 'Страница входа возвращает ошибку 500',
     description:
       'После последнего обновления страница входа постоянно выдаёт ошибку 500. Проблема началась примерно в 14:00 UTC. В логах сервера видно NullPointerException в AuthenticationController.',
-    status: 'IN_WORK',
+    status: 'IN_PROGRESS',
     categoryId: 'c3',
     createdAt: '2026-02-28T14:05:00Z',
     updatedAt: '2026-02-28T16:30:00Z',
@@ -129,7 +129,7 @@ export const tickets: Ticket[] = [
     subject: 'Добавить тёмную тему для дашборда',
     description:
       'Пользователи просят добавить поддержку тёмной темы для главной панели. Нужно реализовать переключение тем с использованием CSS-переменных.',
-    status: 'CREATED',
+    status: 'OPEN',
     categoryId: 'c1',
     createdAt: '2026-02-27T10:00:00Z',
     updatedAt: '2026-02-27T10:00:00Z',
@@ -140,7 +140,7 @@ export const tickets: Ticket[] = [
     subject: 'Кэш Redis не очищается при обновлении профиля',
     description:
       'Кэш Redis не обновляется корректно при изменении профиля пользователя. Устаревшие данные отображаются до 30 минут после изменений.',
-    status: 'IN_WORK',
+    status: 'IN_PROGRESS',
     categoryId: 'c2',
     createdAt: '2026-02-26T09:15:00Z',
     updatedAt: '2026-02-28T11:00:00Z',
@@ -152,7 +152,7 @@ export const tickets: Ticket[] = [
     subject: 'Не приходят письма для сброса пароля',
     description:
       'Несколько пользователей сообщили, что функция сброса пароля не отправляет письма. Проблема может быть связана с изменением конфигурации SMTP.',
-    status: 'IN_WORK',
+    status: 'IN_PROGRESS',
     categoryId: 'c3',
     createdAt: '2026-02-25T16:00:00Z',
     updatedAt: '2026-02-27T09:30:00Z',
@@ -164,7 +164,7 @@ export const tickets: Ticket[] = [
     subject: 'Вопрос по оплате подписки',
     description:
       'Здравствуйте! Хотел бы уточнить возможность оплаты годовой подписки с рассрочкой на 3 месяца. Есть ли такая опция?',
-    status: 'CREATED',
+    status: 'OPEN',
     categoryId: 'c4',
     createdAt: '2026-02-28T08:00:00Z',
     updatedAt: '2026-02-28T08:00:00Z',
@@ -211,7 +211,7 @@ export const tickets: Ticket[] = [
     subject: 'Grafana дашборды не показывают метрики',
     description:
       "После миграции Prometheus endpoint несколько дашбордов Grafana показывают 'No Data'. Проблема затрагивает JVM метрики и панели задержки запросов.",
-    status: 'IN_WORK',
+    status: 'IN_PROGRESS',
     categoryId: 'c2',
     createdAt: '2026-02-27T14:00:00Z',
     updatedAt: '2026-02-28T09:00:00Z',
@@ -223,7 +223,7 @@ export const tickets: Ticket[] = [
     subject: 'Консультация по интеграции API',
     description:
       'Хотел бы получить консультацию по интеграции вашего API с нашей CRM-системой. Какие есть варианты и ограничения?',
-    status: 'CREATED',
+    status: 'OPEN',
     categoryId: 'c6',
     createdAt: '2026-02-28T07:00:00Z',
     updatedAt: '2026-02-28T07:00:00Z',
