@@ -1,7 +1,8 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { useCategoryById } from '@/entities/category/model';
+import { useUserById } from '@/entities/user/model/use-user';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -15,15 +16,26 @@ interface RecentTicketItemProps {
 
 export function RecentTicketItem({ ticket }: RecentTicketItemProps) {
   const { data: category } = useCategoryById(ticket.categoryId);
+  const { data: createdByUser } = useUserById(ticket.createdBy?.userId || null);
+  const { data: assigneeUser } = useUserById(ticket.assignee?.userId || null);
+
+  const createdByName =
+    createdByUser?.userName ||
+    ticket.createdBy?.userName ||
+    ticket.createdBy?.userId;
+  const assigneeName =
+    assigneeUser?.userName ||
+    ticket.assignee?.userName ||
+    ticket.assignee?.userId;
 
   return (
     <Link
       href={`/tickets/${ticket.id}`}
       className="group flex items-center gap-3 rounded-md p-2.5 transition-colors hover:bg-accent"
     >
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-mono text-muted-foreground">
+          <span className="font-mono text-[10px] text-muted-foreground">
             {ticket.id}
           </span>
           {category && (
@@ -32,23 +44,34 @@ export function RecentTicketItem({ ticket }: RecentTicketItemProps) {
             </span>
           )}
         </div>
-        <p className="truncate text-sm text-card-foreground group-hover:text-primary transition-colors">
+
+        <p className="truncate text-sm text-card-foreground transition-colors group-hover:text-primary">
           {ticket.subject}
         </p>
+
         <div className="mt-1 flex items-center gap-2 text-[10px] text-muted-foreground">
           <Clock className="h-3 w-3" />
           {formatDistanceToNow(new Date(ticket.updatedAt), {
             addSuffix: true,
             locale: ru,
           })}
-          {ticket.assignee && (
+
+          {createdByName && (
             <>
-              <span>{'·'}</span>
-              <span>{ticket.assignee.userName}</span>
+              <span>·</span>
+              <span className="truncate">Автор: {createdByName}</span>
+            </>
+          )}
+
+          {assigneeName && (
+            <>
+              <span>·</span>
+              <span className="truncate">Исп.: {assigneeName}</span>
             </>
           )}
         </div>
       </div>
+
       <div className="shrink-0">
         <Badge
           className={`border-0 text-[10px] ${statusStyles[ticket.status]}`}
