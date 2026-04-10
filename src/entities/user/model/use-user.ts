@@ -93,3 +93,34 @@ export const useUpdateUserRole = () => {
     },
   });
 };
+
+export const useUpdateUserProfile = () => {
+  const queryClient = useQueryClient();
+  const updateUserData = useStore((state) => state.updateUserData);
+  const setUsers = useStore((state) => state.setUsers);
+
+  return useMutation({
+    mutationFn: ({ userId, userName }: { userId: string; userName: string }) =>
+      usersDataApi.updateUserProfile(userId, { userName }),
+    onSuccess: (updatedUser) => {
+      updateUserData(updatedUser);
+
+      queryClient.setQueryData<User>(['userData'], updatedUser);
+      queryClient.setQueryData<User>(['user', updatedUser.userId], updatedUser);
+      queryClient.setQueryData<User[]>(['users'], (prev = []) => {
+        const exists = prev.some((user) => user.userId === updatedUser.userId);
+        const nextUsers = exists
+          ? prev.map((user) =>
+              user.userId === updatedUser.userId ? updatedUser : user,
+            )
+          : prev;
+        setUsers(nextUsers);
+        return nextUsers;
+      });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['userData'] });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+  });
+};

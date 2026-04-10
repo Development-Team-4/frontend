@@ -4,6 +4,9 @@ import type { User } from '@/shared/types';
 interface UpdateUserRolePayload {
   userRole: 'SUPPORT' | 'USER' | 'ADMIN';
 }
+interface UpdateUserProfilePayload {
+  userName: string;
+}
 
 class UsersDataApi {
   private baseUrl = 'users';
@@ -26,6 +29,15 @@ class UsersDataApi {
   ) {
     return api
       .patch<User>(`${this.baseUrl}/${userId}/role`, { userRole })
+      .then((res) => res.data);
+  }
+
+  async updateUserProfile(
+    id: string,
+    payload: UpdateUserProfilePayload,
+  ): Promise<User> {
+    return api
+      .put<User>(`${this.baseUrl}/${id}`, payload)
       .then((res) => res.data);
   }
 }
