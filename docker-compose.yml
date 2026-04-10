@@ -1,0 +1,10 @@
+services:
+  frontend:
+    build:
+      context: .
+    container_name: ticketsystem-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
