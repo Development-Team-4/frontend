@@ -48,16 +48,15 @@ export function CreateTicketForm() {
           onClick={() => router.push('/tickets')}
         >
           <ArrowLeft className="mr-1 h-4 w-4" />
-          РќР°Р·Р°Рґ Рє С‚РёРєРµС‚Р°Рј
+          Назад к тикетам
         </Button>
 
         <h1 className="text-xl font-semibold text-foreground sm:text-2xl">
-          РЎРѕР·РґР°С‚СЊ С‚РёРєРµС‚
+          Создать тикет
         </h1>
 
         <p className="mt-1 text-sm text-muted-foreground">
-          РЎРѕР·РґР°Р№С‚Рµ РЅРѕРІРѕРµ РѕР±СЂР°С‰РµРЅРёРµ РІ СЃР»СѓР¶Р±Сѓ
-          РїРѕРґРґРµСЂР¶РєРё
+          Создайте новое обращение в службу поддержки
         </p>
       </div>
 
@@ -69,11 +68,11 @@ export function CreateTicketForm() {
         >
           <div>
             <Label htmlFor="subject" className="mb-1.5 text-xs">
-              Р—Р°РіРѕР»РѕРІРѕРє
+              Заголовок
             </Label>
             <Input
               id="subject"
-              placeholder="РљСЂР°С‚РєРѕРµ РѕРїРёСЃР°РЅРёРµ РїСЂРѕР±Р»РµРјС‹..."
+              placeholder="Краткое описание проблемы..."
               className="bg-background"
               aria-invalid={Boolean(errors.subject)}
               {...register('subject')}
@@ -87,7 +86,7 @@ export function CreateTicketForm() {
 
           <div>
             <Label htmlFor="description" className="mb-1.5 text-xs">
-              РћРїРёСЃР°РЅРёРµ
+              Описание
             </Label>
 
             <Controller
@@ -98,7 +97,7 @@ export function CreateTicketForm() {
                   id="description"
                   value={field.value || ''}
                   onChange={field.onChange}
-                  placeholder="Введите описание"
+                  placeholder="������� ��������"
                 />
               )}
             />
@@ -112,13 +111,13 @@ export function CreateTicketForm() {
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <Label className="mb-1.5 text-xs">РўРµРјР°</Label>
+              <Label className="mb-1.5 text-xs">Тема</Label>
               <Select value={topicId} onValueChange={handleTopicChange}>
                 <SelectTrigger
                   className="bg-background"
                   aria-invalid={Boolean(errors.topicId)}
                 >
-                  <SelectValue placeholder="Р’С‹Р±РµСЂРёС‚Рµ С‚РµРјСѓ" />
+                  <SelectValue placeholder="Выберите тему" />
                 </SelectTrigger>
                 <SelectContent>
                   {topics.map((topic) => (
@@ -144,7 +143,7 @@ export function CreateTicketForm() {
             </div>
 
             <div>
-              <Label className="mb-1.5 text-xs">РљР°С‚РµРіРѕСЂРёСЏ</Label>
+              <Label className="mb-1.5 text-xs">Категория</Label>
               <Select
                 value={categoryId}
                 onValueChange={handleCategoryChange}
@@ -156,9 +155,7 @@ export function CreateTicketForm() {
                 >
                   <SelectValue
                     placeholder={
-                      topicId
-                        ? 'Р’С‹Р±РµСЂРёС‚Рµ РєР°С‚РµРіРѕСЂРёСЋ'
-                        : 'РЎРЅР°С‡Р°Р»Р° РІС‹Р±РµСЂРёС‚Рµ С‚РµРјСѓ'
+                      topicId ? 'Выберите категорию' : 'Сначала выберите тему'
                     }
                   />
                 </SelectTrigger>
@@ -180,11 +177,9 @@ export function CreateTicketForm() {
 
           <div className="rounded-lg border border-border bg-muted/30 p-3">
             <p className="text-xs leading-relaxed text-muted-foreground">
-              РџРѕСЃР»Рµ СЃРѕР·РґР°РЅРёСЏ С‚РёРєРµС‚Р° СЃРѕС‚СЂСѓРґРЅРёРєРё
-              РїРѕРґРґРµСЂР¶РєРё РїРѕР»СѓС‡Р°С‚ СѓРІРµРґРѕРјР»РµРЅРёРµ Рё
-              СЃРјРѕРіСѓС‚ РІР·СЏС‚СЊ Р·Р°РїСЂРѕСЃ РІ СЂР°Р±РѕС‚Сѓ. Р’С‹
-              РїРѕР»СѓС‡РёС‚Рµ СѓРІРµРґРѕРјР»РµРЅРёРµ РїСЂРё РёР·РјРµРЅРµРЅРёРё
-              СЃС‚Р°С‚СѓСЃР° РёР»Рё РґРѕР±Р°РІР»РµРЅРёРё РєРѕРјРјРµРЅС‚Р°СЂРёСЏ.
+              После создания тикета сотрудники поддержки получат уведомление и
+              смогут взять запрос в работу. Вы получите уведомление при
+              изменении статуса или добавлении комментария.
             </p>
           </div>
 
@@ -199,7 +194,7 @@ export function CreateTicketForm() {
               className="w-full sm:w-auto"
               onClick={() => router.push('/tickets')}
             >
-              РћС‚РјРµРЅР°
+              Отмена
             </Button>
 
             <Button
@@ -207,9 +202,7 @@ export function CreateTicketForm() {
               className="w-full sm:w-auto"
               disabled={!canSubmit || isSubmitting}
             >
-              {isSubmitting
-                ? 'РЎРѕР·РґР°РЅРёРµ...'
-                : 'РЎРѕР·РґР°С‚СЊ С‚РёРєРµС‚'}
+              {isSubmitting ? 'Создание...' : 'Создать тикет'}
             </Button>
           </div>
         </form>
