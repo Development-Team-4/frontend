@@ -10,9 +10,7 @@ export default function RegisterPage() {
             <Shield className="h-6 w-6 text-primary-foreground" />
           </div>
           <h1 className="text-2xl font-semibold text-foreground">TicketFlow</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Create your account
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">Создайте аккаунт</p>
         </div>
 
         <RegisterForm />

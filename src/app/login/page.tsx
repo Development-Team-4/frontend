@@ -11,7 +11,7 @@ export default function LoginPage() {
           </div>
           <h1 className="text-2xl font-semibold text-foreground">TicketFlow</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Sign in to your account
+            Войдите в свой аккаунт
           </p>
         </div>
         <LoginForm />
