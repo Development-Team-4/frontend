@@ -51,8 +51,10 @@ import { roleLabels, roleStyles } from '@/shared/consts';
 import { UserRole } from '@/shared/types';
 import { useStore } from '@/shared/store/store';
 import { Loader2, Mail, Plus } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+
+const USERS_PER_PAGE = 10;
 
 export const UsersList = () => {
   const { isLoading } = useUsers();
@@ -86,6 +88,23 @@ export const UsersList = () => {
         a.userName.localeCompare(b.userName, 'ru', { sensitivity: 'base' }),
       );
   }, [normalizedSearch, users]);
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredUsers.length / USERS_PER_PAGE),
+  );
+  const paginatedUsers = useMemo(() => {
+    const start = (page - 1) * USERS_PER_PAGE;
+    return filteredUsers.slice(start, start + USERS_PER_PAGE);
+  }, [filteredUsers, page]);
+
+  useEffect(() => {
+    setPage((currentPage) => Math.min(currentPage, totalPages));
+  }, [totalPages]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchValue]);
 
   const resetCreateForm = () => {
     setNewUserName('');
@@ -356,7 +375,7 @@ export const UsersList = () => {
                 ))}
 
               {!isLoading &&
-                filteredUsers.map((user) => (
+                paginatedUsers.map((user) => (
                   <TableRow key={user.userId}>
                     <TableCell>
                       <div className="flex items-center gap-3">
@@ -443,6 +462,55 @@ export const UsersList = () => {
           </Table>
         </div>
       </Card>
+      {!isLoading && filteredUsers.length > USERS_PER_PAGE && (
+        <div className="mt-3 flex items-center justify-between rounded-md border border-border bg-card px-3 py-2">
+          <p className="text-xs text-muted-foreground">
+            Страница {page} из {totalPages}
+          </p>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => setPage(1)}
+              disabled={page === 1}
+            >
+              В начало
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                setPage((currentPage) => Math.max(1, currentPage - 1))
+              }
+              disabled={page === 1}
+            >
+              Назад
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                setPage((currentPage) => Math.min(totalPages, currentPage + 1))
+              }
+              disabled={page === totalPages}
+            >
+              Вперед
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => setPage(totalPages)}
+              disabled={page === totalPages}
+            >
+              В конец
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

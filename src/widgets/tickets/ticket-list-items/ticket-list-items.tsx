@@ -19,7 +19,10 @@ import { Ticket } from '@/shared/types';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
 import { TicketRow } from './ticket-row';
+
+const TICKETS_PER_PAGE = 10;
 
 const MobileTicketCard = ({ ticket }: { ticket: Ticket }) => {
   const { data: category } = useCategoryById(ticket.categoryId);
@@ -83,6 +86,17 @@ const MobileTicketCard = ({ ticket }: { ticket: Ticket }) => {
 
 export const TicketListItems = () => {
   const { toggleSort, SortIcon, filtered, isLoading } = useTicketsFilter();
+  const [page, setPage] = useState(1);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / TICKETS_PER_PAGE));
+  const paginatedTickets = useMemo(() => {
+    const start = (page - 1) * TICKETS_PER_PAGE;
+    return filtered.slice(start, start + TICKETS_PER_PAGE);
+  }, [filtered, page]);
+
+  useEffect(() => {
+    setPage((currentPage) => Math.min(currentPage, totalPages));
+  }, [totalPages]);
 
   const renderSkeletonRows = () => {
     return Array.from({ length: 5 }, (_, i) => (
@@ -125,7 +139,7 @@ export const TicketListItems = () => {
             Тикеты не найдены
           </Card>
         ) : (
-          filtered.map((ticket) => (
+          paginatedTickets.map((ticket) => (
             <MobileTicketCard key={`mobile-${ticket.id}`} ticket={ticket} />
           ))
         )}
@@ -172,13 +186,59 @@ export const TicketListItems = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              filtered.map((ticket) => (
+              paginatedTickets.map((ticket) => (
                 <TicketRow key={ticket.id} ticket={ticket} />
               ))
             )}
           </TableBody>
         </Table>
       </div>
+
+      {!isLoading && filtered.length > TICKETS_PER_PAGE && (
+        <div className="mt-3 flex items-center justify-between rounded-md border border-border bg-card px-3 py-2">
+          <p className="text-xs text-muted-foreground">
+            Страница {page} из {totalPages}
+          </p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="rounded-md border border-border px-2 py-1 text-xs disabled:opacity-50"
+              onClick={() => setPage(1)}
+              disabled={page === 1}
+            >
+              В начало
+            </button>
+            <button
+              type="button"
+              className="rounded-md border border-border px-2 py-1 text-xs disabled:opacity-50"
+              onClick={() =>
+                setPage((currentPage) => Math.max(1, currentPage - 1))
+              }
+              disabled={page === 1}
+            >
+              Назад
+            </button>
+            <button
+              type="button"
+              className="rounded-md border border-border px-2 py-1 text-xs disabled:opacity-50"
+              onClick={() =>
+                setPage((currentPage) => Math.min(totalPages, currentPage + 1))
+              }
+              disabled={page === totalPages}
+            >
+              Вперед
+            </button>
+            <button
+              type="button"
+              className="rounded-md border border-border px-2 py-1 text-xs disabled:opacity-50"
+              onClick={() => setPage(totalPages)}
+              disabled={page === totalPages}
+            >
+              В конец
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 };
