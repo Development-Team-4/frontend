@@ -155,26 +155,39 @@ export const TopicsCategoriesSettings = ({
                   <div>
                     <Label className="text-xs">Тема</Label>
                     <Select
-                      value={selectedTopicForCategory}
+                      value={selectedTopicForCategory || undefined}
                       onValueChange={setSelectedTopicForCategory}
+                      disabled={topics.length === 0}
                     >
                       <SelectTrigger className="mt-1.5">
-                        <SelectValue placeholder="Выберите тему" />
+                        <SelectValue
+                          placeholder={
+                            topics.length === 0
+                              ? 'Сначала создайте тему'
+                              : 'Выберите тему'
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent>
-                        {topics.map((topic) => (
-                          <SelectItem key={topic.id} value={topic.id}>
-                            <div className="flex flex-col">
-                              <span>{topic.name}</span>
-                              {topic.description && (
-                                <MarkdownContent
-                                  content={topic.description}
-                                  className="text-xs text-muted-foreground"
-                                />
-                              )}
-                            </div>
+                        {topics.length === 0 ? (
+                          <SelectItem value="__no-topics" disabled>
+                            Нет доступных тем
                           </SelectItem>
-                        ))}
+                        ) : (
+                          topics.map((topic) => (
+                            <SelectItem key={topic.id} value={topic.id}>
+                              <div className="flex flex-col">
+                                <span>{topic.name}</span>
+                                {topic.description && (
+                                  <MarkdownContent
+                                    content={topic.description}
+                                    className="text-xs text-muted-foreground"
+                                  />
+                                )}
+                              </div>
+                            </SelectItem>
+                          ))
+                        )}
                       </SelectContent>
                     </Select>
                   </div>

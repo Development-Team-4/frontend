@@ -97,7 +97,7 @@ export function CreateTicketForm() {
                   id="description"
                   value={field.value || ''}
                   onChange={field.onChange}
-                  placeholder="������� ��������"
+                  placeholder="Подробно опишите проблему"
                 />
               )}
             />
@@ -112,7 +112,10 @@ export function CreateTicketForm() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <Label className="mb-1.5 text-xs">Тема</Label>
-              <Select value={topicId} onValueChange={handleTopicChange}>
+              <Select
+                value={topicId || undefined}
+                onValueChange={handleTopicChange}
+              >
                 <SelectTrigger
                   className="bg-background"
                   aria-invalid={Boolean(errors.topicId)}
@@ -120,19 +123,25 @@ export function CreateTicketForm() {
                   <SelectValue placeholder="Выберите тему" />
                 </SelectTrigger>
                 <SelectContent>
-                  {topics.map((topic) => (
-                    <SelectItem key={topic.id} value={topic.id}>
-                      <div className="flex flex-col">
-                        <span>{topic.name}</span>
-                        {topic.description && (
-                          <MarkdownContent
-                            content={topic.description}
-                            className="text-xs text-muted-foreground"
-                          />
-                        )}
-                      </div>
+                  {topics.length === 0 ? (
+                    <SelectItem value="__no-topics" disabled>
+                      Нет доступных тем
                     </SelectItem>
-                  ))}
+                  ) : (
+                    topics.map((topic) => (
+                      <SelectItem key={topic.id} value={topic.id}>
+                        <div className="flex flex-col">
+                          <span>{topic.name}</span>
+                          {topic.description && (
+                            <MarkdownContent
+                              content={topic.description}
+                              className="text-xs text-muted-foreground"
+                            />
+                          )}
+                        </div>
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
               {errors.topicId && (
@@ -145,9 +154,9 @@ export function CreateTicketForm() {
             <div>
               <Label className="mb-1.5 text-xs">Категория</Label>
               <Select
-                value={categoryId}
+                value={categoryId || undefined}
                 onValueChange={handleCategoryChange}
-                disabled={!topicId}
+                disabled={!topicId || filteredCategories.length === 0}
               >
                 <SelectTrigger
                   className="bg-background"
@@ -155,16 +164,30 @@ export function CreateTicketForm() {
                 >
                   <SelectValue
                     placeholder={
-                      topicId ? 'Выберите категорию' : 'Сначала выберите тему'
+                      !topicId
+                        ? 'Сначала выберите тему'
+                        : filteredCategories.length > 0
+                          ? 'Выберите категорию'
+                          : 'Для темы нет категорий'
                     }
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  {filteredCategories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
+                  {!topicId ? (
+                    <SelectItem value="__select-topic-first" disabled>
+                      Сначала выберите тему
                     </SelectItem>
-                  ))}
+                  ) : filteredCategories.length === 0 ? (
+                    <SelectItem value="__no-categories" disabled>
+                      У выбранной темы пока нет категорий
+                    </SelectItem>
+                  ) : (
+                    filteredCategories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
               {errors.categoryId && (

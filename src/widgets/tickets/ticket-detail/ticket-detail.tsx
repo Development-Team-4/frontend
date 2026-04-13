@@ -7,6 +7,8 @@ import { ru } from 'date-fns/locale';
 import { KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft,
+  Check,
+  ChevronsUpDown,
   Clock,
   User,
   MessageSquare,
@@ -44,12 +46,17 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  Command,
+  CommandEmpty,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
@@ -72,6 +79,7 @@ import { useStore } from '@/shared/store/store';
 import { statusLabels, statusStyles } from '@/shared/consts';
 import { TicketStatus } from '@/shared/types';
 import { normalizeApiError } from '@/shared/api/errors';
+import { cn } from '@/shared/lib/utils';
 
 import { useTicketDetail } from '@/features/ticket-detail';
 import { LoadingOverlay } from '@/components/loading-overlay';
@@ -83,6 +91,7 @@ type TransitionAction = {
 };
 
 const COMMENTS_PER_PAGE = 5;
+const ASSIGNEE_VISIBLE_LIMIT = 200;
 
 const STATUS_TRANSITIONS: Record<TicketStatus, TransitionAction[]> = {
   OPEN: [
@@ -141,6 +150,8 @@ export function TicketDetail() {
   const [editSubject, setEditSubject] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [commentsPage, setCommentsPage] = useState(1);
+  const [isAssigneePopoverOpen, setIsAssigneePopoverOpen] = useState(false);
+  const [assigneeSearch, setAssigneeSearch] = useState('');
   const commentsEndRef = useRef<HTMLDivElement | null>(null);
 
   const { data: category } = useCategoryById(ticket?.categoryId || null);
@@ -182,6 +193,27 @@ export function TicketDetail() {
     if (isAdmin) return allSupportUsers;
     return categoryStaff.filter((user) => user.userRole === 'SUPPORT');
   }, [allSupportUsers, categoryStaff, isAdmin]);
+  const sortedAssignableStaff = useMemo(
+    () =>
+      [...assignableStaff].sort((a, b) =>
+        a.userName.localeCompare(b.userName, 'ru', { sensitivity: 'base' }),
+      ),
+    [assignableStaff],
+  );
+  const filteredAssignableStaff = useMemo(() => {
+    const normalizedSearch = assigneeSearch.trim().toLowerCase();
+    if (!normalizedSearch) return sortedAssignableStaff;
+
+    return sortedAssignableStaff.filter((staff) =>
+      staff.userName.toLowerCase().includes(normalizedSearch),
+    );
+  }, [assigneeSearch, sortedAssignableStaff]);
+  const visibleAssignableStaff = useMemo(
+    () => filteredAssignableStaff.slice(0, ASSIGNEE_VISIBLE_LIMIT),
+    [filteredAssignableStaff],
+  );
+  const hasAssigneeOverflow =
+    filteredAssignableStaff.length > ASSIGNEE_VISIBLE_LIMIT;
   const isSupportAssignedToCategory = Boolean(
     currentUserId &&
     ticket &&
@@ -449,9 +481,9 @@ export function TicketDetail() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full sm:w-auto"
+                        className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm"
                       >
-                        <Edit3 className="mr-1 h-3.5 w-3.5" />
+                        <Edit3 className="mr-1 h-3 w-3 sm:h-3.5 sm:w-3.5" />
                         Редактировать
                       </Button>
                     </DialogTrigger>
@@ -516,10 +548,10 @@ export function TicketDetail() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full text-destructive hover:bg-destructive/10 sm:w-auto"
+                        className="h-8 px-2 text-xs text-destructive hover:bg-destructive/10 sm:h-9 sm:px-3 sm:text-sm"
                         disabled={isDeletingTicket}
                       >
-                        <Trash2 className="mr-1 h-3.5 w-3.5" />
+                        <Trash2 className="mr-1 h-3 w-3 sm:h-3.5 sm:w-3.5" />
                         Удалить
                       </Button>
                     </AlertDialogTrigger>
@@ -822,18 +854,70 @@ export function TicketDetail() {
             </label>
             {canAssign ? (
               <>
-                <Select value={assigneeValue} onValueChange={setAssigneeValue}>
-                  <SelectTrigger className="w-full bg-background">
-                    <SelectValue placeholder="Не назначен" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {assignableStaff.map((a) => (
-                      <SelectItem key={a.userId} value={a.userId}>
-                        {a.userName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Popover
+                  open={isAssigneePopoverOpen}
+                  onOpenChange={setIsAssigneePopoverOpen}
+                >
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={isAssigneePopoverOpen}
+                      className="w-full justify-between bg-background font-normal"
+                      disabled={assignableStaff.length === 0}
+                    >
+                      <span className="truncate text-left">
+                        {selectedAssigneeName || 'Не назначен'}
+                      </span>
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-[var(--radix-popover-trigger-width)] p-0"
+                    align="start"
+                  >
+                    <Command shouldFilter={false}>
+                      <CommandInput
+                        placeholder="Поиск по имени сотрудника..."
+                        value={assigneeSearch}
+                        onValueChange={setAssigneeSearch}
+                      />
+                      <CommandList className="max-h-[280px]">
+                        <CommandEmpty>
+                          {assignableStaff.length === 0
+                            ? 'Нет доступных сотрудников'
+                            : 'Сотрудник не найден'}
+                        </CommandEmpty>
+                        {visibleAssignableStaff.map((staff) => (
+                          <CommandItem
+                            key={staff.userId}
+                            value={staff.userName}
+                            onSelect={() => {
+                              setAssigneeValue(staff.userId);
+                              setIsAssigneePopoverOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                'mr-2 h-4 w-4',
+                                assigneeValue === staff.userId
+                                  ? 'opacity-100'
+                                  : 'opacity-0',
+                              )}
+                            />
+                            <span className="truncate">{staff.userName}</span>
+                          </CommandItem>
+                        ))}
+                      </CommandList>
+                      {hasAssigneeOverflow && (
+                        <p className="border-t px-3 py-2 text-[11px] text-muted-foreground">
+                          Показаны первые {ASSIGNEE_VISIBLE_LIMIT} сотрудников.
+                          Уточните поиск.
+                        </p>
+                      )}
+                    </Command>
+                  </PopoverContent>
+                </Popover>
                 {isAdmin && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>

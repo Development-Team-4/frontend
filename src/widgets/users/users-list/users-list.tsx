@@ -51,13 +51,13 @@ import { roleLabels, roleStyles } from '@/shared/consts';
 import { UserRole } from '@/shared/types';
 import { useStore } from '@/shared/store/store';
 import { Loader2, Mail, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 export const UsersList = () => {
   const { isLoading } = useUsers();
   const users = useStore((state) => state.users);
-  const regularUsers = users.filter((u) => u.userRole === 'USER');
+  const [searchValue, setSearchValue] = useState('');
   const { mutateAsync: updateUserRole, isPending: isUpdatingRole } =
     useUpdateUserRole();
   const { mutateAsync: createUser, isPending: isCreatingUser } =
@@ -69,6 +69,23 @@ export const UsersList = () => {
   const [newUserConfirmPassword, setNewUserConfirmPassword] = useState('');
   const [newUserRole, setNewUserRole] = useState<UserRole>('USER');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const normalizedSearch = searchValue.trim().toLowerCase();
+
+  const filteredUsers = useMemo(() => {
+    return users
+      .filter((user) => user.userRole === 'USER')
+      .filter((user) => {
+        if (!normalizedSearch) return true;
+
+        return (
+          user.userName.toLowerCase().includes(normalizedSearch) ||
+          user.userEmail.toLowerCase().includes(normalizedSearch)
+        );
+      })
+      .sort((a, b) =>
+        a.userName.localeCompare(b.userName, 'ru', { sensitivity: 'base' }),
+      );
+  }, [normalizedSearch, users]);
 
   const resetCreateForm = () => {
     setNewUserName('');
@@ -297,6 +314,14 @@ export const UsersList = () => {
           </DialogContent>
         </Dialog>
       </div>
+      <div className="mb-3">
+        <Input
+          value={searchValue}
+          onChange={(event) => setSearchValue(event.target.value)}
+          placeholder="Поиск пользователей по имени или email"
+          className="h-9"
+        />
+      </div>
       <Card>
         <p className="px-4 pt-3 text-[11px] text-muted-foreground md:hidden">
           Проведите влево/вправо, чтобы посмотреть всю таблицу
@@ -331,7 +356,7 @@ export const UsersList = () => {
                 ))}
 
               {!isLoading &&
-                regularUsers.map((user) => (
+                filteredUsers.map((user) => (
                   <TableRow key={user.userId}>
                     <TableCell>
                       <div className="flex items-center gap-3">
@@ -404,7 +429,7 @@ export const UsersList = () => {
                   </TableRow>
                 ))}
 
-              {!isLoading && regularUsers.length === 0 && (
+              {!isLoading && filteredUsers.length === 0 && (
                 <TableRow>
                   <TableCell
                     colSpan={4}

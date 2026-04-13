@@ -6,10 +6,10 @@ export default function StaffPage() {
     <div className="px-3 py-3 sm:p-4 lg:p-6">
       <div className="mb-4 sm:mb-6">
         <h1 className="text-xl font-semibold text-foreground sm:text-2xl">
-          Сотрудники поддержки
+          Сотрудники и пользователи
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Управление сотрудниками и их назначениями на категории
+          Поиск, фильтрация и управление ролями пользователей системы
         </p>
       </div>
 

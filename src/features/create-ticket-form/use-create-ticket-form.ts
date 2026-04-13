@@ -38,7 +38,12 @@ export const useCreateTicketForm = () => {
   const categoryId = form.watch('categoryId');
   const subject = form.watch('subject');
   const description = form.watch('description');
-  const { data: filteredCategories = [] } = useCategories(topicId || null);
+  const {
+    data: filteredCategories = [],
+    isLoading: isCategoriesLoading,
+    isFetching: isCategoriesFetching,
+  } = useCategories(topicId || null);
+  const hasAvailableCategories = filteredCategories.length > 0;
 
   const handleTopicChange = (value: string) => {
     form.setValue('topicId', value, {
@@ -59,13 +64,19 @@ export const useCreateTicketForm = () => {
   };
 
   const onSubmit = async (data: CreateTicketFormData) => {
+    if (data.topicId && !hasAvailableCategories) {
+      form.setError('categoryId', {
+        type: 'manual',
+        message: 'У выбранной темы нет доступных категорий',
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     setServerError('');
     form.clearErrors();
 
     try {
-      console.log('ticket data:', data);
-
       const newData = {
         subject: data.subject,
         description: data.description,
@@ -118,6 +129,9 @@ export const useCreateTicketForm = () => {
     description.trim() &&
     topicId &&
     categoryId &&
+    hasAvailableCategories &&
+    !isCategoriesLoading &&
+    !isCategoriesFetching &&
     !isSubmitting,
   );
 
