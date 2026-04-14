@@ -439,6 +439,7 @@ export const UsersList = () => {
                             </AlertDialogCancel>
                             <AlertDialogAction
                               disabled={isUpdatingRole}
+                              className="cursor-pointer"
                               onClick={() =>
                                 handlePromoteToSupport(user.userId)
                               }

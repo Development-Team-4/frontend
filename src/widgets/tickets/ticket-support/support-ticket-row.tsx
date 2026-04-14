@@ -147,6 +147,7 @@ export const SupportTicketRow = ({ ticket }: SupportTicketRowProps) => {
                 <AlertDialogAction
                   onClick={handleTakeTicket}
                   disabled={isAssigning || isUpdatingStatus}
+                  className="cursor-pointer"
                 >
                   Подтвердить
                 </AlertDialogAction>

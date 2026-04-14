@@ -967,6 +967,7 @@ export function TicketDetail() {
                         <AlertDialogAction
                           onClick={handleAssignAssignee}
                           disabled={isAssigningAssignee || isUpdatingStatus}
+                          className="cursor-pointer"
                         >
                           Подтвердить
                         </AlertDialogAction>
@@ -1012,6 +1013,7 @@ export function TicketDetail() {
                         <AlertDialogAction
                           onClick={handleTakeInWork}
                           disabled={isAssigningAssignee || isUpdatingStatus}
+                          className="cursor-pointer"
                         >
                           Подтвердить
                         </AlertDialogAction>
