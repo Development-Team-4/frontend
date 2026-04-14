@@ -165,7 +165,7 @@ export const TopicList = ({ readOnly = false }: TopicListProps) => {
           <SelectTrigger className="w-full sm:w-[220px]">
             <SelectValue placeholder="Фильтр тем" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="cursor-pointer">
             <SelectItem value="all">Все темы</SelectItem>
             <SelectItem value="with-categories">
               Только с категориями
@@ -231,7 +231,7 @@ export const TopicList = ({ readOnly = false }: TopicListProps) => {
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="mt-2 h-7 w-7 shrink-0 p-0"
+                      className="mt-2 h-7 w-7 shrink-0 p-0 cursor-pointer"
                       onClick={() => openEditTopic(topic)}
                     >
                       <Edit2 className="h-3.5 w-3.5" />
@@ -359,7 +359,7 @@ export const TopicList = ({ readOnly = false }: TopicListProps) => {
                 type="button"
                 onClick={handleUpdateTopic}
                 disabled={!canUpdateTopic}
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto cursor-pointer"
               >
                 {isUpdatingTopic ? 'Сохранение...' : 'Сохранить'}
               </Button>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MarkdownContent } from '@/components/ui/markdown-content';
@@ -172,7 +172,11 @@ export const StaffItem = ({
         {user.userRole !== 'ADMIN' && (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8 gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 gap-1.5 cursor-pointer"
+              >
                 <Edit2 className="h-3.5 w-3.5" />
                 Назначить
               </Button>
@@ -251,7 +255,7 @@ export const StaffItem = ({
                               <Button
                                 type="button"
                                 size="sm"
-                                className="flex-1 sm:flex-none"
+                                className="flex-1 sm:flex-none cursor-pointer"
                                 onClick={() =>
                                   handleAssignCategory(category.id)
                                 }
@@ -278,7 +282,7 @@ export const StaffItem = ({
                                 type="button"
                                 size="sm"
                                 variant="outline"
-                                className="flex-1 sm:flex-none"
+                                className="flex-1 sm:flex-none cursor-pointer"
                                 onClick={() =>
                                   handleRemoveCategory(category.id)
                                 }
@@ -309,7 +313,11 @@ export const StaffItem = ({
 
               <DialogFooter>
                 <DialogClose asChild>
-                  <Button type="button" variant="outline">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="cursor-pointer"
+                  >
                     Готово
                   </Button>
                 </DialogClose>

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { Button } from '@/components/ui/button';
 import { MarkdownContent } from '@/components/ui/markdown-content';
@@ -78,7 +78,7 @@ export const TopicsCategoriesSettings = ({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-full sm:w-auto"
+                  className="w-full sm:w-auto cursor-pointer"
                 >
                   <Plus className="mr-1 h-3.5 w-3.5" />
                   Новая тема
@@ -125,7 +125,7 @@ export const TopicsCategoriesSettings = ({
                     type="button"
                     onClick={handleCreateTopic}
                     disabled={!canCreateTopic}
-                    className="w-full sm:w-auto"
+                    className="w-full sm:w-auto cursor-pointer"
                   >
                     {isCreatingTopic ? 'Создание...' : 'Создать тему'}
                   </Button>
@@ -137,7 +137,10 @@ export const TopicsCategoriesSettings = ({
               onOpenChange={setIsCreateCategoryOpen}
             >
               <DialogTrigger asChild>
-                <Button size="sm" className="w-full sm:w-auto">
+                <Button
+                  size="sm"
+                  className="w-full sm:w-auto cursor-pointer cursor-pointer"
+                >
                   <Plus className="mr-1 h-3.5 w-3.5" />
                   Новая категория
                 </Button>
@@ -226,7 +229,7 @@ export const TopicsCategoriesSettings = ({
                     type="button"
                     onClick={handleCreateCategory}
                     disabled={!canCreateCategory}
-                    className="w-full sm:w-auto"
+                    className="w-full sm:w-auto cursor-pointer"
                   >
                     {isCreatingCategory ? 'Создание...' : 'Создать категорию'}
                   </Button>

@@ -210,7 +210,7 @@ export const UsersList = () => {
           }}
         >
           <DialogTrigger asChild>
-            <Button size="sm" className="w-full sm:w-auto">
+            <Button size="sm" className="w-full sm:w-auto cursor-pointer">
               <Plus className="mr-1 h-3.5 w-3.5" />
               Создать пользователя
             </Button>
@@ -325,7 +325,7 @@ export const UsersList = () => {
                 type="button"
                 onClick={handleCreateUser}
                 disabled={isCreatingUser}
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto cursor-pointer"
               >
                 {isCreatingUser ? 'Создание...' : 'Создать'}
               </Button>
@@ -411,6 +411,7 @@ export const UsersList = () => {
                             size="sm"
                             variant="outline"
                             disabled={isUpdatingRole}
+                            className="cursor-pointer"
                           >
                             {isUpdatingRole ? (
                               <Loader2 className="h-3.5 w-3.5 animate-spin" />

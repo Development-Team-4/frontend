@@ -4,22 +4,25 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { usersDataApi } from '../api';
 import { useStore } from '@/shared/store/store';
 import type { User } from '@/shared/types';
+import { useEffect } from 'react';
 
-export const useUser = () => {
+export const useUser = ({ enabled = true }: { enabled?: boolean } = {}) => {
   const updateUserData = useStore((state) => state.updateUserData);
 
   const query = useQuery<User>({
     queryKey: ['userData'],
     queryFn: () => usersDataApi.getUserData(),
-    select: (data) => {
-      updateUserData(data);
-      return data;
-    },
+    enabled,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
     retry: 0,
   });
+
+  useEffect(() => {
+    if (!query.data) return;
+    updateUserData(query.data);
+  }, [query.data, updateUserData]);
 
   return query;
 };
@@ -39,18 +42,21 @@ export const useUserById = (userId: string | null) => {
 export const useUsers = () => {
   const setUsers = useStore((state) => state.setUsers);
 
-  return useQuery<User[]>({
+  const query = useQuery<User[]>({
     queryKey: ['users'],
     queryFn: () => usersDataApi.getAllUsers(),
-    select: (data) => {
-      setUsers(data);
-      return data;
-    },
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
     retry: 0,
   });
+
+  useEffect(() => {
+    if (!query.data) return;
+    setUsers(query.data);
+  }, [query.data, setUsers]);
+
+  return query;
 };
 
 export const useUpdateUserRole = () => {

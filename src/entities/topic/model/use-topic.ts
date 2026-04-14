@@ -4,17 +4,21 @@ import { Topic } from '@/shared/types/topic';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CreateTopicPayload, topicsDataApi, UpdateTopicPayload } from '../api';
 import { useStore } from '@/shared/store/store';
+import { useEffect } from 'react';
 
 export const useTopics = () => {
   const updateTopics = useStore((state) => state.updateTopics);
-  return useQuery<Topic[]>({
+  const query = useQuery<Topic[]>({
     queryKey: ['topics'],
     queryFn: () => topicsDataApi.getTopicsData(),
-    select: (data) => {
-      updateTopics(data);
-      return data;
-    },
   });
+
+  useEffect(() => {
+    if (!query.data) return;
+    updateTopics(query.data);
+  }, [query.data, updateTopics]);
+
+  return query;
 };
 
 export const useCreateTopic = () => {

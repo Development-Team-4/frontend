@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { loginApi } from './api';
 import { usersDataApi } from '@/entities/user/api';
 import { getApiFieldErrors, normalizeApiError } from '@/shared/api/errors';
+import { setAuthTokens } from '@/shared/lib/auth-tokens';
 
 export const useLoginForm = () => {
   const router = useRouter();
@@ -50,8 +51,10 @@ export const useLoginForm = () => {
       const response = await loginApi.login(newData);
 
       if (response?.status === 200 || response?.status === 201) {
-        localStorage.setItem('access_token', response.data.accessToken);
-        localStorage.setItem('refresh_token', response.data.refreshToken);
+        setAuthTokens({
+          accessToken: response.data.accessToken,
+          refreshToken: response.data.refreshToken,
+        });
 
         try {
           const userData = await usersDataApi.getUserData();

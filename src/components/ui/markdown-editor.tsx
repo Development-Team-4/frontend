@@ -28,8 +28,12 @@ export function MarkdownEditor({
   return (
     <Tabs defaultValue="editor" className="mt-1.5">
       <TabsList>
-        <TabsTrigger value="editor">Редактор</TabsTrigger>
-        <TabsTrigger value="preview">Предпросмотр</TabsTrigger>
+        <TabsTrigger value="editor" className="cursor-pointer">
+          Редактор
+        </TabsTrigger>
+        <TabsTrigger value="preview" className="cursor-pointer">
+          Предпросмотр
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent value="editor">

@@ -71,7 +71,7 @@ export const NotificationList = () => {
                   {!n.read && (
                     <button
                       onClick={() => markRead(n.id)}
-                      className="text-[10px] text-muted-foreground hover:text-foreground"
+                      className="text-[10px] text-muted-foreground hover:text-foreground cursor-pointer"
                     >
                       Прочитано
                     </button>

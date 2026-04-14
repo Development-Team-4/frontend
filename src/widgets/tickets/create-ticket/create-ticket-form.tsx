@@ -214,7 +214,7 @@ export function CreateTicketForm() {
             <Button
               type="button"
               variant="outline"
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto cursor-pointer"
               onClick={() => router.push('/tickets')}
             >
               Отмена
@@ -222,7 +222,7 @@ export function CreateTicketForm() {
 
             <Button
               type="submit"
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto cursor-pointer"
               disabled={!canSubmit || isSubmitting}
             >
               {isSubmitting ? 'Создание...' : 'Создать тикет'}

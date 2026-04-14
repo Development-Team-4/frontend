@@ -535,6 +535,7 @@ export function TicketDetail() {
                           type="button"
                           onClick={handleUpdateTicket}
                           disabled={!canSaveTicketChanges}
+                          className="cursor-pointer"
                         >
                           {isUpdatingTicket ? 'Сохранение...' : 'Сохранить'}
                         </Button>
@@ -548,7 +549,7 @@ export function TicketDetail() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-8 px-2 text-xs text-destructive hover:bg-destructive/10 sm:h-9 sm:px-3 sm:text-sm"
+                        className="h-8 px-2 text-xs text-destructive hover:bg-destructive/10 sm:h-9 sm:px-3 sm:text-sm cursor-pointer"
                         disabled={isDeletingTicket}
                       >
                         <Trash2 className="mr-1 h-3 w-3 sm:h-3.5 sm:w-3.5" />

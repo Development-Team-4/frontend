@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -119,7 +119,7 @@ export const TicketsFilters = () => {
               variant="ghost"
               size="sm"
               onClick={clearFilters}
-              className="w-full text-muted-foreground hover:text-foreground sm:w-auto"
+              className="w-full text-muted-foreground hover:text-foreground sm:w-auto cursor-pointer"
             >
               <X className="mr-1 h-3 w-3" />
               Сбросить

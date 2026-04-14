@@ -95,13 +95,14 @@ const getRoleLabel = (role: string) => {
 };
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { isLoading, isError, refetch } = useUser();
+  const pathname = usePathname();
+  const router = useRouter();
+  const isAuthPage = pathname === '/login' || pathname === '/register';
+  const { isLoading, isError, refetch } = useUser({ enabled: !isAuthPage });
   useNotifications();
 
   const userData = useStore((state) => state.userData);
   const notifications = useStore((state) => state.notifications);
-  const pathname = usePathname();
-  const router = useRouter();
 
   const [collapsed, setCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -116,9 +117,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    if (pathname === '/login' || pathname === '/register') return;
+    if (isAuthPage) return;
     refetch();
-  }, [pathname, refetch]);
+  }, [isAuthPage, pathname, refetch]);
+
+  useEffect(() => {
+    if (isAuthPage || isLoading || !isError) return;
+    router.replace('/login');
+  }, [isAuthPage, isError, isLoading, router]);
 
   useEffect(() => {
     if (!userData) return;
@@ -152,11 +158,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     setMobileMenuOpen(false);
   }, [pathname]);
 
-  if (pathname === '/login' || pathname === '/register') {
+  if (isAuthPage) {
     return <>{children}</>;
   }
 
-  if (isLoading || isError) {
+  if (isLoading) {
+    return <LoadingOverlay />;
+  }
+
+  if (isError) return null;
+
+  if (!userData) {
     return <LoadingOverlay />;
   }
 

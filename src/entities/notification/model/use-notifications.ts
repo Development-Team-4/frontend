@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { notificationsDataApi, CreateNotificationPayload } from '../api';
 import { Notification } from '@/shared/types';
 import { useStore } from '@/shared/store/store';
+import { useEffect } from 'react';
 
 const mergeNotificationsWithReadState = (
   incoming: Notification[],
@@ -26,7 +27,7 @@ export const useNotifications = () => {
   const userData = useStore((state) => state.userData);
   const setNotifications = useStore((state) => state.setNotifications);
 
-  return useQuery<Notification[]>({
+  const query = useQuery<Notification[]>({
     queryKey: ['notifications', userData?.userRole, userData?.userId],
     queryFn: () => {
       if (!userData) return Promise.resolve([]);
@@ -36,15 +37,18 @@ export const useNotifications = () => {
       return notificationsDataApi.getUserNotifications(userData.userId);
     },
     enabled: Boolean(userData?.userId),
-    select: (data) => {
-      const current = useStore.getState().notifications;
-      const merged = mergeNotificationsWithReadState(data, current);
-      setNotifications(merged);
-      return merged;
-    },
     staleTime: 30 * 1000,
     gcTime: 5 * 60 * 1000,
   });
+
+  useEffect(() => {
+    if (!query.data) return;
+    const current = useStore.getState().notifications;
+    const merged = mergeNotificationsWithReadState(query.data, current);
+    setNotifications(merged);
+  }, [query.data, setNotifications]);
+
+  return query;
 };
 
 export const useCreateNotification = () => {
