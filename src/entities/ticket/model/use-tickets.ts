@@ -54,6 +54,7 @@ export const useAssignTicketAssignee = () => {
       );
       queryClient.invalidateQueries({ queryKey: ['tickets'] });
       queryClient.invalidateQueries({ queryKey: ['ticket', nextTicket.id] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
   });
 };
@@ -81,6 +82,7 @@ export const useUpdateTicketStatus = () => {
       );
       queryClient.invalidateQueries({ queryKey: ['tickets'] });
       queryClient.invalidateQueries({ queryKey: ['ticket', updatedTicket.id] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
   });
 };
@@ -101,6 +103,7 @@ export const useDeleteTicket = () => {
       });
       queryClient.invalidateQueries({ queryKey: ['tickets'] });
       queryClient.invalidateQueries({ queryKey: ['statistics'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
   });
 };
@@ -130,6 +133,7 @@ export const useUpdateTicket = () => {
       );
       queryClient.invalidateQueries({ queryKey: ['tickets'] });
       queryClient.invalidateQueries({ queryKey: ['ticket', updatedTicket.id] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
   });
 };

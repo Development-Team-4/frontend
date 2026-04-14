@@ -90,6 +90,7 @@ export const useCreateTicketForm = () => {
       ]);
       queryClient.setQueryData(['ticket', createdTicket.id], createdTicket);
       queryClient.invalidateQueries({ queryKey: ['tickets'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       toast.success('Тикет успешно создан');
 
       router.replace('/tickets');

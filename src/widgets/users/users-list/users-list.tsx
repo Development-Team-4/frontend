@@ -431,7 +431,10 @@ export const UsersList = () => {
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel disabled={isUpdatingRole}>
+                            <AlertDialogCancel
+                              disabled={isUpdatingRole}
+                              className="cursor-pointer"
+                            >
                               Отмена
                             </AlertDialogCancel>
                             <AlertDialogAction

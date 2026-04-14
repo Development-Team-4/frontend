@@ -25,6 +25,7 @@ export const useCreateTicketComment = (ticketId: string | null) => {
         ['ticket-comments', ticketId],
         (prev = []) => [...prev, newComment],
       );
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
   });
 };

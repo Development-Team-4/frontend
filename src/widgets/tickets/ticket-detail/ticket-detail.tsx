@@ -481,7 +481,7 @@ export function TicketDetail() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm"
+                        className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm cursor-pointer"
                       >
                         <Edit3 className="mr-1 h-3 w-3 sm:h-3.5 sm:w-3.5" />
                         Редактировать
@@ -528,6 +528,7 @@ export function TicketDetail() {
                           variant="outline"
                           onClick={() => setIsEditDialogOpen(false)}
                           disabled={isUpdatingTicket}
+                          className="cursor-pointer"
                         >
                           Отмена
                         </Button>
@@ -558,20 +559,25 @@ export function TicketDetail() {
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Удалить тикет?</AlertDialogTitle>
+                        <AlertDialogTitle className="cursor-pointer">
+                          Удалить тикет?
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
                           Это действие необратимо. Тикет и связанные комментарии
                           будут удалены без возможности восстановления.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel disabled={isDeletingTicket}>
+                        <AlertDialogCancel
+                          disabled={isDeletingTicket}
+                          className="cursor-pointer"
+                        >
                           Отмена
                         </AlertDialogCancel>
                         <AlertDialogAction
                           onClick={handleDeleteTicket}
                           disabled={isDeletingTicket}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90 cursor-pointer"
                         >
                           {isDeletingTicket ? 'Удаление...' : 'Удалить тикет'}
                         </AlertDialogAction>
@@ -738,6 +744,7 @@ export function TicketDetail() {
                       size="sm"
                       onClick={handleSendComment}
                       disabled={!canSendComment || isSendingComment}
+                      className="cursor-pointer"
                     >
                       <Send className="mr-1 h-3.5 w-3.5" />
                       {isSendingComment ? 'Отправка...' : 'Отправить'}
@@ -802,7 +809,7 @@ export function TicketDetail() {
                             type="button"
                             size="sm"
                             variant="outline"
-                            className="h-7 w-full text-xs sm:w-auto sm:shrink-0"
+                            className="h-7 w-full text-xs sm:w-auto sm:shrink-0 cursor-pointer"
                             onClick={() => handleStatusChange(transition.to)}
                             disabled={isUpdatingStatus}
                           >
@@ -925,7 +932,7 @@ export function TicketDetail() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="mt-2 w-full text-xs"
+                        className="mt-2 w-full text-xs cursor-pointer"
                         disabled={
                           !assigneeValue ||
                           assigneeValue === currentAssigneeId ||
@@ -952,6 +959,7 @@ export function TicketDetail() {
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel
+                          className="cursor-pointer"
                           disabled={isAssigningAssignee || isUpdatingStatus}
                         >
                           Отмена
@@ -997,6 +1005,7 @@ export function TicketDetail() {
                       <AlertDialogFooter>
                         <AlertDialogCancel
                           disabled={isAssigningAssignee || isUpdatingStatus}
+                          className="cursor-pointer"
                         >
                           Отмена
                         </AlertDialogCancel>

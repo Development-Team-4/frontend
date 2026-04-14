@@ -26,17 +26,17 @@ export function MarkdownEditor({
   const editorHeightClass = minHeightClassName ?? heightClassName;
 
   return (
-    <Tabs defaultValue="editor" className="mt-1.5">
+    <Tabs defaultValue="Редактор" className="mt-1.5">
       <TabsList>
-        <TabsTrigger value="editor" className="cursor-pointer">
+        <TabsTrigger value="Редактор" className="cursor-pointer">
           Редактор
         </TabsTrigger>
-        <TabsTrigger value="preview" className="cursor-pointer">
+        <TabsTrigger value="Предпросмотр" className="cursor-pointer">
           Предпросмотр
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="editor">
+      <TabsContent value="Редактор">
         <Textarea
           id={id}
           value={value}
