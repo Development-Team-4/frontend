@@ -117,12 +117,12 @@ export function CreateTicketForm() {
                 onValueChange={handleTopicChange}
               >
                 <SelectTrigger
-                  className="bg-background"
+                  className="w-full bg-background"
                   aria-invalid={Boolean(errors.topicId)}
                 >
                   <SelectValue placeholder="Выберите тему" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-w-[calc(100vw-2rem)]">
                   {topics.length === 0 ? (
                     <SelectItem value="__no-topics" disabled>
                       Нет доступных тем
@@ -130,12 +130,14 @@ export function CreateTicketForm() {
                   ) : (
                     topics.map((topic) => (
                       <SelectItem key={topic.id} value={topic.id}>
-                        <div className="flex flex-col">
-                          <span>{topic.name}</span>
+                        <div className="flex min-w-0 max-w-full flex-col gap-0.5">
+                          <span className="truncate font-medium">
+                            {topic.name}
+                          </span>
                           {topic.description && (
                             <MarkdownContent
                               content={topic.description}
-                              className="text-xs text-muted-foreground"
+                              className="max-w-full break-words text-xs text-muted-foreground [overflow-wrap:anywhere] [&_*]:max-w-full [&_p]:m-0 [&_p]:line-clamp-2"
                             />
                           )}
                         </div>
@@ -159,7 +161,7 @@ export function CreateTicketForm() {
                 disabled={!topicId || filteredCategories.length === 0}
               >
                 <SelectTrigger
-                  className="bg-background"
+                  className="w-full bg-background"
                   aria-invalid={Boolean(errors.categoryId)}
                 >
                   <SelectValue
@@ -172,7 +174,7 @@ export function CreateTicketForm() {
                     }
                   />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-w-[calc(100vw-2rem)]">
                   {!topicId ? (
                     <SelectItem value="__select-topic-first" disabled>
                       Сначала выберите тему

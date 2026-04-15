@@ -414,8 +414,8 @@ export function TicketDetail() {
   if (!ticket) return <TicketNotExist ticketId={ticketId} />;
 
   return (
-    <div className="flex flex-col lg:flex-row">
-      <div className="flex-1 p-3 sm:p-4 lg:p-6">
+    <div className="mx-auto flex w-full max-w-[1600px] flex-col xl:flex-row">
+      <div className="flex-1 p-3 sm:p-4 lg:p-6 xl:pr-4">
         <div className="mb-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           <Link
             href="/tickets"
@@ -428,18 +428,23 @@ export function TicketDetail() {
         </div>
 
         <div className="mb-5 sm:mb-6">
-          <div className="flex items-start gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="mt-0.5 shrink-0"
-              onClick={() => router.push('/tickets')}
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <div className="flex-1">
+          <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-3 sm:p-4 md:flex-row md:items-start">
+            <div className="flex items-center gap-2 md:items-start">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mt-0.5 shrink-0 self-start"
+                onClick={() => router.push('/tickets')}
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <span className="break-all font-mono text-xs text-muted-foreground md:hidden">
+                {ticket.id}
+              </span>
+            </div>
+            <div className="min-w-0 flex-1">
               <div className="mb-2 flex flex-wrap items-center gap-2">
-                <span className="break-all font-mono text-xs text-muted-foreground">
+                <span className="hidden break-all font-mono text-xs text-muted-foreground md:inline">
                   {ticket.id}
                 </span>
                 <Badge
@@ -471,7 +476,7 @@ export function TicketDetail() {
             </div>
 
             {(canEdit || canDelete) && (
-              <div className="flex flex-wrap justify-end gap-2">
+              <div className="flex w-full flex-wrap gap-2 md:w-auto md:justify-end">
                 {canEdit && (
                   <Dialog
                     open={isEditDialogOpen}
@@ -481,7 +486,7 @@ export function TicketDetail() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm cursor-pointer"
+                        className="h-8 w-full px-2 text-xs sm:h-9 sm:w-auto sm:px-3 sm:text-sm cursor-pointer"
                       >
                         <Edit3 className="mr-1 h-3 w-3 sm:h-3.5 sm:w-3.5" />
                         Редактировать
@@ -550,7 +555,7 @@ export function TicketDetail() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-8 px-2 text-xs text-destructive hover:bg-destructive/10 sm:h-9 sm:px-3 sm:text-sm cursor-pointer"
+                        className="h-8 w-full px-2 text-xs text-destructive hover:bg-destructive/10 sm:h-9 sm:w-auto sm:px-3 sm:text-sm cursor-pointer"
                         disabled={isDeletingTicket}
                       >
                         <Trash2 className="mr-1 h-3 w-3 sm:h-3.5 sm:w-3.5" />
@@ -765,7 +770,7 @@ export function TicketDetail() {
         </Tabs>
       </div>
 
-      <div className="w-full border-t border-border bg-card p-3 sm:p-4 lg:w-80 lg:border-l lg:border-t-0 lg:p-6">
+      <div className="w-full border-t border-border bg-card p-3 sm:p-4 xl:sticky xl:top-14 xl:h-fit xl:w-[22rem] xl:shrink-0 xl:border-l xl:border-t-0 xl:p-6">
         <h3 className="mb-4 text-sm font-medium text-card-foreground">
           Детали
         </h3>
@@ -840,8 +845,8 @@ export function TicketDetail() {
             <label className="mb-1.5 block text-xs text-muted-foreground">
               Тема / Категория
             </label>
-            <div className="rounded-md border border-border bg-background px-3 py-2 text-sm">
-              <div className="flex flex-col gap-1">
+            <div className="min-w-0 rounded-md border border-border bg-background px-3 py-2 text-sm">
+              <div className="flex min-w-0 flex-col gap-1">
                 <span className="break-words">
                   {topic?.name || 'Без темы'} /{' '}
                   {category?.name || 'Без категории'}
@@ -849,7 +854,7 @@ export function TicketDetail() {
                 {topic?.description && (
                   <MarkdownContent
                     content={topic.description}
-                    className="text-xs text-muted-foreground"
+                    className="max-w-full break-words text-xs text-muted-foreground [overflow-wrap:anywhere] [&_*]:max-w-full [&_img]:h-auto [&_img]:max-w-full [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_table]:block [&_table]:max-w-full [&_table]:overflow-x-auto"
                   />
                 )}
               </div>
@@ -1048,23 +1053,23 @@ export function TicketDetail() {
           <Separator />
 
           <div className="flex flex-col gap-2 text-xs">
-            <div className="flex items-start justify-between gap-2">
+            <div className="flex flex-col gap-1 rounded-md border border-border bg-background px-3 py-2 sm:flex-row sm:items-start sm:justify-between">
               <span className="text-muted-foreground">Автор</span>
-              <span className="max-w-[60%] break-words text-right text-card-foreground">
+              <span className="break-words text-left text-card-foreground sm:max-w-[60%] sm:text-right">
                 {createdByName}
               </span>
             </div>
-            <div className="flex items-start justify-between gap-2">
+            <div className="flex flex-col gap-1 rounded-md border border-border bg-background px-3 py-2 sm:flex-row sm:items-start sm:justify-between">
               <span className="text-muted-foreground">Создан</span>
-              <span className="text-right text-card-foreground">
+              <span className="text-left text-card-foreground sm:text-right">
                 {format(new Date(ticket.createdAt), 'd MMM, HH:mm', {
                   locale: ru,
                 })}
               </span>
             </div>
-            <div className="flex items-start justify-between gap-2">
+            <div className="flex flex-col gap-1 rounded-md border border-border bg-background px-3 py-2 sm:flex-row sm:items-start sm:justify-between">
               <span className="text-muted-foreground">Обновлен</span>
-              <span className="text-right text-card-foreground">
+              <span className="text-left text-card-foreground sm:text-right">
                 {formatDistanceToNow(new Date(ticket.updatedAt), {
                   addSuffix: true,
                   locale: ru,

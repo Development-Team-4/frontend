@@ -70,16 +70,16 @@ export const TicketsFilters = () => {
             <SelectTrigger className="w-full bg-background">
               <SelectValue placeholder="Тема" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-w-[calc(100vw-2rem)]">
               <SelectItem value="all">Все темы</SelectItem>
               {topics.map((topic) => (
                 <SelectItem key={topic.id} value={topic.id}>
-                  <div className="flex flex-col">
-                    <span>{topic.name}</span>
+                  <div className="flex min-w-0 max-w-full flex-col gap-0.5">
+                    <span className="truncate font-medium">{topic.name}</span>
                     {topic.description && (
                       <MarkdownContent
                         content={topic.description}
-                        className="text-xs text-muted-foreground"
+                        className="max-w-full break-words text-xs text-muted-foreground [overflow-wrap:anywhere] [&_*]:max-w-full [&_p]:m-0 [&_p]:line-clamp-2"
                       />
                     )}
                   </div>
