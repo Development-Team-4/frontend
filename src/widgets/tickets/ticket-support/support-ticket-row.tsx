@@ -138,12 +138,16 @@ export const SupportTicketRow = ({ ticket }: SupportTicketRowProps) => {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel disabled={isAssigning || isUpdatingStatus}>
+                <AlertDialogCancel
+                  className="cursor-pointer"
+                  disabled={isAssigning || isUpdatingStatus}
+                >
                   Отмена
                 </AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleTakeTicket}
                   disabled={isAssigning || isUpdatingStatus}
+                  className="cursor-pointer"
                 >
                   Подтвердить
                 </AlertDialogAction>

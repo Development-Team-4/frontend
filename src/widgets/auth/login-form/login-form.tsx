@@ -26,12 +26,12 @@ export const LoginForm = () => {
       >
         <div>
           <Label htmlFor="email" className="mb-1.5 text-xs">
-            Email
+            Электронная почта
           </Label>
           <Input
             id="email"
             type="email"
-            placeholder="you@company.com"
+            placeholder="Введите email"
             className="bg-background"
             aria-invalid={Boolean(errors.email)}
             {...register('email')}
@@ -45,12 +45,12 @@ export const LoginForm = () => {
 
         <div>
           <Label htmlFor="password" className="mb-1.5 text-xs">
-            Password
+            Пароль
           </Label>
           <Input
             id="password"
             type="password"
-            placeholder="Enter your password"
+            placeholder="Введите пароль"
             className="bg-background"
             aria-invalid={Boolean(errors.password)}
             {...register('password')}
@@ -62,8 +62,12 @@ export const LoginForm = () => {
           )}
         </div>
 
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? 'Signing in...' : 'Sign In'}
+        <Button
+          type="submit"
+          className="w-full cursor-pointer"
+          disabled={isLoading}
+        >
+          {isLoading ? 'Входим...' : 'Войти'}
         </Button>
 
         {serverError && (
@@ -73,7 +77,7 @@ export const LoginForm = () => {
 
       <div className="mt-4 text-center">
         <Link href="/register" className="text-xs text-primary hover:underline">
-          {"Don't have an account? Register"}
+          {'Нет аккаунта? Зарегистрироваться'}
         </Link>
       </div>
     </Card>

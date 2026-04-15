@@ -48,16 +48,15 @@ export function CreateTicketForm() {
           onClick={() => router.push('/tickets')}
         >
           <ArrowLeft className="mr-1 h-4 w-4" />
-          РќР°Р·Р°Рґ Рє С‚РёРєРµС‚Р°Рј
+          Назад к тикетам
         </Button>
 
         <h1 className="text-xl font-semibold text-foreground sm:text-2xl">
-          РЎРѕР·РґР°С‚СЊ С‚РёРєРµС‚
+          Создать тикет
         </h1>
 
         <p className="mt-1 text-sm text-muted-foreground">
-          РЎРѕР·РґР°Р№С‚Рµ РЅРѕРІРѕРµ РѕР±СЂР°С‰РµРЅРёРµ РІ СЃР»СѓР¶Р±Сѓ
-          РїРѕРґРґРµСЂР¶РєРё
+          Создайте новое обращение в службу поддержки
         </p>
       </div>
 
@@ -69,11 +68,11 @@ export function CreateTicketForm() {
         >
           <div>
             <Label htmlFor="subject" className="mb-1.5 text-xs">
-              Р—Р°РіРѕР»РѕРІРѕРє
+              Заголовок
             </Label>
             <Input
               id="subject"
-              placeholder="РљСЂР°С‚РєРѕРµ РѕРїРёСЃР°РЅРёРµ РїСЂРѕР±Р»РµРјС‹..."
+              placeholder="Краткое описание проблемы..."
               className="bg-background"
               aria-invalid={Boolean(errors.subject)}
               {...register('subject')}
@@ -87,7 +86,7 @@ export function CreateTicketForm() {
 
           <div>
             <Label htmlFor="description" className="mb-1.5 text-xs">
-              РћРїРёСЃР°РЅРёРµ
+              Описание
             </Label>
 
             <Controller
@@ -98,7 +97,7 @@ export function CreateTicketForm() {
                   id="description"
                   value={field.value || ''}
                   onChange={field.onChange}
-                  placeholder="Введите описание"
+                  placeholder="Подробно опишите проблему"
                 />
               )}
             />
@@ -112,28 +111,39 @@ export function CreateTicketForm() {
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <Label className="mb-1.5 text-xs">РўРµРјР°</Label>
-              <Select value={topicId} onValueChange={handleTopicChange}>
+              <Label className="mb-1.5 text-xs">Тема</Label>
+              <Select
+                value={topicId || undefined}
+                onValueChange={handleTopicChange}
+              >
                 <SelectTrigger
-                  className="bg-background"
+                  className="w-full bg-background"
                   aria-invalid={Boolean(errors.topicId)}
                 >
-                  <SelectValue placeholder="Р’С‹Р±РµСЂРёС‚Рµ С‚РµРјСѓ" />
+                  <SelectValue placeholder="Выберите тему" />
                 </SelectTrigger>
-                <SelectContent>
-                  {topics.map((topic) => (
-                    <SelectItem key={topic.id} value={topic.id}>
-                      <div className="flex flex-col">
-                        <span>{topic.name}</span>
-                        {topic.description && (
-                          <MarkdownContent
-                            content={topic.description}
-                            className="text-xs text-muted-foreground"
-                          />
-                        )}
-                      </div>
+                <SelectContent className="max-w-[calc(100vw-2rem)]">
+                  {topics.length === 0 ? (
+                    <SelectItem value="__no-topics" disabled>
+                      Нет доступных тем
                     </SelectItem>
-                  ))}
+                  ) : (
+                    topics.map((topic) => (
+                      <SelectItem key={topic.id} value={topic.id}>
+                        <div className="flex min-w-0 max-w-full flex-col gap-0.5">
+                          <span className="truncate font-medium">
+                            {topic.name}
+                          </span>
+                          {topic.description && (
+                            <MarkdownContent
+                              content={topic.description}
+                              className="max-w-full break-words text-xs text-muted-foreground [overflow-wrap:anywhere] [&_*]:max-w-full [&_p]:m-0 [&_p]:line-clamp-2"
+                            />
+                          )}
+                        </div>
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
               {errors.topicId && (
@@ -144,30 +154,42 @@ export function CreateTicketForm() {
             </div>
 
             <div>
-              <Label className="mb-1.5 text-xs">РљР°С‚РµРіРѕСЂРёСЏ</Label>
+              <Label className="mb-1.5 text-xs">Категория</Label>
               <Select
-                value={categoryId}
+                value={categoryId || undefined}
                 onValueChange={handleCategoryChange}
-                disabled={!topicId}
+                disabled={!topicId || filteredCategories.length === 0}
               >
                 <SelectTrigger
-                  className="bg-background"
+                  className="w-full bg-background"
                   aria-invalid={Boolean(errors.categoryId)}
                 >
                   <SelectValue
                     placeholder={
-                      topicId
-                        ? 'Р’С‹Р±РµСЂРёС‚Рµ РєР°С‚РµРіРѕСЂРёСЋ'
-                        : 'РЎРЅР°С‡Р°Р»Р° РІС‹Р±РµСЂРёС‚Рµ С‚РµРјСѓ'
+                      !topicId
+                        ? 'Сначала выберите тему'
+                        : filteredCategories.length > 0
+                          ? 'Выберите категорию'
+                          : 'Для темы нет категорий'
                     }
                   />
                 </SelectTrigger>
-                <SelectContent>
-                  {filteredCategories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
+                <SelectContent className="max-w-[calc(100vw-2rem)]">
+                  {!topicId ? (
+                    <SelectItem value="__select-topic-first" disabled>
+                      Сначала выберите тему
                     </SelectItem>
-                  ))}
+                  ) : filteredCategories.length === 0 ? (
+                    <SelectItem value="__no-categories" disabled>
+                      У выбранной темы пока нет категорий
+                    </SelectItem>
+                  ) : (
+                    filteredCategories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
               {errors.categoryId && (
@@ -180,11 +202,9 @@ export function CreateTicketForm() {
 
           <div className="rounded-lg border border-border bg-muted/30 p-3">
             <p className="text-xs leading-relaxed text-muted-foreground">
-              РџРѕСЃР»Рµ СЃРѕР·РґР°РЅРёСЏ С‚РёРєРµС‚Р° СЃРѕС‚СЂСѓРґРЅРёРєРё
-              РїРѕРґРґРµСЂР¶РєРё РїРѕР»СѓС‡Р°С‚ СѓРІРµРґРѕРјР»РµРЅРёРµ Рё
-              СЃРјРѕРіСѓС‚ РІР·СЏС‚СЊ Р·Р°РїСЂРѕСЃ РІ СЂР°Р±РѕС‚Сѓ. Р’С‹
-              РїРѕР»СѓС‡РёС‚Рµ СѓРІРµРґРѕРјР»РµРЅРёРµ РїСЂРё РёР·РјРµРЅРµРЅРёРё
-              СЃС‚Р°С‚СѓСЃР° РёР»Рё РґРѕР±Р°РІР»РµРЅРёРё РєРѕРјРјРµРЅС‚Р°СЂРёСЏ.
+              После создания тикета сотрудники поддержки получат уведомление и
+              смогут взять запрос в работу. Вы получите уведомление при
+              изменении статуса или добавлении комментария.
             </p>
           </div>
 
@@ -196,20 +216,18 @@ export function CreateTicketForm() {
             <Button
               type="button"
               variant="outline"
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto cursor-pointer"
               onClick={() => router.push('/tickets')}
             >
-              РћС‚РјРµРЅР°
+              Отмена
             </Button>
 
             <Button
               type="submit"
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto cursor-pointer"
               disabled={!canSubmit || isSubmitting}
             >
-              {isSubmitting
-                ? 'РЎРѕР·РґР°РЅРёРµ...'
-                : 'РЎРѕР·РґР°С‚СЊ С‚РёРєРµС‚'}
+              {isSubmitting ? 'Создание...' : 'Создать тикет'}
             </Button>
           </div>
         </form>

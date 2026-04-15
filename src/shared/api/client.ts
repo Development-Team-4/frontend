@@ -1,5 +1,11 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { normalizeApiError } from './errors';
+import {
+  clearAuthTokens,
+  getAccessToken,
+  getRefreshToken,
+  setAuthTokens,
+} from '../lib/auth-tokens';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ticketsystem.braverto.com';
 let isAuthRedirectInProgress = false;
@@ -12,15 +18,26 @@ export const api = axios.create({
   withCredentials: false,
 });
 
+const refreshApi = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: false,
+});
+
+type RetryableRequestConfig = InternalAxiosRequestConfig & {
+  _retry?: boolean;
+};
+
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('access_token');
+    const token = getAccessToken();
 
-      if (token && config.headers) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
+
     return config;
   },
   (error) => {
@@ -32,10 +49,51 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
+    const originalRequest = error.config as RetryableRequestConfig | undefined;
     console.error('API Error:', error.response?.data);
 
     const isUnauthorized =
       error.response?.status === 401 || error.response?.status === 403;
+
+    const isRefreshRequest = originalRequest?.url?.includes('/auth/refresh');
+
+    if (
+      isUnauthorized &&
+      originalRequest &&
+      !isRefreshRequest &&
+      originalRequest._retry !== true
+    ) {
+      const refreshToken = getRefreshToken();
+
+      if (refreshToken) {
+        originalRequest._retry = true;
+
+        try {
+          const refreshResponse = await refreshApi.post<{
+            accessToken: string;
+            refreshToken: string;
+          }>('/auth/refresh', { refreshToken });
+
+          if (
+            refreshResponse.data.accessToken &&
+            refreshResponse.data.refreshToken
+          ) {
+            setAuthTokens({
+              accessToken: refreshResponse.data.accessToken,
+              refreshToken: refreshResponse.data.refreshToken,
+            });
+
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${refreshResponse.data.accessToken}`;
+            }
+
+            return api.request(originalRequest);
+          }
+        } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError);
+        }
+      }
+    }
 
     if (
       isUnauthorized &&
@@ -43,8 +101,7 @@ api.interceptors.response.use(
       !isAuthRedirectInProgress
     ) {
       isAuthRedirectInProgress = true;
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
+      clearAuthTokens();
 
       if (window.location.pathname !== '/login') {
         window.location.replace('/login');

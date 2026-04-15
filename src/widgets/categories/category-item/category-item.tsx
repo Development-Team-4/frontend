@@ -84,7 +84,7 @@ export const CategoryItem = ({
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-7 w-7 p-0"
+                className="h-7 w-7 p-0 cursor-pointer"
                 onClick={() => handleOpen(true)}
               >
                 <Edit2 className="h-3.5 w-3.5" />
@@ -139,7 +139,12 @@ export const CategoryItem = ({
             </div>
 
             <DialogFooter>
-              <Button type="button" onClick={handleSave} disabled={!canSave}>
+              <Button
+                type="button"
+                onClick={handleSave}
+                disabled={!canSave}
+                className="cursor-pointer"
+              >
                 {isUpdatingCategory ? 'Сохранение...' : 'Сохранить'}
               </Button>
             </DialogFooter>

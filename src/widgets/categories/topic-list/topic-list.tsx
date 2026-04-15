@@ -22,7 +22,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useTopicsList } from '@/features/topics-list/use-topics-list';
 import { Edit2, FolderTree, Search, X } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CategoryItem } from '../category-item';
 import {
   Select,
@@ -36,11 +36,14 @@ type TopicListProps = {
   readOnly?: boolean;
 };
 
+const TOPICS_PER_PAGE = 10;
+
 export const TopicList = ({ readOnly = false }: TopicListProps) => {
   const [searchValue, setSearchValue] = useState('');
   const [topicsFilter, setTopicsFilter] = useState<
     'all' | 'with-categories' | 'without-categories'
   >('all');
+  const [page, setPage] = useState(1);
 
   const {
     topics,
@@ -86,6 +89,23 @@ export const TopicList = ({ readOnly = false }: TopicListProps) => {
       return matchesSearch && matchesFilter;
     });
   }, [getCategoriesByTopicId, normalizedSearch, topics, topicsFilter]);
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredTopics.length / TOPICS_PER_PAGE),
+  );
+  const paginatedTopics = useMemo(() => {
+    const start = (page - 1) * TOPICS_PER_PAGE;
+    return filteredTopics.slice(start, start + TOPICS_PER_PAGE);
+  }, [filteredTopics, page]);
+
+  useEffect(() => {
+    setPage((currentPage) => Math.min(currentPage, totalPages));
+  }, [totalPages]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchValue, topicsFilter]);
 
   if (isTopicsLoading) {
     return (
@@ -145,7 +165,7 @@ export const TopicList = ({ readOnly = false }: TopicListProps) => {
           <SelectTrigger className="w-full sm:w-[220px]">
             <SelectValue placeholder="Фильтр тем" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="cursor-pointer">
             <SelectItem value="all">Все темы</SelectItem>
             <SelectItem value="with-categories">
               Только с категориями
@@ -171,10 +191,10 @@ export const TopicList = ({ readOnly = false }: TopicListProps) => {
       ) : (
         <Accordion
           type="multiple"
-          defaultValue={filteredTopics.map((topic) => topic.id)}
+          defaultValue={paginatedTopics.map((topic) => topic.id)}
           className="w-full rounded-lg border border-border bg-card px-3 sm:px-4"
         >
-          {filteredTopics.map((topic) => {
+          {paginatedTopics.map((topic) => {
             const topicCategories = getCategoriesByTopicId(topic.id);
 
             return (
@@ -211,7 +231,7 @@ export const TopicList = ({ readOnly = false }: TopicListProps) => {
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="mt-2 h-7 w-7 shrink-0 p-0"
+                      className="mt-2 h-7 w-7 shrink-0 p-0 cursor-pointer"
                       onClick={() => openEditTopic(topic)}
                     >
                       <Edit2 className="h-3.5 w-3.5" />
@@ -244,6 +264,56 @@ export const TopicList = ({ readOnly = false }: TopicListProps) => {
             );
           })}
         </Accordion>
+      )}
+
+      {filteredTopics.length > TOPICS_PER_PAGE && (
+        <div className="mt-3 flex items-center justify-between rounded-md border border-border bg-card px-3 py-2">
+          <p className="text-xs text-muted-foreground">
+            Страница {page} из {totalPages}
+          </p>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => setPage(1)}
+              disabled={page === 1}
+            >
+              В начало
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                setPage((currentPage) => Math.max(1, currentPage - 1))
+              }
+              disabled={page === 1}
+            >
+              Назад
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                setPage((currentPage) => Math.min(totalPages, currentPage + 1))
+              }
+              disabled={page === totalPages}
+            >
+              Вперед
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => setPage(totalPages)}
+              disabled={page === totalPages}
+            >
+              В конец
+            </Button>
+          </div>
+        </div>
       )}
 
       {!readOnly && (
@@ -289,7 +359,7 @@ export const TopicList = ({ readOnly = false }: TopicListProps) => {
                 type="button"
                 onClick={handleUpdateTopic}
                 disabled={!canUpdateTopic}
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto cursor-pointer"
               >
                 {isUpdatingTopic ? 'Сохранение...' : 'Сохранить'}
               </Button>

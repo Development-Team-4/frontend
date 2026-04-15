@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { Button } from '@/components/ui/button';
 import { MarkdownContent } from '@/components/ui/markdown-content';
@@ -78,7 +78,7 @@ export const TopicsCategoriesSettings = ({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-full sm:w-auto"
+                  className="w-full sm:w-auto cursor-pointer"
                 >
                   <Plus className="mr-1 h-3.5 w-3.5" />
                   Новая тема
@@ -125,7 +125,7 @@ export const TopicsCategoriesSettings = ({
                     type="button"
                     onClick={handleCreateTopic}
                     disabled={!canCreateTopic}
-                    className="w-full sm:w-auto"
+                    className="w-full sm:w-auto cursor-pointer"
                   >
                     {isCreatingTopic ? 'Создание...' : 'Создать тему'}
                   </Button>
@@ -137,7 +137,10 @@ export const TopicsCategoriesSettings = ({
               onOpenChange={setIsCreateCategoryOpen}
             >
               <DialogTrigger asChild>
-                <Button size="sm" className="w-full sm:w-auto">
+                <Button
+                  size="sm"
+                  className="w-full sm:w-auto cursor-pointer cursor-pointer"
+                >
                   <Plus className="mr-1 h-3.5 w-3.5" />
                   Новая категория
                 </Button>
@@ -155,26 +158,39 @@ export const TopicsCategoriesSettings = ({
                   <div>
                     <Label className="text-xs">Тема</Label>
                     <Select
-                      value={selectedTopicForCategory}
+                      value={selectedTopicForCategory || undefined}
                       onValueChange={setSelectedTopicForCategory}
+                      disabled={topics.length === 0}
                     >
                       <SelectTrigger className="mt-1.5">
-                        <SelectValue placeholder="Выберите тему" />
+                        <SelectValue
+                          placeholder={
+                            topics.length === 0
+                              ? 'Сначала создайте тему'
+                              : 'Выберите тему'
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent>
-                        {topics.map((topic) => (
-                          <SelectItem key={topic.id} value={topic.id}>
-                            <div className="flex flex-col">
-                              <span>{topic.name}</span>
-                              {topic.description && (
-                                <MarkdownContent
-                                  content={topic.description}
-                                  className="text-xs text-muted-foreground"
-                                />
-                              )}
-                            </div>
+                        {topics.length === 0 ? (
+                          <SelectItem value="__no-topics" disabled>
+                            Нет доступных тем
                           </SelectItem>
-                        ))}
+                        ) : (
+                          topics.map((topic) => (
+                            <SelectItem key={topic.id} value={topic.id}>
+                              <div className="flex flex-col">
+                                <span>{topic.name}</span>
+                                {topic.description && (
+                                  <MarkdownContent
+                                    content={topic.description}
+                                    className="text-xs text-muted-foreground"
+                                  />
+                                )}
+                              </div>
+                            </SelectItem>
+                          ))
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
@@ -213,7 +229,7 @@ export const TopicsCategoriesSettings = ({
                     type="button"
                     onClick={handleCreateCategory}
                     disabled={!canCreateCategory}
-                    className="w-full sm:w-auto"
+                    className="w-full sm:w-auto cursor-pointer"
                   >
                     {isCreatingCategory ? 'Создание...' : 'Создать категорию'}
                   </Button>

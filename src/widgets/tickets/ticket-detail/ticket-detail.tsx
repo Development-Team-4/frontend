@@ -7,6 +7,8 @@ import { ru } from 'date-fns/locale';
 import { KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft,
+  Check,
+  ChevronsUpDown,
   Clock,
   User,
   MessageSquare,
@@ -44,12 +46,17 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  Command,
+  CommandEmpty,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
@@ -72,6 +79,7 @@ import { useStore } from '@/shared/store/store';
 import { statusLabels, statusStyles } from '@/shared/consts';
 import { TicketStatus } from '@/shared/types';
 import { normalizeApiError } from '@/shared/api/errors';
+import { cn } from '@/shared/lib/utils';
 
 import { useTicketDetail } from '@/features/ticket-detail';
 import { LoadingOverlay } from '@/components/loading-overlay';
@@ -83,6 +91,7 @@ type TransitionAction = {
 };
 
 const COMMENTS_PER_PAGE = 5;
+const ASSIGNEE_VISIBLE_LIMIT = 200;
 
 const STATUS_TRANSITIONS: Record<TicketStatus, TransitionAction[]> = {
   OPEN: [
@@ -141,6 +150,8 @@ export function TicketDetail() {
   const [editSubject, setEditSubject] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [commentsPage, setCommentsPage] = useState(1);
+  const [isAssigneePopoverOpen, setIsAssigneePopoverOpen] = useState(false);
+  const [assigneeSearch, setAssigneeSearch] = useState('');
   const commentsEndRef = useRef<HTMLDivElement | null>(null);
 
   const { data: category } = useCategoryById(ticket?.categoryId || null);
@@ -182,6 +193,27 @@ export function TicketDetail() {
     if (isAdmin) return allSupportUsers;
     return categoryStaff.filter((user) => user.userRole === 'SUPPORT');
   }, [allSupportUsers, categoryStaff, isAdmin]);
+  const sortedAssignableStaff = useMemo(
+    () =>
+      [...assignableStaff].sort((a, b) =>
+        a.userName.localeCompare(b.userName, 'ru', { sensitivity: 'base' }),
+      ),
+    [assignableStaff],
+  );
+  const filteredAssignableStaff = useMemo(() => {
+    const normalizedSearch = assigneeSearch.trim().toLowerCase();
+    if (!normalizedSearch) return sortedAssignableStaff;
+
+    return sortedAssignableStaff.filter((staff) =>
+      staff.userName.toLowerCase().includes(normalizedSearch),
+    );
+  }, [assigneeSearch, sortedAssignableStaff]);
+  const visibleAssignableStaff = useMemo(
+    () => filteredAssignableStaff.slice(0, ASSIGNEE_VISIBLE_LIMIT),
+    [filteredAssignableStaff],
+  );
+  const hasAssigneeOverflow =
+    filteredAssignableStaff.length > ASSIGNEE_VISIBLE_LIMIT;
   const isSupportAssignedToCategory = Boolean(
     currentUserId &&
     ticket &&
@@ -382,8 +414,8 @@ export function TicketDetail() {
   if (!ticket) return <TicketNotExist ticketId={ticketId} />;
 
   return (
-    <div className="flex flex-col lg:flex-row">
-      <div className="flex-1 p-3 sm:p-4 lg:p-6">
+    <div className="mx-auto flex w-full max-w-[1600px] flex-col xl:flex-row">
+      <div className="flex-1 p-3 sm:p-4 lg:p-6 xl:pr-4">
         <div className="mb-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           <Link
             href="/tickets"
@@ -396,18 +428,23 @@ export function TicketDetail() {
         </div>
 
         <div className="mb-5 sm:mb-6">
-          <div className="flex items-start gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="mt-0.5 shrink-0"
-              onClick={() => router.push('/tickets')}
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <div className="flex-1">
+          <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-3 sm:p-4 md:flex-row md:items-start">
+            <div className="flex items-center gap-2 md:items-start">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mt-0.5 shrink-0 self-start"
+                onClick={() => router.push('/tickets')}
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <span className="break-all font-mono text-xs text-muted-foreground md:hidden">
+                {ticket.id}
+              </span>
+            </div>
+            <div className="min-w-0 flex-1">
               <div className="mb-2 flex flex-wrap items-center gap-2">
-                <span className="break-all font-mono text-xs text-muted-foreground">
+                <span className="hidden break-all font-mono text-xs text-muted-foreground md:inline">
                   {ticket.id}
                 </span>
                 <Badge
@@ -439,7 +476,7 @@ export function TicketDetail() {
             </div>
 
             {(canEdit || canDelete) && (
-              <div className="flex flex-wrap justify-end gap-2">
+              <div className="flex w-full flex-wrap gap-2 md:w-auto md:justify-end">
                 {canEdit && (
                   <Dialog
                     open={isEditDialogOpen}
@@ -449,9 +486,9 @@ export function TicketDetail() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full sm:w-auto"
+                        className="h-8 w-full px-2 text-xs sm:h-9 sm:w-auto sm:px-3 sm:text-sm cursor-pointer"
                       >
-                        <Edit3 className="mr-1 h-3.5 w-3.5" />
+                        <Edit3 className="mr-1 h-3 w-3 sm:h-3.5 sm:w-3.5" />
                         Редактировать
                       </Button>
                     </DialogTrigger>
@@ -496,6 +533,7 @@ export function TicketDetail() {
                           variant="outline"
                           onClick={() => setIsEditDialogOpen(false)}
                           disabled={isUpdatingTicket}
+                          className="cursor-pointer"
                         >
                           Отмена
                         </Button>
@@ -503,6 +541,7 @@ export function TicketDetail() {
                           type="button"
                           onClick={handleUpdateTicket}
                           disabled={!canSaveTicketChanges}
+                          className="cursor-pointer"
                         >
                           {isUpdatingTicket ? 'Сохранение...' : 'Сохранить'}
                         </Button>
@@ -516,29 +555,34 @@ export function TicketDetail() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full text-destructive hover:bg-destructive/10 sm:w-auto"
+                        className="h-8 w-full px-2 text-xs text-destructive hover:bg-destructive/10 sm:h-9 sm:w-auto sm:px-3 sm:text-sm cursor-pointer"
                         disabled={isDeletingTicket}
                       >
-                        <Trash2 className="mr-1 h-3.5 w-3.5" />
+                        <Trash2 className="mr-1 h-3 w-3 sm:h-3.5 sm:w-3.5" />
                         Удалить
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Удалить тикет?</AlertDialogTitle>
+                        <AlertDialogTitle className="cursor-pointer">
+                          Удалить тикет?
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
                           Это действие необратимо. Тикет и связанные комментарии
                           будут удалены без возможности восстановления.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel disabled={isDeletingTicket}>
+                        <AlertDialogCancel
+                          disabled={isDeletingTicket}
+                          className="cursor-pointer"
+                        >
                           Отмена
                         </AlertDialogCancel>
                         <AlertDialogAction
                           onClick={handleDeleteTicket}
                           disabled={isDeletingTicket}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90 cursor-pointer"
                         >
                           {isDeletingTicket ? 'Удаление...' : 'Удалить тикет'}
                         </AlertDialogAction>
@@ -705,6 +749,7 @@ export function TicketDetail() {
                       size="sm"
                       onClick={handleSendComment}
                       disabled={!canSendComment || isSendingComment}
+                      className="cursor-pointer"
                     >
                       <Send className="mr-1 h-3.5 w-3.5" />
                       {isSendingComment ? 'Отправка...' : 'Отправить'}
@@ -725,7 +770,7 @@ export function TicketDetail() {
         </Tabs>
       </div>
 
-      <div className="w-full border-t border-border bg-card p-3 sm:p-4 lg:w-80 lg:border-l lg:border-t-0 lg:p-6">
+      <div className="w-full border-t border-border bg-card p-3 sm:p-4 xl:sticky xl:top-14 xl:h-fit xl:w-[22rem] xl:shrink-0 xl:border-l xl:border-t-0 xl:p-6">
         <h3 className="mb-4 text-sm font-medium text-card-foreground">
           Детали
         </h3>
@@ -769,7 +814,7 @@ export function TicketDetail() {
                             type="button"
                             size="sm"
                             variant="outline"
-                            className="h-7 w-full text-xs sm:w-auto sm:shrink-0"
+                            className="h-7 w-full text-xs sm:w-auto sm:shrink-0 cursor-pointer"
                             onClick={() => handleStatusChange(transition.to)}
                             disabled={isUpdatingStatus}
                           >
@@ -800,8 +845,8 @@ export function TicketDetail() {
             <label className="mb-1.5 block text-xs text-muted-foreground">
               Тема / Категория
             </label>
-            <div className="rounded-md border border-border bg-background px-3 py-2 text-sm">
-              <div className="flex flex-col gap-1">
+            <div className="min-w-0 rounded-md border border-border bg-background px-3 py-2 text-sm">
+              <div className="flex min-w-0 flex-col gap-1">
                 <span className="break-words">
                   {topic?.name || 'Без темы'} /{' '}
                   {category?.name || 'Без категории'}
@@ -809,7 +854,7 @@ export function TicketDetail() {
                 {topic?.description && (
                   <MarkdownContent
                     content={topic.description}
-                    className="text-xs text-muted-foreground"
+                    className="max-w-full break-words text-xs text-muted-foreground [overflow-wrap:anywhere] [&_*]:max-w-full [&_img]:h-auto [&_img]:max-w-full [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_table]:block [&_table]:max-w-full [&_table]:overflow-x-auto"
                   />
                 )}
               </div>
@@ -822,25 +867,77 @@ export function TicketDetail() {
             </label>
             {canAssign ? (
               <>
-                <Select value={assigneeValue} onValueChange={setAssigneeValue}>
-                  <SelectTrigger className="w-full bg-background">
-                    <SelectValue placeholder="Не назначен" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {assignableStaff.map((a) => (
-                      <SelectItem key={a.userId} value={a.userId}>
-                        {a.userName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Popover
+                  open={isAssigneePopoverOpen}
+                  onOpenChange={setIsAssigneePopoverOpen}
+                >
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={isAssigneePopoverOpen}
+                      className="w-full justify-between bg-background font-normal"
+                      disabled={assignableStaff.length === 0}
+                    >
+                      <span className="truncate text-left">
+                        {selectedAssigneeName || 'Не назначен'}
+                      </span>
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-[var(--radix-popover-trigger-width)] p-0"
+                    align="start"
+                  >
+                    <Command shouldFilter={false}>
+                      <CommandInput
+                        placeholder="Поиск по имени сотрудника..."
+                        value={assigneeSearch}
+                        onValueChange={setAssigneeSearch}
+                      />
+                      <CommandList className="max-h-[280px]">
+                        <CommandEmpty>
+                          {assignableStaff.length === 0
+                            ? 'Нет доступных сотрудников'
+                            : 'Сотрудник не найден'}
+                        </CommandEmpty>
+                        {visibleAssignableStaff.map((staff) => (
+                          <CommandItem
+                            key={staff.userId}
+                            value={staff.userName}
+                            onSelect={() => {
+                              setAssigneeValue(staff.userId);
+                              setIsAssigneePopoverOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                'mr-2 h-4 w-4',
+                                assigneeValue === staff.userId
+                                  ? 'opacity-100'
+                                  : 'opacity-0',
+                              )}
+                            />
+                            <span className="truncate">{staff.userName}</span>
+                          </CommandItem>
+                        ))}
+                      </CommandList>
+                      {hasAssigneeOverflow && (
+                        <p className="border-t px-3 py-2 text-[11px] text-muted-foreground">
+                          Показаны первые {ASSIGNEE_VISIBLE_LIMIT} сотрудников.
+                          Уточните поиск.
+                        </p>
+                      )}
+                    </Command>
+                  </PopoverContent>
+                </Popover>
                 {isAdmin && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button
                         variant="outline"
                         size="sm"
-                        className="mt-2 w-full text-xs"
+                        className="mt-2 w-full text-xs cursor-pointer"
                         disabled={
                           !assigneeValue ||
                           assigneeValue === currentAssigneeId ||
@@ -867,6 +964,7 @@ export function TicketDetail() {
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel
+                          className="cursor-pointer"
                           disabled={isAssigningAssignee || isUpdatingStatus}
                         >
                           Отмена
@@ -874,6 +972,7 @@ export function TicketDetail() {
                         <AlertDialogAction
                           onClick={handleAssignAssignee}
                           disabled={isAssigningAssignee || isUpdatingStatus}
+                          className="cursor-pointer"
                         >
                           Подтвердить
                         </AlertDialogAction>
@@ -912,12 +1011,14 @@ export function TicketDetail() {
                       <AlertDialogFooter>
                         <AlertDialogCancel
                           disabled={isAssigningAssignee || isUpdatingStatus}
+                          className="cursor-pointer"
                         >
                           Отмена
                         </AlertDialogCancel>
                         <AlertDialogAction
                           onClick={handleTakeInWork}
                           disabled={isAssigningAssignee || isUpdatingStatus}
+                          className="cursor-pointer"
                         >
                           Подтвердить
                         </AlertDialogAction>
@@ -952,23 +1053,23 @@ export function TicketDetail() {
           <Separator />
 
           <div className="flex flex-col gap-2 text-xs">
-            <div className="flex items-start justify-between gap-2">
+            <div className="flex flex-col gap-1 rounded-md border border-border bg-background px-3 py-2 sm:flex-row sm:items-start sm:justify-between">
               <span className="text-muted-foreground">Автор</span>
-              <span className="max-w-[60%] break-words text-right text-card-foreground">
+              <span className="break-words text-left text-card-foreground sm:max-w-[60%] sm:text-right">
                 {createdByName}
               </span>
             </div>
-            <div className="flex items-start justify-between gap-2">
+            <div className="flex flex-col gap-1 rounded-md border border-border bg-background px-3 py-2 sm:flex-row sm:items-start sm:justify-between">
               <span className="text-muted-foreground">Создан</span>
-              <span className="text-right text-card-foreground">
+              <span className="text-left text-card-foreground sm:text-right">
                 {format(new Date(ticket.createdAt), 'd MMM, HH:mm', {
                   locale: ru,
                 })}
               </span>
             </div>
-            <div className="flex items-start justify-between gap-2">
+            <div className="flex flex-col gap-1 rounded-md border border-border bg-background px-3 py-2 sm:flex-row sm:items-start sm:justify-between">
               <span className="text-muted-foreground">Обновлен</span>
-              <span className="text-right text-card-foreground">
+              <span className="text-left text-card-foreground sm:text-right">
                 {formatDistanceToNow(new Date(ticket.updatedAt), {
                   addSuffix: true,
                   locale: ru,

@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { RegisterFormData, registerSchema } from './model/register.schema';
 import { regApi } from './api';
 import { getApiFieldErrors, normalizeApiError } from '@/shared/api/errors';
+import { setAuthTokens } from '@/shared/lib/auth-tokens';
 
 export const useRegisterForm = () => {
   const router = useRouter();
@@ -35,8 +36,10 @@ export const useRegisterForm = () => {
       });
 
       if (response?.status === 200 || response?.status === 201) {
-        localStorage.setItem('access_token', response.data.accessToken);
-        localStorage.setItem('refresh_token', response.data.refreshToken);
+        setAuthTokens({
+          accessToken: response.data.accessToken,
+          refreshToken: response.data.refreshToken,
+        });
 
         router.push('/tickets');
       }

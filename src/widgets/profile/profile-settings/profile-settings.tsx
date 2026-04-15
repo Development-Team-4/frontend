@@ -59,7 +59,7 @@ export const ProfileSettings = () => {
         <div className="flex justify-stretch sm:justify-end">
           <Button
             size="sm"
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto cursor-pointer"
             onClick={handleSave}
             disabled={!canSave}
           >

@@ -51,13 +51,15 @@ import { roleLabels, roleStyles } from '@/shared/consts';
 import { UserRole } from '@/shared/types';
 import { useStore } from '@/shared/store/store';
 import { Loader2, Mail, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+
+const USERS_PER_PAGE = 10;
 
 export const UsersList = () => {
   const { isLoading } = useUsers();
   const users = useStore((state) => state.users);
-  const regularUsers = users.filter((u) => u.userRole === 'USER');
+  const [searchValue, setSearchValue] = useState('');
   const { mutateAsync: updateUserRole, isPending: isUpdatingRole } =
     useUpdateUserRole();
   const { mutateAsync: createUser, isPending: isCreatingUser } =
@@ -69,6 +71,40 @@ export const UsersList = () => {
   const [newUserConfirmPassword, setNewUserConfirmPassword] = useState('');
   const [newUserRole, setNewUserRole] = useState<UserRole>('USER');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const normalizedSearch = searchValue.trim().toLowerCase();
+
+  const filteredUsers = useMemo(() => {
+    return users
+      .filter((user) => user.userRole === 'USER')
+      .filter((user) => {
+        if (!normalizedSearch) return true;
+
+        return (
+          user.userName.toLowerCase().includes(normalizedSearch) ||
+          user.userEmail.toLowerCase().includes(normalizedSearch)
+        );
+      })
+      .sort((a, b) =>
+        a.userName.localeCompare(b.userName, 'ru', { sensitivity: 'base' }),
+      );
+  }, [normalizedSearch, users]);
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredUsers.length / USERS_PER_PAGE),
+  );
+  const paginatedUsers = useMemo(() => {
+    const start = (page - 1) * USERS_PER_PAGE;
+    return filteredUsers.slice(start, start + USERS_PER_PAGE);
+  }, [filteredUsers, page]);
+
+  useEffect(() => {
+    setPage((currentPage) => Math.min(currentPage, totalPages));
+  }, [totalPages]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchValue]);
 
   const resetCreateForm = () => {
     setNewUserName('');
@@ -174,7 +210,7 @@ export const UsersList = () => {
           }}
         >
           <DialogTrigger asChild>
-            <Button size="sm" className="w-full sm:w-auto">
+            <Button size="sm" className="w-full sm:w-auto cursor-pointer">
               <Plus className="mr-1 h-3.5 w-3.5" />
               Создать пользователя
             </Button>
@@ -289,13 +325,21 @@ export const UsersList = () => {
                 type="button"
                 onClick={handleCreateUser}
                 disabled={isCreatingUser}
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto cursor-pointer"
               >
                 {isCreatingUser ? 'Создание...' : 'Создать'}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
+      </div>
+      <div className="mb-3">
+        <Input
+          value={searchValue}
+          onChange={(event) => setSearchValue(event.target.value)}
+          placeholder="Поиск пользователей по имени или email"
+          className="h-9"
+        />
       </div>
       <Card>
         <p className="px-4 pt-3 text-[11px] text-muted-foreground md:hidden">
@@ -331,7 +375,7 @@ export const UsersList = () => {
                 ))}
 
               {!isLoading &&
-                regularUsers.map((user) => (
+                paginatedUsers.map((user) => (
                   <TableRow key={user.userId}>
                     <TableCell>
                       <div className="flex items-center gap-3">
@@ -367,6 +411,7 @@ export const UsersList = () => {
                             size="sm"
                             variant="outline"
                             disabled={isUpdatingRole}
+                            className="cursor-pointer"
                           >
                             {isUpdatingRole ? (
                               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -386,11 +431,15 @@ export const UsersList = () => {
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel disabled={isUpdatingRole}>
+                            <AlertDialogCancel
+                              disabled={isUpdatingRole}
+                              className="cursor-pointer"
+                            >
                               Отмена
                             </AlertDialogCancel>
                             <AlertDialogAction
                               disabled={isUpdatingRole}
+                              className="cursor-pointer"
                               onClick={() =>
                                 handlePromoteToSupport(user.userId)
                               }
@@ -404,7 +453,7 @@ export const UsersList = () => {
                   </TableRow>
                 ))}
 
-              {!isLoading && regularUsers.length === 0 && (
+              {!isLoading && filteredUsers.length === 0 && (
                 <TableRow>
                   <TableCell
                     colSpan={4}
@@ -418,6 +467,55 @@ export const UsersList = () => {
           </Table>
         </div>
       </Card>
+      {!isLoading && filteredUsers.length > USERS_PER_PAGE && (
+        <div className="mt-3 flex items-center justify-between rounded-md border border-border bg-card px-3 py-2">
+          <p className="text-xs text-muted-foreground">
+            Страница {page} из {totalPages}
+          </p>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => setPage(1)}
+              disabled={page === 1}
+            >
+              В начало
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                setPage((currentPage) => Math.max(1, currentPage - 1))
+              }
+              disabled={page === 1}
+            >
+              Назад
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                setPage((currentPage) => Math.min(totalPages, currentPage + 1))
+              }
+              disabled={page === totalPages}
+            >
+              Вперед
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => setPage(totalPages)}
+              disabled={page === totalPages}
+            >
+              В конец
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

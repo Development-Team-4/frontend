@@ -18,7 +18,12 @@ export const NotificationInfo = () => {
         </p>
       </div>
       {unreadCount > 0 && (
-        <Button variant="outline" size="sm" onClick={markAllRead}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={markAllRead}
+          className="cursor-pointer"
+        >
           <Check className="mr-1 h-3.5 w-3.5" />
           Отметить все
         </Button>

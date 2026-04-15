@@ -22,11 +22,11 @@ export const RegisterForm = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div>
           <Label htmlFor="fullname" className="mb-1.5 text-xs">
-            Full Name
+            Полное имя
           </Label>
           <Input
             id="fullname"
-            placeholder="John Doe"
+            placeholder="Иван Иванов"
             className="bg-background"
             {...register('fullname')}
           />
@@ -39,12 +39,12 @@ export const RegisterForm = () => {
 
         <div>
           <Label htmlFor="email" className="mb-1.5 text-xs">
-            Email
+            Электронная почта
           </Label>
           <Input
             id="email"
             type="email"
-            placeholder="you@company.com"
+            placeholder="Введите email"
             className="bg-background"
             {...register('email')}
           />
@@ -55,12 +55,12 @@ export const RegisterForm = () => {
 
         <div>
           <Label htmlFor="password" className="mb-1.5 text-xs">
-            Password
+            Пароль
           </Label>
           <Input
             id="password"
             type="password"
-            placeholder="Min. 6 characters"
+            placeholder="Минимум 6 символов"
             className="bg-background"
             {...register('password')}
           />
@@ -73,12 +73,12 @@ export const RegisterForm = () => {
 
         <div>
           <Label htmlFor="confirmPassword" className="mb-1.5 text-xs">
-            Confirm Password
+            Подтверждение пароля
           </Label>
           <Input
             id="confirmPassword"
             type="password"
-            placeholder="Repeat password"
+            placeholder="Повторите пароль"
             className="bg-background"
             {...register('confirmPassword')}
           />
@@ -89,8 +89,12 @@ export const RegisterForm = () => {
           )}
         </div>
 
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? 'Creating account...' : 'Create Account'}
+        <Button
+          type="submit"
+          className="w-full cursor-pointer"
+          disabled={isLoading}
+        >
+          {isLoading ? 'Создаем аккаунт...' : 'Создать аккаунт'}
         </Button>
 
         {serverError && (
@@ -100,7 +104,7 @@ export const RegisterForm = () => {
 
       <div className="mt-4 text-center">
         <Link href="/login" className="text-xs text-primary hover:underline">
-          Already have an account? Sign in
+          Уже есть аккаунт? Войти
         </Link>
       </div>
     </Card>

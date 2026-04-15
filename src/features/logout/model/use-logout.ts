@@ -4,6 +4,11 @@ import { useMutation } from '@tanstack/react-query';
 import { logoutApi } from '../api';
 import { useRouter } from 'next/navigation';
 import { getJtiFromToken } from '@/shared/lib/jwt-parser';
+import {
+  clearAuthTokens,
+  getAccessToken,
+  getRefreshToken,
+} from '@/shared/lib/auth-tokens';
 
 export const useLogout = () => {
   const router = useRouter();
@@ -13,18 +18,14 @@ export const useLogout = () => {
       if (typeof window === 'undefined') {
         return logoutApi.logout({ refreshToken: null, accessTokenJti: null });
       }
-
-      const refreshToken = localStorage.getItem('refresh_token');
-      const accessToken = localStorage.getItem('access_token');
+      const refreshToken = getRefreshToken();
+      const accessToken = getAccessToken();
       const accessTokenJti = accessToken ? getJtiFromToken(accessToken) : null;
 
       return logoutApi.logout({ refreshToken, accessTokenJti });
     },
     onSuccess: () => {
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-      }
+      clearAuthTokens();
       router.push('/login');
     },
     onError: (error) => {
