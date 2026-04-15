@@ -109,6 +109,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const hasMountedRef = useRef(false);
   const unreadCount = notifications.filter((n) => !n.read).length;
   const navigation = getNavigation(userData?.userRole || 'USER');
+  const activeNavigationItem = navigation.find((item) =>
+    item.href === '/' ? pathname === '/' : pathname.startsWith(item.href),
+  );
   const { logout } = useLogout();
 
   useEffect(() => {
@@ -159,7 +162,31 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [pathname]);
 
   if (isAuthPage) {
-    return <>{children}</>;
+    const authAltHref = pathname === '/login' ? '/register' : '/login';
+    const authAltLabel = pathname === '/login' ? 'Регистрация' : 'Вход';
+
+    return (
+      <div className="min-h-screen bg-background">
+        <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-background/95 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/70 sm:px-4">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">
+              <Shield className="h-4 w-4 text-primary-foreground" />
+            </div>
+            <span className="text-sm font-semibold text-foreground">
+              TicketFlow
+            </span>
+          </Link>
+
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" asChild>
+              <Link href={authAltHref}>{authAltLabel}</Link>
+            </Button>
+            <ThemeToggle />
+          </div>
+        </header>
+        {children}
+      </div>
+    );
   }
 
   if (isLoading) {
@@ -289,17 +316,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   </p>
                 </div>
               )}
-              {!collapsed && (
-                <div className="flex items-center gap-1.5">
-                  <ThemeToggle />
-                  <button
-                    className="cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
-                    onClick={() => logout()}
-                  >
-                    <LogOut className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              )}
             </div>
           </div>
         </aside>
@@ -332,6 +348,36 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   {unreadCount}
                 </Badge>
               )}
+            </div>
+          </header>
+
+          <header className="sticky top-0 z-20 hidden h-14 items-center justify-between border-b border-border bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/70 md:flex">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-foreground">
+                {activeNavigationItem?.name || 'Раздел'}
+              </p>
+              <p className="truncate text-xs text-muted-foreground">
+                {userData?.userName} • {getRoleLabel(userData?.userRole || '')}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {unreadCount > 0 && (
+                <Badge variant="destructive" className="h-5 px-1.5 text-[10px]">
+                  {unreadCount}
+                </Badge>
+              )}
+              <ThemeToggle />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-9 cursor-pointer gap-1.5"
+                onClick={() => logout()}
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                Выйти
+              </Button>
             </div>
           </header>
 
