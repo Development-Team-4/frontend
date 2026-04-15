@@ -10,7 +10,6 @@ import {
   Menu,
   Settings,
   LogOut,
-  Shield,
   ChevronLeft,
   ChevronRight,
   FolderTree,
@@ -22,6 +21,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { LoadingOverlay } from '@/components/loading-overlay';
 import { Button } from '@/components/ui/button';
+import { SiteLogo } from '@/components/ui/site-logo';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import {
   Tooltip,
@@ -169,9 +169,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen bg-background">
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-background/95 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/70 sm:px-4">
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">
-              <Shield className="h-4 w-4 text-primary-foreground" />
-            </div>
+            <SiteLogo className="h-7 w-7 rounded-md" />
             <span className="text-sm font-semibold text-foreground">
               TicketFlow
             </span>
@@ -221,9 +219,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           )}
         >
           <div className="flex h-14 items-center gap-2 border-b border-sidebar-border px-4">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary">
-              <Shield className="h-4 w-4 text-primary-foreground" />
-            </div>
+            <SiteLogo />
             {!collapsed && (
               <span className="tracking-tight text-sm font-semibold text-sidebar-foreground">
                 TicketFlow
@@ -333,9 +329,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </Button>
 
             <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">
-                <Shield className="h-4 w-4 text-primary-foreground" />
-              </div>
+              <SiteLogo className="h-7 w-7 rounded-md" />
               <span className="text-sm font-semibold text-foreground">
                 TicketFlow
               </span>
