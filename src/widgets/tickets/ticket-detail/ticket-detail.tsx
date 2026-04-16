@@ -773,8 +773,8 @@ export function TicketDetail() {
                 <div className="mt-2">
                   <Tabs defaultValue="editor" className="w-full">
                     <TabsList>
-                      <TabsTrigger value="editor">Editor</TabsTrigger>
-                      <TabsTrigger value="preview">Preview</TabsTrigger>
+                      <TabsTrigger value="editor">Редактор</TabsTrigger>
+                      <TabsTrigger value="preview">Предпросмотр</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="editor" className="mt-2">
@@ -793,7 +793,7 @@ export function TicketDetail() {
                         <MarkdownContent
                           content={newComment}
                           className="text-sm leading-relaxed text-card-foreground"
-                          emptyText='Пока пусто. Начните писать комментарий во вкладке "Editor".'
+                          emptyText='Пока пусто. Начните писать комментарий во вкладке "Редактор".'
                         />
                       </div>
                     </TabsContent>

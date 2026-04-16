@@ -47,7 +47,7 @@ export function MarkdownEditor({
         />
       </TabsContent>
 
-      <TabsContent value="preview">
+      <TabsContent value="Предпросмотр">
         <div
           className={`${editorHeightClass} max-h-[50vh] overflow-y-auto rounded-md border border-input bg-background p-3 text-sm leading-relaxed`}
         >

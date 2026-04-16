@@ -26,7 +26,7 @@ export const NotificationsChannels = () => {
 
   const telegramBotLink =
     process.env.NEXT_PUBLIC_TELEGRAM_BOT_URL ||
-    'https://t.me/ticketflow_notifications_bot';
+    'https://t.me/braverto_ticket_system_bot';
 
   const onSave = async () => {
     const success = await handleSave();
