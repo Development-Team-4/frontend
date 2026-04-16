@@ -1,14 +1,43 @@
-'use client';
+﻿'use client';
+
 import { Card } from '@/components/ui/card';
-import { Bell } from 'lucide-react';
+import { Bell, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { useNotificationInfo } from '@/features/notification-info';
 import { ru } from 'date-fns/locale';
+import { useEffect, useMemo, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { useTickets } from '@/entities/ticket/model/use-tickets';
+
+const NOTIFICATIONS_PER_PAGE = 10;
 
 export const NotificationList = () => {
-  const { notifications, markRead, typeConfig, isLoading } =
-    useNotificationInfo();
+  const {
+    notifications,
+    markRead,
+    removeNotification,
+    typeConfig,
+    isLoading,
+    isDeletingOne,
+    isMarkingRead,
+  } = useNotificationInfo();
+  const { data: tickets = [] } = useTickets();
+  const [page, setPage] = useState(1);
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(notifications.length / NOTIFICATIONS_PER_PAGE),
+  );
+
+  useEffect(() => {
+    setPage((currentPage) => Math.min(currentPage, totalPages));
+  }, [totalPages]);
+
+  const paginatedNotifications = useMemo(() => {
+    const start = (page - 1) * NOTIFICATIONS_PER_PAGE;
+    return notifications.slice(start, start + NOTIFICATIONS_PER_PAGE);
+  }, [notifications, page]);
 
   if (isLoading) {
     return (
@@ -29,8 +58,14 @@ export const NotificationList = () => {
           <p className="mt-3 text-sm text-muted-foreground">Нет уведомлений</p>
         </Card>
       ) : (
-        notifications.map((n) => {
+        paginatedNotifications.map((n) => {
           const config = typeConfig[n.type];
+          const ticket = tickets.find((item) => item.id === n.ticketId);
+          const title =
+            n.type === 'STATUS_CHANGE'
+              ? `Статус тикета ${ticket?.subject || n.ticketId} был изменен`
+              : n.title;
+
           return (
             <Card
               key={n.id}
@@ -46,7 +81,7 @@ export const NotificationList = () => {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-medium text-card-foreground">
-                    {n.title}
+                    {title}
                   </p>
                   {!n.read && (
                     <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />
@@ -55,7 +90,7 @@ export const NotificationList = () => {
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   {n.message}
                 </p>
-                <div className="mt-2 flex items-center gap-3">
+                <div className="mt-2 flex flex-wrap items-center gap-3">
                   <span className="text-[10px] text-muted-foreground">
                     {formatDistanceToNow(new Date(n.createdAt), {
                       addSuffix: true,
@@ -71,9 +106,20 @@ export const NotificationList = () => {
                   {!n.read && (
                     <button
                       onClick={() => markRead(n.id)}
-                      className="text-[10px] text-muted-foreground hover:text-foreground cursor-pointer"
+                      className="cursor-pointer text-[10px] text-muted-foreground hover:text-foreground"
+                      disabled={isMarkingRead}
                     >
                       Прочитано
+                    </button>
+                  )}
+                  {n.userId && (
+                    <button
+                      onClick={() => removeNotification(n.userId!, n.id)}
+                      className="inline-flex cursor-pointer items-center gap-1 text-[10px] text-destructive hover:opacity-90"
+                      disabled={isDeletingOne}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                      Удалить
                     </button>
                   )}
                 </div>
@@ -81,6 +127,52 @@ export const NotificationList = () => {
             </Card>
           );
         })
+      )}
+
+      {notifications.length > NOTIFICATIONS_PER_PAGE && (
+        <Card className="mt-2 flex items-center justify-between px-3 py-2">
+          <p className="text-xs text-muted-foreground">
+            Страница {page} из {totalPages}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage(1)}
+              disabled={page === 1}
+            >
+              В начало
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setPage((currentPage) => Math.max(1, currentPage - 1))
+              }
+              disabled={page === 1}
+            >
+              Назад
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setPage((currentPage) => Math.min(totalPages, currentPage + 1))
+              }
+              disabled={page === totalPages}
+            >
+              Вперед
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage(totalPages)}
+              disabled={page === totalPages}
+            >
+              В конец
+            </Button>
+          </div>
+        </Card>
       )}
     </div>
   );

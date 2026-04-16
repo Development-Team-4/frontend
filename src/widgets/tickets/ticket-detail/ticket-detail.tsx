@@ -10,6 +10,7 @@ import {
   Check,
   ChevronsUpDown,
   Clock,
+  History,
   User,
   MessageSquare,
   Send,
@@ -66,6 +67,7 @@ import { useUserById, useUsers } from '@/entities/user/model/use-user';
 import {
   useAssignTicketAssignee,
   useDeleteTicket,
+  useTicketHistory,
   useUpdateTicket,
   useUpdateTicketStatus,
 } from '@/entities/ticket/model';
@@ -91,6 +93,7 @@ type TransitionAction = {
 };
 
 const COMMENTS_PER_PAGE = 5;
+const HISTORY_PER_PAGE = 8;
 const ASSIGNEE_VISIBLE_LIMIT = 200;
 
 const STATUS_TRANSITIONS: Record<TicketStatus, TransitionAction[]> = {
@@ -132,6 +135,8 @@ export function TicketDetail() {
   const { ticketId, data: ticket, isLoading } = useTicketDetail();
   const { data: ticketComments = [], isLoading: isCommentsLoading } =
     useTicketComments(ticketId || null);
+  const { data: ticketHistory = [], isLoading: isHistoryLoading } =
+    useTicketHistory(ticketId || null);
   const { mutateAsync: createComment, isPending: isSendingComment } =
     useCreateTicketComment(ticketId || null);
   const { mutateAsync: updateTicketStatus, isPending: isUpdatingStatus } =
@@ -150,6 +155,7 @@ export function TicketDetail() {
   const [editSubject, setEditSubject] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [commentsPage, setCommentsPage] = useState(1);
+  const [historyPage, setHistoryPage] = useState(1);
   const [isAssigneePopoverOpen, setIsAssigneePopoverOpen] = useState(false);
   const [assigneeSearch, setAssigneeSearch] = useState('');
   const commentsEndRef = useRef<HTMLDivElement | null>(null);
@@ -250,10 +256,50 @@ export function TicketDetail() {
     1,
     Math.ceil(ticketComments.length / COMMENTS_PER_PAGE),
   );
+  const totalHistoryPages = Math.max(
+    1,
+    Math.ceil(ticketHistory.length / HISTORY_PER_PAGE),
+  );
   const paginatedComments = useMemo(() => {
     const start = (commentsPage - 1) * COMMENTS_PER_PAGE;
     return ticketComments.slice(start, start + COMMENTS_PER_PAGE);
   }, [commentsPage, ticketComments]);
+  const paginatedHistory = useMemo(() => {
+    const start = (historyPage - 1) * HISTORY_PER_PAGE;
+    return ticketHistory.slice(start, start + HISTORY_PER_PAGE);
+  }, [historyPage, ticketHistory]);
+
+  const getOperationLabel = (operation: string) => {
+    switch (operation) {
+      case 'CREATE':
+        return 'Создание';
+      case 'UPDATE':
+        return 'Обновление';
+      case 'DELETE':
+        return 'Удаление';
+      default:
+        return operation;
+    }
+  };
+
+  const getOperationStyle = (operation: string) => {
+    switch (operation) {
+      case 'CREATE':
+        return 'bg-success/15 text-success';
+      case 'UPDATE':
+        return 'bg-primary/15 text-primary';
+      case 'DELETE':
+        return 'bg-destructive/15 text-destructive';
+      default:
+        return 'bg-muted text-muted-foreground';
+    }
+  };
+
+  const resolveAssigneeName = (assigneeId: string | null | undefined) => {
+    if (!assigneeId) return 'Не назначен';
+    const staff = users.find((item) => item.userId === assigneeId);
+    return staff?.userName || assigneeId;
+  };
 
   const scrollCommentsToBottom = () => {
     commentsEndRef.current?.scrollIntoView({
@@ -265,6 +311,10 @@ export function TicketDetail() {
   useEffect(() => {
     setCommentsPage((currentPage) => Math.min(currentPage, totalCommentsPages));
   }, [totalCommentsPages]);
+
+  useEffect(() => {
+    setHistoryPage((currentPage) => Math.min(currentPage, totalHistoryPages));
+  }, [totalHistoryPages]);
 
   const handleSendComment = async () => {
     const content = newComment.trim();
@@ -608,6 +658,10 @@ export function TicketDetail() {
               <MessageSquare className="h-3.5 w-3.5" />
               Комментарии ({ticketComments.length})
             </TabsTrigger>
+            <TabsTrigger value="history" className="gap-1.5">
+              <History className="h-3.5 w-3.5" />
+              История ({ticketHistory.length})
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="comments" className="mt-4">
@@ -765,6 +819,182 @@ export function TicketDetail() {
               )}
 
               <div ref={commentsEndRef} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="history" className="mt-4">
+            <div className="flex flex-col gap-3">
+              {isHistoryLoading && (
+                <p className="py-8 text-center text-sm text-muted-foreground">
+                  Загрузка истории изменений...
+                </p>
+              )}
+
+              {!isHistoryLoading && ticketHistory.length === 0 && (
+                <p className="py-8 text-center text-sm text-muted-foreground">
+                  История изменений пока отсутствует
+                </p>
+              )}
+
+              {paginatedHistory.map((entry) => {
+                const changes: Array<{
+                  label: string;
+                  oldValue: string;
+                  newValue: string;
+                }> = [];
+
+                if (
+                  (entry.oldSubject || '') !== (entry.newSubject || '') &&
+                  (entry.oldSubject || entry.newSubject)
+                ) {
+                  changes.push({
+                    label: 'Тема',
+                    oldValue: entry.oldSubject || '—',
+                    newValue: entry.newSubject || '—',
+                  });
+                }
+
+                if (
+                  (entry.oldDescription || '') !==
+                    (entry.newDescription || '') &&
+                  (entry.oldDescription || entry.newDescription)
+                ) {
+                  changes.push({
+                    label: 'Описание',
+                    oldValue: entry.oldDescription || '—',
+                    newValue: entry.newDescription || '—',
+                  });
+                }
+
+                if (
+                  (entry.oldStatus || '') !== (entry.newStatus || '') &&
+                  (entry.oldStatus || entry.newStatus)
+                ) {
+                  changes.push({
+                    label: 'Статус',
+                    oldValue: entry.oldStatus
+                      ? getStatusLabel(entry.oldStatus)
+                      : '—',
+                    newValue: entry.newStatus
+                      ? getStatusLabel(entry.newStatus)
+                      : '—',
+                  });
+                }
+
+                if (
+                  (entry.oldAssigneeId || '') !== (entry.newAssigneeId || '') &&
+                  (entry.oldAssigneeId || entry.newAssigneeId)
+                ) {
+                  changes.push({
+                    label: 'Исполнитель',
+                    oldValue: resolveAssigneeName(entry.oldAssigneeId),
+                    newValue: resolveAssigneeName(entry.newAssigneeId),
+                  });
+                }
+
+                return (
+                  <div
+                    key={entry.id}
+                    className="rounded-lg border border-border bg-card p-3"
+                  >
+                    <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                      <Badge
+                        className={`border-0 text-[10px] ${getOperationStyle(entry.operation)}`}
+                      >
+                        {getOperationLabel(entry.operation)}
+                      </Badge>
+                      <span className="text-[10px] text-muted-foreground">
+                        {format(
+                          new Date(entry.changedAt),
+                          'd MMM yyyy, HH:mm',
+                          {
+                            locale: ru,
+                          },
+                        )}
+                      </span>
+                    </div>
+
+                    {changes.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">
+                        Изменений в отслеживаемых полях не зафиксировано.
+                      </p>
+                    ) : (
+                      <div className="grid gap-2">
+                        {changes.map((change) => (
+                          <div
+                            key={`${entry.id}-${change.label}`}
+                            className="rounded-md border border-border bg-background px-2.5 py-2"
+                          >
+                            <p className="mb-1 text-[11px] font-medium text-muted-foreground">
+                              {change.label}
+                            </p>
+                            <div className="grid gap-1 text-xs">
+                              <p className="break-words text-muted-foreground">
+                                Было: {change.oldValue}
+                              </p>
+                              <p className="break-words text-card-foreground">
+                                Стало: {change.newValue}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              {!isHistoryLoading && ticketHistory.length > HISTORY_PER_PAGE && (
+                <div className="flex items-center justify-between rounded-md border border-border bg-card px-3 py-2">
+                  <p className="text-xs text-muted-foreground">
+                    Страница {historyPage} из {totalHistoryPages}
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setHistoryPage(1)}
+                      disabled={historyPage === 1}
+                    >
+                      В начало
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        setHistoryPage((page) => Math.max(1, page - 1))
+                      }
+                      disabled={historyPage === 1}
+                    >
+                      Назад
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        setHistoryPage((page) =>
+                          Math.min(totalHistoryPages, page + 1),
+                        )
+                      }
+                      disabled={historyPage === totalHistoryPages}
+                    >
+                      Вперед
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setHistoryPage(totalHistoryPages)}
+                      disabled={historyPage === totalHistoryPages}
+                    >
+                      В конец
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>
