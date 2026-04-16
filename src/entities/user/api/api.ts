@@ -12,6 +12,10 @@ interface CreateUserPayload {
   userEmail: string;
   userPassword: string;
 }
+export interface UserNotificationSettings {
+  userEmailNotification: string;
+  userTelegramNotification: string;
+}
 
 class UsersDataApi {
   private baseUrl = 'users';
@@ -48,6 +52,28 @@ class UsersDataApi {
   ): Promise<User> {
     return api
       .put<User>(`${this.baseUrl}/${id}`, payload)
+      .then((res) => res.data);
+  }
+
+  async getUserNotificationSettings(
+    id: string,
+  ): Promise<UserNotificationSettings> {
+    return api
+      .get<UserNotificationSettings>(
+        `${this.baseUrl}/${id}/notification-settings`,
+      )
+      .then((res) => res.data);
+  }
+
+  async updateUserNotificationSettings(
+    id: string,
+    payload: UserNotificationSettings,
+  ): Promise<UserNotificationSettings> {
+    return api
+      .put<UserNotificationSettings>(
+        `${this.baseUrl}/${id}/notification-settings`,
+        payload,
+      )
       .then((res) => res.data);
   }
 }

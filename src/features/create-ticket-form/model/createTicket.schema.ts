@@ -4,7 +4,7 @@ export const createTicketSchema = z.object({
   subject: z
     .string()
     .min(2, 'Заголовок должен содержать минимум 2 символа')
-    .max(15, 'Заголовок должен быть максимум 15 символов'),
+    .max(30, 'Заголовок должен быть максимум 15 символов'),
 
   description: z
     .string()
