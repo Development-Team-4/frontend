@@ -2,7 +2,7 @@
 
 import { api } from '@/shared/api/client';
 import { TicketStatus } from '@/shared/types/enums';
-import type { Ticket } from '@/shared/types';
+import type { Ticket, TicketHistoryEntry } from '@/shared/types';
 import { getUserById } from '@/shared/lib/mock-data';
 
 export interface TicketBackend {
@@ -38,6 +38,8 @@ interface UpdateTicketPayload {
   subject: string;
   description: string;
 }
+
+type TicketHistoryBackend = TicketHistoryEntry;
 
 type TicketsQueryParams = TicketsFilterParams & {
   'filterRequest.categoryId'?: string;
@@ -194,6 +196,12 @@ class TicketsDataApi {
 
   async deleteTicket(ticketId: string): Promise<void> {
     await api.delete(`/tickets/${ticketId}`);
+  }
+
+  async getTicketHistory(ticketId: string): Promise<TicketHistoryEntry[]> {
+    return api
+      .get<TicketHistoryBackend[]>(`/tickets/${ticketId}/history`)
+      .then((res) => res.data);
   }
 }
 

@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ticketsDataApi } from '../api';
-import type { Ticket } from '@/shared/types';
+import type { Ticket, TicketHistoryEntry } from '@/shared/types';
 import { useStore } from '@/shared/store/store';
 import { TicketStatus } from '@/shared/types';
 
@@ -19,6 +19,16 @@ export const useTicketById = (ticketId: string | null) => {
   return useQuery<Ticket>({
     queryKey: ['ticket', ticketId],
     queryFn: () => ticketsDataApi.getTicketById(ticketId!),
+    enabled: Boolean(ticketId),
+    staleTime: 30 * 1000,
+    gcTime: 5 * 60 * 1000,
+  });
+};
+
+export const useTicketHistory = (ticketId: string | null) => {
+  return useQuery<TicketHistoryEntry[]>({
+    queryKey: ['ticket-history', ticketId],
+    queryFn: () => ticketsDataApi.getTicketHistory(ticketId!),
     enabled: Boolean(ticketId),
     staleTime: 30 * 1000,
     gcTime: 5 * 60 * 1000,
@@ -54,6 +64,9 @@ export const useAssignTicketAssignee = () => {
       );
       queryClient.invalidateQueries({ queryKey: ['tickets'] });
       queryClient.invalidateQueries({ queryKey: ['ticket', nextTicket.id] });
+      queryClient.invalidateQueries({
+        queryKey: ['ticket-history', nextTicket.id],
+      });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
   });
@@ -82,6 +95,9 @@ export const useUpdateTicketStatus = () => {
       );
       queryClient.invalidateQueries({ queryKey: ['tickets'] });
       queryClient.invalidateQueries({ queryKey: ['ticket', updatedTicket.id] });
+      queryClient.invalidateQueries({
+        queryKey: ['ticket-history', updatedTicket.id],
+      });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
   });
@@ -98,6 +114,9 @@ export const useDeleteTicket = () => {
         prev.filter((ticket) => ticket.id !== variables.ticketId),
       );
       queryClient.removeQueries({ queryKey: ['ticket', variables.ticketId] });
+      queryClient.invalidateQueries({
+        queryKey: ['ticket-history', variables.ticketId],
+      });
       queryClient.removeQueries({
         queryKey: ['ticket-comments', variables.ticketId],
       });
@@ -133,6 +152,9 @@ export const useUpdateTicket = () => {
       );
       queryClient.invalidateQueries({ queryKey: ['tickets'] });
       queryClient.invalidateQueries({ queryKey: ['ticket', updatedTicket.id] });
+      queryClient.invalidateQueries({
+        queryKey: ['ticket-history', updatedTicket.id],
+      });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
   });

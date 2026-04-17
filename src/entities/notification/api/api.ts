@@ -8,6 +8,7 @@ type NotificationBackend = {
   type: NotificationType;
   title: string;
   message: string;
+  read?: boolean;
   sent: boolean;
   createdAt: string;
   updatedAt: string;
@@ -32,7 +33,7 @@ const mapNotificationFromBackend = (
   sent: backend.sent,
   createdAt: backend.createdAt,
   updatedAt: backend.updatedAt,
-  read,
+  read: backend.read ?? read,
 });
 
 class NotificationsDataApi {
@@ -54,6 +55,21 @@ class NotificationsDataApi {
     return api
       .post<NotificationBackend>('/notifications', payload)
       .then((res) => mapNotificationFromBackend(res.data));
+  }
+
+  async deleteUserNotifications(userId: string): Promise<void> {
+    await api.delete(`/notifications/${userId}`);
+  }
+
+  async deleteUserNotification(
+    userId: string,
+    notificationId: string,
+  ): Promise<void> {
+    await api.delete(`/notifications/${userId}/${notificationId}`);
+  }
+
+  async markNotificationAsRead(notificationId: string): Promise<void> {
+    await api.put(`/notifications/${notificationId}/read`);
   }
 }
 

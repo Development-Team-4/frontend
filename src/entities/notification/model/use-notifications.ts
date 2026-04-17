@@ -15,7 +15,7 @@ const mergeNotificationsWithReadState = (
   return [...incoming]
     .map((item) => ({
       ...item,
-      read: readById.get(item.id) ?? false,
+      read: item.read || readById.get(item.id) === true,
     }))
     .sort(
       (a, b) =>
@@ -57,6 +57,47 @@ export const useCreateNotification = () => {
   return useMutation({
     mutationFn: (payload: CreateNotificationPayload) =>
       notificationsDataApi.createNotification(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
+};
+
+export const useDeleteUserNotifications = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (userId: string) =>
+      notificationsDataApi.deleteUserNotifications(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
+};
+
+export const useDeleteUserNotification = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      userId,
+      notificationId,
+    }: {
+      userId: string;
+      notificationId: string;
+    }) => notificationsDataApi.deleteUserNotification(userId, notificationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
+};
+
+export const useMarkNotificationAsRead = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (notificationId: string) =>
+      notificationsDataApi.markNotificationAsRead(notificationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },

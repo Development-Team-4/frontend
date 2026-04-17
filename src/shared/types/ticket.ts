@@ -12,3 +12,18 @@ export interface Ticket {
   createdBy: User;
   assignee?: User;
 }
+
+export interface TicketHistoryEntry {
+  id: string;
+  ticketId: string;
+  operation: string;
+  oldSubject?: string | null;
+  newSubject?: string | null;
+  oldDescription?: string | null;
+  newDescription?: string | null;
+  oldStatus?: TicketStatus | null;
+  newStatus?: TicketStatus | null;
+  oldAssigneeId?: string | null;
+  newAssigneeId?: string | null;
+  changedAt: string;
+}

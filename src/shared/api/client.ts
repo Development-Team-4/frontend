@@ -52,8 +52,8 @@ api.interceptors.response.use(
     const originalRequest = error.config as RetryableRequestConfig | undefined;
     console.error('API Error:', error.response?.data);
 
-    const isUnauthorized =
-      error.response?.status === 401 || error.response?.status === 403;
+    const status = error.response?.status;
+    const isUnauthorized = status === 401;
 
     const isRefreshRequest = originalRequest?.url?.includes('/auth/refresh');
 

@@ -1,7 +1,12 @@
+'use client';
+
 import { NotificationsChannels } from '@/widgets/notifications/notifications-channels';
 import { ProfileSettings } from '@/widgets/profile/profile-settings';
+import { useStore } from '@/shared/store/store';
 
 export default function SettingsPage() {
+  const userRole = useStore((state) => state.userData?.userRole);
+
   return (
     <div className="mx-auto max-w-2xl px-3 py-3 sm:p-4 lg:p-6">
       <div className="mb-4 sm:mb-6">
@@ -14,7 +19,7 @@ export default function SettingsPage() {
       </div>
 
       <ProfileSettings />
-      <NotificationsChannels />
+      {userRole !== 'SUPPORT' && <NotificationsChannels />}
     </div>
   );
 }

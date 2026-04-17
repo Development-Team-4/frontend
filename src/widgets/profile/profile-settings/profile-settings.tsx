@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useUpdateProfile } from '@/features/update-profile';
+import { roleLabels } from '@/shared/consts';
 
 export const ProfileSettings = () => {
   const {
@@ -17,6 +18,7 @@ export const ProfileSettings = () => {
     nameError,
     serverError,
   } = useUpdateProfile();
+  const roleLabel = userData?.userRole ? roleLabels[userData.userRole] : '';
 
   return (
     <Card className="mb-4 p-4 sm:mb-6 sm:p-6">
@@ -49,11 +51,7 @@ export const ProfileSettings = () => {
 
         <div>
           <Label className="mb-1.5 text-xs">Роль</Label>
-          <Input
-            value={userData?.userRole || ''}
-            disabled
-            className="bg-muted"
-          />
+          <Input value={roleLabel} disabled className="bg-muted" />
         </div>
 
         <div className="flex justify-stretch sm:justify-end">
