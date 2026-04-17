@@ -1,4 +1,3 @@
-import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import {
   Table,
@@ -8,11 +7,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { statusLabels, statusStyles } from '@/shared/consts';
-import { User } from 'lucide-react';
-import Link from 'next/link';
-import { formatDistanceToNow } from 'date-fns';
-import { ru } from 'date-fns/locale';
 import { Ticket } from '@/shared/types';
 import { AssignedTicketRow } from './assigned-ticket-row';
 
