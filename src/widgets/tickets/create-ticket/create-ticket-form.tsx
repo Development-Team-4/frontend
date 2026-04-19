@@ -35,6 +35,9 @@ export function CreateTicketForm() {
     topics,
     onSubmit,
     serverError,
+    handleImproveDescription,
+    canImproveDescription,
+    isImprovingDescription,
     formState: { errors },
   } = useCreateTicketForm();
 
@@ -85,9 +88,23 @@ export function CreateTicketForm() {
           </div>
 
           <div>
-            <Label htmlFor="description" className="mb-1.5 text-xs">
-              Описание
-            </Label>
+            <div className="mb-1.5 flex items-center justify-between gap-2">
+              <Label htmlFor="description" className="text-xs">
+                Описание
+              </Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-7 px-2 text-xs cursor-pointer"
+                onClick={handleImproveDescription}
+                disabled={!canImproveDescription}
+              >
+                {isImprovingDescription
+                  ? 'Улучшаем...'
+                  : 'Улучшить с помощью ИИ'}
+              </Button>
+            </div>
 
             <Controller
               name="description"
@@ -98,6 +115,7 @@ export function CreateTicketForm() {
                   value={field.value || ''}
                   onChange={field.onChange}
                   placeholder="Подробно опишите проблему"
+                  disabled={isImprovingDescription}
                 />
               )}
             />

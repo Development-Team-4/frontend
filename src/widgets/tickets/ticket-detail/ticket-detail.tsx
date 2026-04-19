@@ -67,6 +67,7 @@ import { useUserById, useUsers } from '@/entities/user/model/use-user';
 import {
   useAssignTicketAssignee,
   useDeleteTicket,
+  useImproveTicketDescription,
   useTicketHistory,
   useUpdateTicket,
   useUpdateTicketStatus,
@@ -145,6 +146,10 @@ export function TicketDetail() {
     useAssignTicketAssignee();
   const { mutateAsync: updateTicket, isPending: isUpdatingTicket } =
     useUpdateTicket();
+  const {
+    mutateAsync: improveTicketDescription,
+    isPending: isImprovingDescription,
+  } = useImproveTicketDescription();
   const { mutateAsync: deleteTicket, isPending: isDeletingTicket } =
     useDeleteTicket();
 
@@ -439,7 +444,14 @@ export function TicketDetail() {
   };
 
   const canSaveTicketChanges = Boolean(
-    editSubject.trim() && editDescription.trim() && !isUpdatingTicket,
+    editSubject.trim() &&
+    editDescription.trim() &&
+    !isUpdatingTicket &&
+    !isImprovingDescription,
+  );
+
+  const canImproveEditDescription = Boolean(
+    editDescription.trim() && !isUpdatingTicket && !isImprovingDescription,
   );
 
   const handleUpdateTicket = async () => {
@@ -456,6 +468,28 @@ export function TicketDetail() {
       toast.success('Тикет обновлен');
     } catch (error) {
       const apiError = normalizeApiError(error, 'Не удалось обновить тикет');
+      toast.error(apiError.message);
+    }
+  };
+
+  const handleImproveEditDescription = async () => {
+    const currentDescription = editDescription.trim();
+
+    if (!currentDescription) {
+      toast.error('Введите описание перед улучшением');
+      return;
+    }
+
+    try {
+      const improvedDescription = await improveTicketDescription({
+        ticketName: editSubject.trim() || ticket?.subject || 'Тикет',
+        currentDescription,
+      });
+
+      setEditDescription(improvedDescription);
+      toast.success('Описание улучшено с помощью ИИ');
+    } catch (error) {
+      const apiError = normalizeApiError(error, 'Не удалось улучшить описание');
       toast.error(apiError.message);
     }
   };
@@ -563,16 +597,32 @@ export function TicketDetail() {
                           />
                         </div>
                         <div>
-                          <label className="mb-1 block text-xs text-muted-foreground">
-                            Описание
-                          </label>
+                          <div className="mb-1 flex items-center justify-between gap-2">
+                            <label className="block text-xs text-muted-foreground">
+                              Описание
+                            </label>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="h-7 px-2 text-xs cursor-pointer"
+                              onClick={handleImproveEditDescription}
+                              disabled={!canImproveEditDescription}
+                            >
+                              {isImprovingDescription
+                                ? 'Улучшаем...'
+                                : 'Улучшить с помощью ИИ'}
+                            </Button>
+                          </div>
                           <MarkdownEditor
                             id="ticket-edit-description"
                             value={editDescription}
                             onChange={setEditDescription}
                             placeholder="Введите описание в Markdown"
                             heightClassName="h-[180px]"
-                            disabled={isUpdatingTicket}
+                            disabled={
+                              isUpdatingTicket || isImprovingDescription
+                            }
                           />
                         </div>
                       </div>
@@ -582,7 +632,7 @@ export function TicketDetail() {
                           type="button"
                           variant="outline"
                           onClick={() => setIsEditDialogOpen(false)}
-                          disabled={isUpdatingTicket}
+                          disabled={isUpdatingTicket || isImprovingDescription}
                           className="cursor-pointer"
                         >
                           Отмена
