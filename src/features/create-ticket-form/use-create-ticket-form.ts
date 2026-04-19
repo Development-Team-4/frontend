@@ -14,6 +14,7 @@ import { createTicketApi } from './api';
 import { Ticket } from '@/shared/types';
 import { getApiFieldErrors, normalizeApiError } from '@/shared/api/errors';
 import { toast } from 'sonner';
+import { useImproveTicketDescription } from '@/entities/ticket/model';
 
 export const useCreateTicketForm = () => {
   useTopics();
@@ -22,6 +23,10 @@ export const useCreateTicketForm = () => {
   const topics = useStore((state) => state.topics);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState('');
+  const {
+    mutateAsync: improveTicketDescription,
+    isPending: isImprovingDescription,
+  } = useImproveTicketDescription();
 
   const form = useForm<CreateTicketFormData>({
     resolver: zodResolver(createTicketSchema),
@@ -125,6 +130,35 @@ export const useCreateTicketForm = () => {
     }
   };
 
+  const handleImproveDescription = async () => {
+    const currentDescription = form.getValues('description').trim();
+
+    if (!currentDescription) {
+      form.setError('description', {
+        type: 'manual',
+        message: 'Введите описание перед улучшением',
+      });
+      return;
+    }
+
+    try {
+      const improvedDescription = await improveTicketDescription({
+        ticketName: form.getValues('subject').trim() || 'Новый тикет',
+        currentDescription,
+      });
+
+      form.setValue('description', improvedDescription, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+      form.clearErrors('description');
+      toast.success('Описание улучшено с помощью ИИ');
+    } catch (error) {
+      const apiError = normalizeApiError(error, 'Не удалось улучшить описание');
+      toast.error(apiError.message);
+    }
+  };
+
   const canSubmit = Boolean(
     subject.trim() &&
     description.trim() &&
@@ -134,6 +168,9 @@ export const useCreateTicketForm = () => {
     !isCategoriesLoading &&
     !isCategoriesFetching &&
     !isSubmitting,
+  );
+  const canImproveDescription = Boolean(
+    description.trim() && !isSubmitting && !isImprovingDescription,
   );
 
   return {
@@ -148,5 +185,8 @@ export const useCreateTicketForm = () => {
     topicId,
     categoryId,
     serverError,
+    handleImproveDescription,
+    canImproveDescription,
+    isImprovingDescription,
   };
 };

@@ -159,3 +159,15 @@ export const useUpdateTicket = () => {
     },
   });
 };
+
+export const useImproveTicketDescription = () => {
+  return useMutation({
+    mutationFn: ({
+      ticketName,
+      currentDescription,
+    }: {
+      ticketName: string;
+      currentDescription: string;
+    }) => ticketsDataApi.upgradeDescription({ ticketName, currentDescription }),
+  });
+};
