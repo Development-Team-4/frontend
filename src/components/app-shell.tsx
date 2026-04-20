@@ -169,7 +169,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen bg-background">
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-background/95 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/70 sm:px-4">
           <Link href="/" className="flex items-center gap-2">
-            <SiteLogo className="h-7 w-7 rounded-md" />
+            <SiteLogo className="h-10 w-10 rounded-md" />
             <span className="text-sm font-semibold text-foreground">
               TicketFlow
             </span>
@@ -329,7 +329,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </Button>
 
             <div className="flex items-center gap-2">
-              <SiteLogo className="h-7 w-7 rounded-md" />
+              <SiteLogo className="h-10 w-10 rounded-md" />
               <span className="text-sm font-semibold text-foreground">
                 TicketFlow
               </span>
