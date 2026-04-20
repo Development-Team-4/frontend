@@ -8,10 +8,11 @@ import { useStore } from '@/shared/store/store';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const TELEGRAM_ID_REGEX = /^-?\d+$/;
+const DEFAULT_EMAIL_NOTIFICATION = 's';
 
 const toDefaultSettings = (email: string) => ({
-  userEmailNotification: email,
-  userTelegramNotification: '',
+  userEmailNotification: email || DEFAULT_EMAIL_NOTIFICATION,
+  userTelegramNotification: null,
 });
 
 export const useSelectNotificationChannels = () => {
@@ -65,9 +66,12 @@ export const useSelectNotificationChannels = () => {
         throw new Error('Пользователь не найден');
       }
 
+      const nextEmail = emailNotification.trim();
+      const nextTelegram = telegramNotification.trim();
+
       return usersDataApi.updateUserNotificationSettings(userData.userId, {
-        userEmailNotification: emailNotification.trim(),
-        userTelegramNotification: telegramNotification.trim(),
+        userEmailNotification: nextEmail || DEFAULT_EMAIL_NOTIFICATION,
+        userTelegramNotification: nextTelegram || null,
       });
     },
     onSuccess: (settings) => {
@@ -90,16 +94,16 @@ export const useSelectNotificationChannels = () => {
       settingsQuery.data?.userTelegramNotification || ''
     ).trim();
 
-    if (!nextEmail || !nextTelegram) return false;
-    if (!EMAIL_REGEX.test(nextEmail)) return false;
-    if (!TELEGRAM_ID_REGEX.test(nextTelegram)) return false;
+    if (!nextEmail && !nextTelegram) return false;
+    if (nextEmail && !EMAIL_REGEX.test(nextEmail)) return false;
+    if (nextTelegram && !TELEGRAM_ID_REGEX.test(nextTelegram)) return false;
 
     return nextEmail !== currentEmail || nextTelegram !== currentTelegram;
   }, [
     emailNotification,
+    telegramNotification,
     settingsQuery.data?.userEmailNotification,
     settingsQuery.data?.userTelegramNotification,
-    telegramNotification,
     updateMutation.isPending,
     userData?.userId,
   ]);
@@ -112,22 +116,17 @@ export const useSelectNotificationChannels = () => {
     const nextEmail = emailNotification.trim();
     const nextTelegram = telegramNotification.trim();
 
-    if (!nextEmail) {
-      setEmailError('Введите email для уведомлений');
+    if (!nextEmail && !nextTelegram) {
+      setServerError('Укажите хотя бы один канал уведомлений');
       return false;
     }
 
-    if (!EMAIL_REGEX.test(nextEmail)) {
+    if (nextEmail && !EMAIL_REGEX.test(nextEmail)) {
       setEmailError('Введите корректный email');
       return false;
     }
 
-    if (!nextTelegram) {
-      setTelegramError('Введите Telegram ID, который прислал бот');
-      return false;
-    }
-
-    if (!TELEGRAM_ID_REGEX.test(nextTelegram)) {
+    if (nextTelegram && !TELEGRAM_ID_REGEX.test(nextTelegram)) {
       setTelegramError('Telegram ID должен содержать только цифры');
       return false;
     }
@@ -135,7 +134,7 @@ export const useSelectNotificationChannels = () => {
     try {
       const updated = await updateMutation.mutateAsync();
       setEmailNotification(updated.userEmailNotification || '');
-      setTelegramNotification(updated.userTelegramNotification);
+      setTelegramNotification(updated.userTelegramNotification || '');
       return true;
     } catch (error) {
       const normalizedError = normalizeApiError(
