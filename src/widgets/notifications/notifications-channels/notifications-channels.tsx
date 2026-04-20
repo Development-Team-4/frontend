@@ -91,7 +91,7 @@ export const NotificationsChannels = () => {
               value={telegramNotification}
               onChange={(event) => setTelegramNotification(event.target.value)}
               placeholder="Например: 653949548"
-              disabled={isLoading || isSaving}
+              disabled
             />
             {telegramError && (
               <p className="mt-1 text-xs text-destructive">{telegramError}</p>

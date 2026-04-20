@@ -13,8 +13,8 @@ interface CreateUserPayload {
   userPassword: string;
 }
 export interface UserNotificationSettings {
-  userEmailNotification: string;
-  userTelegramNotification: string;
+  userEmailNotification: string | null;
+  userTelegramNotification: string | null;
 }
 
 class UsersDataApi {
