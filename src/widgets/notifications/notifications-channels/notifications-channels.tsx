@@ -11,15 +11,12 @@ import { useSelectNotificationChannels } from '@/features/select-notification-ch
 
 export const NotificationsChannels = () => {
   const {
-    emailNotification,
     telegramNotification,
-    setEmailNotification,
     setTelegramNotification,
     handleSave,
     canSave,
     isLoading,
     isSaving,
-    emailError,
     telegramError,
     serverError,
   } = useSelectNotificationChannels();
@@ -62,23 +59,7 @@ export const NotificationsChannels = () => {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <Label className="mb-1.5 text-xs" htmlFor="notification-email">
-              Email для уведомлений
-            </Label>
-            <Input
-              id="notification-email"
-              value={emailNotification}
-              onChange={(event) => setEmailNotification(event.target.value)}
-              placeholder="user@example.com"
-              disabled={isLoading || isSaving}
-            />
-            {emailError && (
-              <p className="mt-1 text-xs text-destructive">{emailError}</p>
-            )}
-          </div>
-
+        <div className="grid grid-cols-1 gap-4">
           <div>
             <Label
               className="mb-1.5 text-xs"

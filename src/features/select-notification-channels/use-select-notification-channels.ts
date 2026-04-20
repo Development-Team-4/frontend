@@ -6,11 +6,11 @@ import { usersDataApi } from '@/entities/user/api';
 import { normalizeApiError } from '@/shared/api/errors';
 import { useStore } from '@/shared/store/store';
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const TELEGRAM_ID_REGEX = /^-?\d+$/;
+const NOTIFICATION_EMAIL = 'dim.maluckow2017@yandex.ru';
 
-const toDefaultSettings = (email: string) => ({
-  userEmailNotification: email,
+const toDefaultSettings = () => ({
+  userEmailNotification: null as null,
   userTelegramNotification: '',
 });
 
@@ -18,9 +18,7 @@ export const useSelectNotificationChannels = () => {
   const userData = useStore((state) => state.userData);
   const queryClient = useQueryClient();
 
-  const [emailNotification, setEmailNotification] = useState('');
   const [telegramNotification, setTelegramNotification] = useState('');
-  const [emailError, setEmailError] = useState('');
   const [telegramError, setTelegramError] = useState('');
   const [serverError, setServerError] = useState('');
 
@@ -29,7 +27,7 @@ export const useSelectNotificationChannels = () => {
     enabled: Boolean(userData?.userId),
     queryFn: async () => {
       if (!userData?.userId) {
-        return toDefaultSettings('');
+        return toDefaultSettings();
       }
 
       try {
@@ -37,7 +35,7 @@ export const useSelectNotificationChannels = () => {
       } catch (error) {
         const normalizedError = normalizeApiError(error);
         if (normalizedError.status === 404) {
-          return toDefaultSettings(userData.userEmail || '');
+          return toDefaultSettings();
         }
         throw normalizedError;
       }
@@ -50,14 +48,8 @@ export const useSelectNotificationChannels = () => {
 
   useEffect(() => {
     if (!settingsQuery.data) return;
-    setEmailNotification(settingsQuery.data.userEmailNotification || '');
     setTelegramNotification(settingsQuery.data.userTelegramNotification || '');
   }, [settingsQuery.data]);
-
-  useEffect(() => {
-    if (!userData?.userEmail) return;
-    setEmailNotification((prev) => prev || userData.userEmail);
-  }, [userData?.userEmail]);
 
   const updateMutation = useMutation({
     mutationFn: () => {
@@ -66,7 +58,7 @@ export const useSelectNotificationChannels = () => {
       }
 
       return usersDataApi.updateUserNotificationSettings(userData.userId, {
-        userEmailNotification: emailNotification.trim(),
+        userEmailNotification: NOTIFICATION_EMAIL,
         userTelegramNotification: telegramNotification.trim(),
       });
     },
@@ -81,23 +73,16 @@ export const useSelectNotificationChannels = () => {
   const canSave = useMemo(() => {
     if (!userData?.userId || updateMutation.isPending) return false;
 
-    const nextEmail = emailNotification.trim();
     const nextTelegram = telegramNotification.trim();
-    const currentEmail = (
-      settingsQuery.data?.userEmailNotification || ''
-    ).trim();
     const currentTelegram = (
       settingsQuery.data?.userTelegramNotification || ''
     ).trim();
 
-    if (!nextEmail || !nextTelegram) return false;
-    if (!EMAIL_REGEX.test(nextEmail)) return false;
+    if (!nextTelegram) return false;
     if (!TELEGRAM_ID_REGEX.test(nextTelegram)) return false;
 
-    return nextEmail !== currentEmail || nextTelegram !== currentTelegram;
+    return nextTelegram !== currentTelegram;
   }, [
-    emailNotification,
-    settingsQuery.data?.userEmailNotification,
     settingsQuery.data?.userTelegramNotification,
     telegramNotification,
     updateMutation.isPending,
@@ -105,22 +90,10 @@ export const useSelectNotificationChannels = () => {
   ]);
 
   const handleSave = async (): Promise<boolean> => {
-    setEmailError('');
     setTelegramError('');
     setServerError('');
 
-    const nextEmail = emailNotification.trim();
     const nextTelegram = telegramNotification.trim();
-
-    if (!nextEmail) {
-      setEmailError('Введите email для уведомлений');
-      return false;
-    }
-
-    if (!EMAIL_REGEX.test(nextEmail)) {
-      setEmailError('Введите корректный email');
-      return false;
-    }
 
     if (!nextTelegram) {
       setTelegramError('Введите Telegram ID, который прислал бот');
@@ -134,7 +107,6 @@ export const useSelectNotificationChannels = () => {
 
     try {
       const updated = await updateMutation.mutateAsync();
-      setEmailNotification(updated.userEmailNotification);
       setTelegramNotification(updated.userTelegramNotification);
       return true;
     } catch (error) {
@@ -148,15 +120,12 @@ export const useSelectNotificationChannels = () => {
   };
 
   return {
-    emailNotification,
     telegramNotification,
-    setEmailNotification,
     setTelegramNotification,
     handleSave,
     canSave,
     isLoading: settingsQuery.isLoading,
     isSaving: updateMutation.isPending,
-    emailError,
     telegramError,
     serverError,
   };
