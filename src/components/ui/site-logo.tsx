@@ -10,16 +10,16 @@ export function SiteLogo({ className, imageClassName }: SiteLogoProps) {
   return (
     <div
       className={cn(
-        'flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md bg-primary/10',
+        'relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg',
         className,
       )}
     >
       <Image
-        src="/logo.svg"
+        src="/logo.png"
         alt="TicketFlow logo"
-        width={32}
-        height={32}
-        className={cn('h-full w-full object-contain', imageClassName)}
+        fill
+        sizes="48px"
+        className={cn('object-cover scale-125', imageClassName)}
         priority
       />
     </div>
