@@ -13,7 +13,7 @@ interface CreateUserPayload {
   userPassword: string;
 }
 export interface UserNotificationSettings {
-  userEmailNotification: string | null;
+  userEmailNotification: string;
   userTelegramNotification: string;
 }
 
